@@ -14,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _roomCodeController = TextEditingController();
   bool _isLoading = false;
 
+  /// ルームを作成
   Future<void> _createRoom() async {
     setState(() => _isLoading = true);
     
@@ -21,8 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final playerId = DateTime.now().millisecondsSinceEpoch.toString();
       final roomCode = await _gameService.createRoom(playerId);
       
-      if (mounted) {
-        Navigator.push(
+      if (!mounted) return;
+      Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => GameScreen(
@@ -32,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,27 +60,27 @@ class _HomeScreenState extends State<HomeScreen> {
       final playerId = DateTime.now().millisecondsSinceEpoch.toString();
       final success = await _gameService.joinRoom(roomCode, playerId);
       
+      // 参加に失敗した場合はエラーメッセージを表示
       if (!success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('ルームが見つからないか、すでに満員です')),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ルームが見つからないか、すでに満員です')),
+        );
         return;
       }
       
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GameScreen(
-              roomCode: roomCode,
-              playerId: playerId,
-              isHost: false,
-            ),
+      // 参加成功後、ゲーム画面へ遷移
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameScreen(
+            roomCode: roomCode,
+            playerId: playerId,
+            isHost: false,
           ),
-        );
-      }
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -92,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// ホーム画面のUI
   @override
   Widget build(BuildContext context) {
     return Scaffold(

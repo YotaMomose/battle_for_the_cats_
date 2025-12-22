@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/game_room.dart';
 import '../services/game_service.dart';
 
+/// ゲーム画面
 class GameScreen extends StatefulWidget {
   final String roomCode;
   final String playerId;
