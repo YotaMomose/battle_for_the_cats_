@@ -100,4 +100,137 @@ class GameService {
   Future<void> deleteRoom(String roomCode) async {
     await _firestore.collection('rooms').doc(roomCode).delete();
   }
+
+  // ランダムマッチング: 待機リストに登録
+  Future<String> joinMatchmaking(String playerId) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    
+    await _firestore.collection('matchmaking').doc(playerId).set({
+      'playerId': playerId,
+      'timestamp': timestamp,
+      'status': 'waiting',
+    });
+    
+    return playerId;
+  }
+
+  // ランダムマッチング: 待機中のプレイヤーを監視してマッチング
+  Stream<String?> watchMatchmaking(String playerId) async* {
+    // 自分の待機状態を監視
+    await for (final snapshot in _firestore
+        .collection('matchmaking')
+        .doc(playerId)
+        .snapshots()) {
+      
+      if (!snapshot.exists) {
+        yield null;
+        return;
+      }
+      
+      final data = snapshot.data()!;
+      final status = data['status'] as String;
+      
+      // マッチング成立した場合
+      if (status == 'matched') {
+        final roomCode = data['roomCode'] as String?;
+        yield roomCode;
+        return;
+      }
+      
+      // まだ待機中の場合、相手を探す
+      if (status == 'waiting') {
+        await _tryToMatch(playerId);
+        yield null; // まだマッチングしていない
+      }
+    }
+  }
+
+  // 相手を探してマッチング試行（トランザクションで制御）
+  Future<void> _tryToMatch(String playerId) async {
+    try {
+      // トランザクション外で待機中のプレイヤーを検索
+      final querySnapshot = await _firestore
+          .collection('matchmaking')
+          .where('status', isEqualTo: 'waiting')
+          .orderBy('timestamp')
+          .limit(10)
+          .get();
+      
+      // 自分以外の最初の相手を探す
+      String? opponentId;
+      for (final doc in querySnapshot.docs) {
+        if (doc.id != playerId) {
+          opponentId = doc.id;
+          break;
+        }
+      }
+      
+      // 相手が見つからない場合は何もしない
+      if (opponentId == null) {
+        return;
+      }
+      
+      // トランザクションでマッチング処理
+      await _firestore.runTransaction((transaction) async {
+        // 両プレイヤーの現在の状態を確認
+        final myRef = _firestore.collection('matchmaking').doc(playerId);
+        final opponentRef = _firestore.collection('matchmaking').doc(opponentId);
+        
+        final myDoc = await transaction.get(myRef);
+        final opponentDoc = await transaction.get(opponentRef);
+        
+        // どちらかが既にマッチング済みの場合は中断
+        if (!myDoc.exists || !opponentDoc.exists) {
+          return;
+        }
+        
+        final myStatus = myDoc.data()?['status'];
+        final opponentStatus = opponentDoc.data()?['status'];
+        
+        if (myStatus != 'waiting' || opponentStatus != 'waiting') {
+          return;
+        }
+        
+        // ルームを作成
+        final roomCode = generateRoomCode();
+        final room = GameRoom(
+          roomId: roomCode,
+          hostId: playerId,
+          guestId: opponentId,
+          status: 'playing',
+        );
+        
+        // トランザクション内でルームを作成
+        final roomRef = _firestore.collection('rooms').doc(roomCode);
+        transaction.set(roomRef, room.toMap());
+        
+        // 両プレイヤーのマッチング状態を更新
+        transaction.update(myRef, {
+          'status': 'matched',
+          'roomCode': roomCode,
+          'isHost': true,
+        });
+        
+        transaction.update(opponentRef, {
+          'status': 'matched',
+          'roomCode': roomCode,
+          'isHost': false,
+        });
+      });
+    } catch (e) {
+      // トランザクション失敗（競合が発生した場合など）
+      // 何もせずに次の監視サイクルで再試行
+    }
+  }
+
+  // ランダムマッチングをキャンセル
+  Future<void> cancelMatchmaking(String playerId) async {
+    await _firestore.collection('matchmaking').doc(playerId).delete();
+  }
+
+  // マッチング情報からホストかどうかを取得
+  Future<bool> isHostInMatch(String playerId) async {
+    final doc = await _firestore.collection('matchmaking').doc(playerId).get();
+    return doc.data()?['isHost'] as bool? ?? true;
+  }
 }

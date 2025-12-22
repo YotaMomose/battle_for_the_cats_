@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ルームコレクション
+    match /rooms/{roomId} {
+      allow read, write: if true;
+    }
+    
+    // マッチングコレクション
+    match /matchmaking/{playerId} {
+      allow read, write: if true;
+    }
+  }
+}
