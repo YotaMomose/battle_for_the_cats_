@@ -63,30 +63,31 @@ class _HomeScreenState extends State<HomeScreen> {
       await for (final roomCode in _gameService.watchMatchmaking(_currentPlayerId!)) {
         if (!mounted) return;
         
-        if (roomCode != null) {
-          // マッチング成立！
-          setState(() => _isMatchmaking = false);
-          
-          // マッチング情報を取得してホストかゲストか判定
-          final isHost = await _gameService.isHostInMatch(_currentPlayerId!);
-          
-          // ゲーム画面へ遷移
-          if (!mounted) return;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GameScreen(
-                roomCode: roomCode,
-                playerId: _currentPlayerId!,
-                isHost: isHost,
-              ),
+        // まだマッチングしていない場合は継続
+        if (roomCode == null) continue;
+        
+        // マッチング成立！
+        setState(() => _isMatchmaking = false);
+        
+        // マッチング情報を取得してホストかゲストか判定
+        final isHost = await _gameService.isHostInMatch(_currentPlayerId!);
+        
+        // ゲーム画面へ遷移
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameScreen(
+              roomCode: roomCode,
+              playerId: _currentPlayerId!,
+              isHost: isHost,
             ),
-          );
-          
-          // マッチング情報をクリーンアップ
-          await _gameService.cancelMatchmaking(_currentPlayerId!);
-          break;
-        }
+          ),
+        );
+        
+        // マッチング情報をクリーンアップ
+        await _gameService.cancelMatchmaking(_currentPlayerId!);
+        break;
       }
     } catch (e) {
       if (mounted) {

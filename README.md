@@ -1,16 +1,33 @@
-# battle_for_the_cats
+graph TD
+    %% 中心
+    Flutter[Flutter<br/>アプリ基盤]
 
-A new Flutter project.
+    %% 言語
+    Dart[Dart言語]
+    Dart -->|記述言語| Flutter
 
-## Getting Started
+    %% UI
+    UI[UI / Widget設計]
+    UI -->|画面・入力| Flutter
 
-This project is a starting point for a Flutter application.
+    %% 状態管理
+    State[状態管理]
+    State -->|ゲーム状態<br/>UI状態| Flutter
 
-A few resources to get you started if this is your first Flutter project:
+    %% 非同期
+    Async[同期 / 非同期処理]
+    Async -->|Future / Stream<br/>待ち・同時確定| Flutter
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+    %% オンライン
+    Online[オンライン通信]
+    Online -->|リアルタイム同期| Flutter
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+    %% Firebase
+    Firebase[Firebase]
+    Firebase -->|Auth / Firestore| Online
+
+    %% ゲーム設計
+    GameDesign[ゲーム設計]
+    GameDesign -->|ルール| State
+    GameDesign -->|同時公開| Async
+    GameDesign -->|心理戦| UI
