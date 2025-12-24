@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     %% 中心
     Flutter[Flutter<br/>アプリ基盤]
