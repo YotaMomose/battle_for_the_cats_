@@ -55,15 +55,15 @@ class GameService {
         .map((snapshot) => GameRoom.fromMap(snapshot.data()!));
   }
 
-  // 魚を賭ける
-  Future<void> placeBet(String roomCode, String playerId, int betAmount) async {
+  // 魚を賭ける（3匹の猫に対して）
+  Future<void> placeBets(String roomCode, String playerId, Map<String, int> bets) async {
     final roomDoc = await _firestore.collection('rooms').doc(roomCode).get();
     final room = GameRoom.fromMap(roomDoc.data()!);
     
     final isHost = room.hostId == playerId;
     
     await _firestore.collection('rooms').doc(roomCode).update({
-      isHost ? 'hostBet' : 'guestBet': betAmount,
+      isHost ? 'hostBets' : 'guestBets': bets,
       isHost ? 'hostReady' : 'guestReady': true,
     });
     
@@ -76,22 +76,27 @@ class GameService {
     }
   }
 
-  // ラウンドの結果を判定
+  // ラウンドの結果を判定（3匹の猫それぞれ）
   Future<void> _resolveRound(String roomCode, GameRoom room) async {
-    final hostBet = room.hostBet ?? 0;
-    final guestBet = room.guestBet ?? 0;
+    final Map<String, String> winners = {};
     
-    String? winner;
-    if (hostBet > guestBet) {
-      winner = 'host';
-    } else if (guestBet > hostBet) {
-      winner = 'guest';
-    } else {
-      winner = 'draw';
+    // 各猫について勝敗を判定
+    for (int i = 0; i < 3; i++) {
+      final catIndex = i.toString();
+      final hostBet = room.hostBets[catIndex] ?? 0;
+      final guestBet = room.guestBets[catIndex] ?? 0;
+      
+      if (hostBet > guestBet) {
+        winners[catIndex] = 'host';
+      } else if (guestBet > hostBet) {
+        winners[catIndex] = 'guest';
+      } else {
+        winners[catIndex] = 'draw';
+      }
     }
     
     await _firestore.collection('rooms').doc(roomCode).update({
-      'winner': winner,
+      'winners': winners,
       'status': 'finished',
     });
   }
@@ -116,7 +121,7 @@ class GameService {
 
   // ランダムマッチング: 待機中のプレイヤーを監視してマッチング
   Stream<String?> watchMatchmaking(String playerId) async* {
-    // 自分の待機状態を監視
+    // 自分の matchmaking ドキュメントが更新されるのを監視
     await for (final snapshot in _firestore
         .collection('matchmaking')
         .doc(playerId)
@@ -137,9 +142,11 @@ class GameService {
         return;
       }
       
-      // まだ待機中の場合、相手を探す
+      //------------------------------------------
+      // まだ待機中の場合、自分から相手を探す
       if (status == 'waiting') {
         await _tryToMatch(playerId);
+        //ここでマッチングが成功したら次のループで検出される
         yield null; // まだマッチングしていない
       }
     }

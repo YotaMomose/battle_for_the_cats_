@@ -7,11 +7,19 @@ class GameRoom {
   // ゲーム状態
   int hostFishCount;
   int guestFishCount;
-  int? hostBet;
-  int? guestBet;
+  
+  // 3匹の猫（猫の種類を格納）
+  List<String> cats;
+  
+  // 各プレイヤーの各猫への賭け（猫のインデックス -> 魚の数）
+  Map<String, int> hostBets;
+  Map<String, int> guestBets;
+  
   bool hostReady;
   bool guestReady;
-  String? winner;
+  
+  // 各猫の勝者（猫のインデックス -> 'host'/'guest'/'draw'）
+  Map<String, String>? winners;
 
   GameRoom({
     required this.roomId,
@@ -20,12 +28,15 @@ class GameRoom {
     this.status = 'waiting',
     this.hostFishCount = 5,
     this.guestFishCount = 5,
-    this.hostBet,
-    this.guestBet,
+    List<String>? cats,
+    Map<String, int>? hostBets,
+    Map<String, int>? guestBets,
     this.hostReady = false,
     this.guestReady = false,
-    this.winner,
-  });
+    this.winners,
+  })  : cats = cats ?? ['通常ネコ', '通常ネコ', '通常ネコ'],
+        hostBets = hostBets ?? {'0': 0, '1': 0, '2': 0},
+        guestBets = guestBets ?? {'0': 0, '1': 0, '2': 0};
 
   Map<String, dynamic> toMap() {
     return {
@@ -35,11 +46,12 @@ class GameRoom {
       'status': status,
       'hostFishCount': hostFishCount,
       'guestFishCount': guestFishCount,
-      'hostBet': hostBet,
-      'guestBet': guestBet,
+      'cats': cats,
+      'hostBets': hostBets,
+      'guestBets': guestBets,
       'hostReady': hostReady,
       'guestReady': guestReady,
-      'winner': winner,
+      'winners': winners,
     };
   }
 
@@ -51,11 +63,12 @@ class GameRoom {
       status: map['status'] ?? 'waiting',
       hostFishCount: map['hostFishCount'] ?? 5,
       guestFishCount: map['guestFishCount'] ?? 5,
-      hostBet: map['hostBet'],
-      guestBet: map['guestBet'],
+      cats: List<String>.from(map['cats'] ?? ['通常ネコ', '通常ネコ', '通常ネコ']),
+      hostBets: Map<String, int>.from(map['hostBets'] ?? {'0': 0, '1': 0, '2': 0}),
+      guestBets: Map<String, int>.from(map['guestBets'] ?? {'0': 0, '1': 0, '2': 0}),
       hostReady: map['hostReady'] ?? false,
       guestReady: map['guestReady'] ?? false,
-      winner: map['winner'],
+      winners: map['winners'] != null ? Map<String, String>.from(map['winners']) : null,
     );
   }
 }
