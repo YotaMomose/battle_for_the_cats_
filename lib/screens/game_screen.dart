@@ -27,6 +27,7 @@ class _GameScreenState extends State<GameScreen> {
   final Map<String, int> _bets = {'0': 0, '1': 0, '2': 0};
   bool _hasPlacedBet = false;
   int _lastTurn = 0;  // 最後に処理したターン番号を記録
+  bool _hasRolled = false;  // ローカル: サイコロを振ったか
 
   // 賭けの合計を計算
   int get _totalBet => _bets.values.reduce((a, b) => a + b);
@@ -38,7 +39,21 @@ class _GameScreenState extends State<GameScreen> {
       _bets['1'] = 0;
       _bets['2'] = 0;
       _hasPlacedBet = false;
+      _hasRolled = false;
     });
+  }
+
+  void _rollDice() async {
+    try {
+      await _gameService.rollDice(widget.roomCode, widget.playerId);
+      setState(() => _hasRolled = true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラー: $e')),
+        );
+      }
+    }
   }
 
   void _placeBets() async {
@@ -92,7 +107,7 @@ class _GameScreenState extends State<GameScreen> {
           final room = snapshot.data!;
           
           // 新しいターンになったらローカル状態をリセット
-          if (room.currentTurn != _lastTurn && room.status == 'playing') {
+          if (room.currentTurn != _lastTurn && (room.status == 'playing' || room.status == 'rolling')) {
             // 次のフレームで状態をリセット（build中の setState を避ける）
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
@@ -140,9 +155,15 @@ class _GameScreenState extends State<GameScreen> {
             return _buildRoundResultScreen(room);
           }
 
+          // サイコロフェーズ
+          if (room.status == 'rolling') {
+            return _buildRollingScreen(room);
+          }
+
           // ゲーム中
           final isHost = widget.isHost;
           final myFishCount = isHost ? room.hostFishCount : room.guestFishCount;
+          final opponentFishCount = isHost ? room.guestFishCount : room.hostFishCount;
           final myReady = isHost ? room.hostReady : room.guestReady;
           final opponentReady = isHost ? room.guestReady : room.hostReady;
           final myCatsWon = isHost ? room.hostCatsWon : room.guestCatsWon;
@@ -187,6 +208,15 @@ class _GameScreenState extends State<GameScreen> {
                           const Text(
                             '対戦相手',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '魚: $opponentFishCount匹 🐟',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -336,6 +366,139 @@ class _GameScreenState extends State<GameScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  // サイコロフェーズ画面
+  Widget _buildRollingScreen(GameRoom room) {
+    final isHost = widget.isHost;
+    final myRolled = isHost ? room.hostRolled : room.guestRolled;
+    final opponentRolled = isHost ? room.guestRolled : room.hostRolled;
+    final myDiceRoll = isHost ? room.hostDiceRoll : room.guestDiceRoll;
+    final opponentDiceRoll = isHost ? room.guestDiceRoll : room.hostDiceRoll;
+    final myCatsWon = isHost ? room.hostCatsWon : room.guestCatsWon;
+    final opponentCatsWon = isHost ? room.guestCatsWon : room.hostCatsWon;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ターン情報
+            Card(
+              color: Colors.purple.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'ターン ${room.currentTurn}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'あなた: $myCatsWon匹  |  相手: $opponentCatsWon匹',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // タイトル
+            const Text(
+              '🎲 サイコロフェーズ 🎲',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+
+            // 相手の状態
+            Card(
+              color: Colors.blue.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      '対戦相手',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    if (opponentRolled && opponentDiceRoll != null) ...[
+                      Text(
+                        '🎲 $opponentDiceRoll',
+                        style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '魚を $opponentDiceRoll 匹獲得しました！',
+                        style: const TextStyle(fontSize: 16, color: Colors.green),
+                      ),
+                    ] else ...[
+                      const Text(
+                        'サイコロを振っています...',
+                        style: TextStyle(fontSize: 16, color: Colors.orange),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // 自分のサイコロ
+            Card(
+              color: Colors.green.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      'あなた',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    if (myRolled && myDiceRoll != null) ...[
+                      Text(
+                        '🎲 $myDiceRoll',
+                        style: const TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '魚を $myDiceRoll 匹獲得！',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        '相手を待っています...',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ] else ...[
+                      ElevatedButton.icon(
+                        onPressed: _hasRolled ? null : _rollDice,
+                        icon: const Icon(Icons.casino, size: 32),
+                        label: Text(
+                          _hasRolled ? '振りました' : 'サイコロを振る',
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                          backgroundColor: _hasRolled ? Colors.grey : Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
