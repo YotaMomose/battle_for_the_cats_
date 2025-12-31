@@ -149,84 +149,96 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-                  // 3匹の猫カード
-                  ...List.generate(3, (index) {
-                    final catIndex = index.toString();
-                    final catName = room.cats[index];
-                    final currentBet = _bets[catIndex] ?? 0;
+                  // 3匹の猫カード（横並び）
+                  SizedBox(
+                    height: 200,
+                    child: Row(
+                      children: List.generate(3, (index) {
+                        final catIndex = index.toString();
+                        final catName = room.cats[index];
+                        final currentBet = _bets[catIndex] ?? 0;
 
-                    return Column(
-                      children: [
-                        Card(
-                          elevation: 4,
+                        return Flexible(
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Card(
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.pets, size: 40, color: Colors.orange),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      catName,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
+                                    const Icon(Icons.pets, size: 24, color: Colors.orange),
+                                    const SizedBox(height: 2),
+                                    Flexible(
+                                      child: Text(
+                                        catName,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                  ],
-                                ),
-                                if (!myReady) ...[
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    '置いた魚: $currentBet 🐟',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      IconButton(
-                                        onPressed: _hasPlacedBet || currentBet == 0
-                                            ? null
-                                            : () {
-                                                setState(() {
-                                                  _bets[catIndex] = currentBet - 1;
-                                                });
-                                              },
-                                        icon: const Icon(Icons.remove_circle),
-                                        iconSize: 32,
+                                    if (!myReady) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '$currentBet 🐟',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
                                       ),
-                                      const SizedBox(width: 16),
-                                      IconButton(
-                                        onPressed: _hasPlacedBet || _totalBet >= myFishCount
-                                            ? null
-                                            : () {
-                                                setState(() {
-                                                  _bets[catIndex] = currentBet + 1;
-                                                });
-                                              },
-                                        icon: const Icon(Icons.add_circle),
-                                        iconSize: 32,
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            onPressed: _hasPlacedBet || currentBet == 0
+                                                ? null
+                                                : () {
+                                                    setState(() {
+                                                      _bets[catIndex] = currentBet - 1;
+                                                    });
+                                                  },
+                                            icon: const Icon(Icons.remove_circle),
+                                            iconSize: 20,
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          IconButton(
+                                            onPressed: _hasPlacedBet || _totalBet >= myFishCount
+                                                ? null
+                                                : () {
+                                                    setState(() {
+                                                      _bets[catIndex] = currentBet + 1;
+                                                    });
+                                                  },
+                                            icon: const Icon(Icons.add_circle),
+                                            iconSize: 20,
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                          ),
+                                        ],
                                       ),
                                     ],
-                                  ),
-                                ],
-                              ],
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  }),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // 自分の情報
                   Card(
@@ -334,73 +346,89 @@ class _GameScreenState extends State<GameScreen> {
                 'あなた $myWins - $opponentWins 相手',
                 style: const TextStyle(fontSize: 24),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               
-              // 各猫の結果
-              ...List.generate(3, (index) {
-                final catIndex = index.toString();
-                final catName = room.cats[index];
-                final myBet = myBets[catIndex] ?? 0;
-                final opponentBet = opponentBets[catIndex] ?? 0;
-                final winner = winners[catIndex];
+              // 各猫の結果（横並び）
+              SizedBox(
+                height: 160,
+                child: Row(
+                  children: List.generate(3, (index) {
+                    final catIndex = index.toString();
+                    final catName = room.cats[index];
+                    final myBet = myBets[catIndex] ?? 0;
+                    final opponentBet = opponentBets[catIndex] ?? 0;
+                    final winner = winners[catIndex];
 
-                Color cardColor;
-                String winnerText;
-                if (winner == (isHost ? 'host' : 'guest')) {
-                  cardColor = Colors.green.shade50;
-                  winnerText = 'あなたの獲得！';
-                } else if (winner == (isHost ? 'guest' : 'host')) {
-                  cardColor = Colors.red.shade50;
-                  winnerText = '相手の獲得';
-                } else {
-                  cardColor = Colors.grey.shade50;
-                  winnerText = '引き分け';
-                }
+                    Color cardColor;
+                    String winnerText;
+                    if (winner == (isHost ? 'host' : 'guest')) {
+                      cardColor = Colors.green.shade50;
+                      winnerText = 'あなた獲得';
+                    } else if (winner == (isHost ? 'guest' : 'host')) {
+                      cardColor = Colors.red.shade50;
+                      winnerText = '相手獲得';
+                    } else {
+                      cardColor = Colors.grey.shade50;
+                      winnerText = '引き分け';
+                    }
 
-                return Column(
-                  children: [
-                    Card(
-                      color: cardColor,
+                    return Flexible(
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Card(
+                          color: cardColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.pets, size: 40, color: Colors.orange),
-                                const SizedBox(width: 12),
-                                Text(
-                                  catName,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                const Icon(Icons.pets, size: 24, color: Colors.orange),
+                                const SizedBox(height: 4),
+                                Flexible(
+                                  child: Text(
+                                    catName,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  winnerText,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: winner == 'draw' ? Colors.grey : (winner == (isHost ? 'host' : 'guest') ? Colors.green : Colors.red),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'あなた: $myBet',
+                                  style: const TextStyle(fontSize: 10),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '相手: $opponentBet',
+                                  style: const TextStyle(fontSize: 10),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              winnerText,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: winner == 'draw' ? Colors.grey : (winner == (isHost ? 'host' : 'guest') ? Colors.green : Colors.red),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'あなた: $myBet 🐟  vs  相手: $opponentBet 🐟',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              }),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 24),
 
               ElevatedButton(
                 onPressed: () {
