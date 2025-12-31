@@ -79,6 +79,8 @@ class GameService {
   // ラウンドの結果を判定（3匹の猫それぞれ）
   Future<void> _resolveRound(String roomCode, GameRoom room) async {
     final Map<String, String> winners = {};
+    int hostWins = 0;
+    int guestWins = 0;
     
     // 各猫について勝敗を判定
     for (int i = 0; i < 3; i++) {
@@ -88,16 +90,65 @@ class GameService {
       
       if (hostBet > guestBet) {
         winners[catIndex] = 'host';
+        hostWins++;
       } else if (guestBet > hostBet) {
         winners[catIndex] = 'guest';
+        guestWins++;
       } else {
         winners[catIndex] = 'draw';
       }
     }
     
+    // 累計獲得猫数を更新
+    final newHostCatsWon = room.hostCatsWon + hostWins;
+    final newGuestCatsWon = room.guestCatsWon + guestWins;
+    
+    // 勝利条件判定（3匹獲得）
+    String finalStatus;
+    String? finalWinner;
+    
+    if (newHostCatsWon >= 3 && newGuestCatsWon >= 3) {
+      // 同時に3匹到達 → 引き分け
+      finalStatus = 'finished';
+      finalWinner = 'draw';
+    } else if (newHostCatsWon >= 3) {
+      // ホストの勝利
+      finalStatus = 'finished';
+      finalWinner = 'host';
+    } else if (newGuestCatsWon >= 3) {
+      // ゲストの勝利
+      finalStatus = 'finished';
+      finalWinner = 'guest';
+    } else {
+      // まだ勝敗がつかない → ラウンド結果表示
+      finalStatus = 'roundResult';
+      finalWinner = null;
+    }
+    
     await _firestore.collection('rooms').doc(roomCode).update({
       'winners': winners,
-      'status': 'finished',
+      'hostCatsWon': newHostCatsWon,
+      'guestCatsWon': newGuestCatsWon,
+      'status': finalStatus,
+      'finalWinner': finalWinner,
+    });
+  }
+  
+  // 次のターンへ進む
+  Future<void> nextTurn(String roomCode) async {
+    final roomDoc = await _firestore.collection('rooms').doc(roomCode).get();
+    final room = GameRoom.fromMap(roomDoc.data()!);
+    
+    await _firestore.collection('rooms').doc(roomCode).update({
+      'currentTurn': room.currentTurn + 1,
+      'status': 'playing',
+      'hostFishCount': 5,  // 魚をリセット
+      'guestFishCount': 5,
+      'hostBets': {'0': 0, '1': 0, '2': 0},  // 賭けをリセット
+      'guestBets': {'0': 0, '1': 0, '2': 0},
+      'hostReady': false,
+      'guestReady': false,
+      'winners': null,
     });
   }
 

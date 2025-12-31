@@ -2,7 +2,12 @@ class GameRoom {
   final String roomId;
   final String hostId;
   String? guestId;
-  String status; // 'waiting', 'playing', 'finished'
+  String status; // 'waiting', 'playing', 'roundResult', 'finished'
+  
+  // ターン情報
+  int currentTurn;
+  int hostCatsWon;    // ホストが獲得した猫の累計数
+  int guestCatsWon;   // ゲストが獲得した猫の累計数
   
   // ゲーム状態
   int hostFishCount;
@@ -20,12 +25,18 @@ class GameRoom {
   
   // 各猫の勝者（猫のインデックス -> 'host'/'guest'/'draw'）
   Map<String, String>? winners;
+  
+  // 最終勝者
+  String? finalWinner;
 
   GameRoom({
     required this.roomId,
     required this.hostId,
     this.guestId,
     this.status = 'waiting',
+    this.currentTurn = 1,
+    this.hostCatsWon = 0,
+    this.guestCatsWon = 0,
     this.hostFishCount = 5,
     this.guestFishCount = 5,
     List<String>? cats,
@@ -34,6 +45,7 @@ class GameRoom {
     this.hostReady = false,
     this.guestReady = false,
     this.winners,
+    this.finalWinner,
   })  : cats = cats ?? ['通常ネコ', '通常ネコ', '通常ネコ'],
         hostBets = hostBets ?? {'0': 0, '1': 0, '2': 0},
         guestBets = guestBets ?? {'0': 0, '1': 0, '2': 0};
@@ -44,6 +56,9 @@ class GameRoom {
       'hostId': hostId,
       'guestId': guestId,
       'status': status,
+      'currentTurn': currentTurn,
+      'hostCatsWon': hostCatsWon,
+      'guestCatsWon': guestCatsWon,
       'hostFishCount': hostFishCount,
       'guestFishCount': guestFishCount,
       'cats': cats,
@@ -52,6 +67,7 @@ class GameRoom {
       'hostReady': hostReady,
       'guestReady': guestReady,
       'winners': winners,
+      'finalWinner': finalWinner,
     };
   }
 
@@ -61,6 +77,9 @@ class GameRoom {
       hostId: map['hostId'] ?? '',
       guestId: map['guestId'],
       status: map['status'] ?? 'waiting',
+      currentTurn: map['currentTurn'] ?? 1,
+      hostCatsWon: map['hostCatsWon'] ?? 0,
+      guestCatsWon: map['guestCatsWon'] ?? 0,
       hostFishCount: map['hostFishCount'] ?? 5,
       guestFishCount: map['guestFishCount'] ?? 5,
       cats: List<String>.from(map['cats'] ?? ['通常ネコ', '通常ネコ', '通常ネコ']),
@@ -69,6 +88,7 @@ class GameRoom {
       hostReady: map['hostReady'] ?? false,
       guestReady: map['guestReady'] ?? false,
       winners: map['winners'] != null ? Map<String, String>.from(map['winners']) : null,
+      finalWinner: map['finalWinner'],
     );
   }
 }

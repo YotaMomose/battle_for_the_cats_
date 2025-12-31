@@ -26,9 +26,20 @@ class _GameScreenState extends State<GameScreen> {
   // 各猫への賭け（猫のインデックス -> 魚の数）
   final Map<String, int> _bets = {'0': 0, '1': 0, '2': 0};
   bool _hasPlacedBet = false;
+  int _lastTurn = 0;  // 最後に処理したターン番号を記録
 
   // 賭けの合計を計算
   int get _totalBet => _bets.values.reduce((a, b) => a + b);
+  
+  // ローカル状態をリセット
+  void _resetLocalState() {
+    setState(() {
+      _bets['0'] = 0;
+      _bets['1'] = 0;
+      _bets['2'] = 0;
+      _hasPlacedBet = false;
+    });
+  }
 
   void _placeBets() async {
     if (_totalBet == 0) {
@@ -79,6 +90,17 @@ class _GameScreenState extends State<GameScreen> {
           }
 
           final room = snapshot.data!;
+          
+          // 新しいターンになったらローカル状態をリセット
+          if (room.currentTurn != _lastTurn && room.status == 'playing') {
+            // 次のフレームで状態をリセット（build中の setState を避ける）
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _resetLocalState();
+                _lastTurn = room.currentTurn;
+              }
+            });
+          }
 
           // 待機中
           if (room.status == 'waiting') {
@@ -110,7 +132,12 @@ class _GameScreenState extends State<GameScreen> {
 
           // ゲーム終了
           if (room.status == 'finished') {
-            return _buildResultScreen(room);
+            return _buildFinalResultScreen(room);
+          }
+
+          // ラウンド結果表示
+          if (room.status == 'roundResult') {
+            return _buildRoundResultScreen(room);
           }
 
           // ゲーム中
@@ -118,6 +145,8 @@ class _GameScreenState extends State<GameScreen> {
           final myFishCount = isHost ? room.hostFishCount : room.guestFishCount;
           final myReady = isHost ? room.hostReady : room.guestReady;
           final opponentReady = isHost ? room.guestReady : room.hostReady;
+          final myCatsWon = isHost ? room.hostCatsWon : room.guestCatsWon;
+          final opponentCatsWon = isHost ? room.guestCatsWon : room.hostCatsWon;
 
           return SingleChildScrollView(
             child: Padding(
@@ -126,6 +155,28 @@ class _GameScreenState extends State<GameScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // ターン情報とスコア表示
+                  Card(
+                    color: Colors.purple.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'ターン ${room.currentTurn}',
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'あなた: $myCatsWon匹  |  相手: $opponentCatsWon匹',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
                   // 対戦相手の状態
                   Card(
                     color: Colors.blue.shade50,
@@ -289,41 +340,27 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _buildResultScreen(GameRoom room) {
+  // ラウンド結果画面（次のターンへ進むボタン付き）
+  Widget _buildRoundResultScreen(GameRoom room) {
     final isHost = widget.isHost;
     final myBets = isHost ? room.hostBets : room.guestBets;
     final opponentBets = isHost ? room.guestBets : room.hostBets;
     final winners = room.winners ?? {};
+    final myCatsWon = isHost ? room.hostCatsWon : room.guestCatsWon;
+    final opponentCatsWon = isHost ? room.guestCatsWon : room.hostCatsWon;
 
-    // 各プレイヤーの勝利数をカウント
-    int myWins = 0;
-    int opponentWins = 0;
-    int draws = 0;
+    // このラウンドで獲得した猫数をカウント
+    int myRoundWins = 0;
+    int opponentRoundWins = 0;
 
     for (int i = 0; i < 3; i++) {
       final catIndex = i.toString();
       final winner = winners[catIndex];
       if (winner == (isHost ? 'host' : 'guest')) {
-        myWins++;
+        myRoundWins++;
       } else if (winner == (isHost ? 'guest' : 'host')) {
-        opponentWins++;
-      } else {
-        draws++;
+        opponentRoundWins++;
       }
-    }
-
-    String resultText;
-    Color resultColor;
-
-    if (myWins > opponentWins) {
-      resultText = 'あなたの勝利！';
-      resultColor = Colors.green;
-    } else if (opponentWins > myWins) {
-      resultText = '敗北...';
-      resultColor = Colors.red;
-    } else {
-      resultText = '引き分け';
-      resultColor = Colors.grey;
     }
 
     return Center(
@@ -334,17 +371,21 @@ class _GameScreenState extends State<GameScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                resultText,
-                style: TextStyle(
-                  fontSize: 36,
+                'ターン ${room.currentTurn} 結果',
+                style: const TextStyle(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: resultColor,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'あなた $myWins - $opponentWins 相手',
-                style: const TextStyle(fontSize: 24),
+                'このターン: あなた $myRoundWins匹 - $opponentRoundWins匹 相手',
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '累計: あなた $myCatsWon匹 - $opponentCatsWon匹 相手',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               
@@ -431,13 +472,15 @@ class _GameScreenState extends State<GameScreen> {
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
+                onPressed: () async {
+                  await _gameService.nextTurn(widget.roomCode);
+                  // ローカル状態のリセットは StreamBuilder で自動的に行われる
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
+                  backgroundColor: Colors.orange,
                 ),
-                child: const Text('ホームに戻る', style: TextStyle(fontSize: 18)),
+                child: const Text('次のターンへ', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),
@@ -445,4 +488,88 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
   }
+
+  // 最終結果画面（ゲーム終了）
+  Widget _buildFinalResultScreen(GameRoom room) {
+    final isHost = widget.isHost;
+    final myCatsWon = isHost ? room.hostCatsWon : room.guestCatsWon;
+    final opponentCatsWon = isHost ? room.guestCatsWon : room.hostCatsWon;
+
+    String resultText;
+    Color resultColor;
+
+    if (room.finalWinner == 'draw') {
+      resultText = '引き分け';
+      resultColor = Colors.grey;
+    } else if ((room.finalWinner == 'host' && isHost) ||
+        (room.finalWinner == 'guest' && !isHost)) {
+      resultText = 'あなたの勝利！';
+      resultColor = Colors.green;
+    } else {
+      resultText = '敗北...';
+      resultColor = Colors.red;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              resultText,
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: resultColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    const Icon(Icons.emoji_events, size: 80, color: Colors.amber),
+                    const SizedBox(height: 16),
+                    Text(
+                      '最終スコア',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'あなた: $myCatsWon匹',
+                      style: const TextStyle(fontSize: 28),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '相手: $opponentCatsWon匹',
+                      style: const TextStyle(fontSize: 28),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '全${room.currentTurn}ターン',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+              ),
+              child: const Text('ホームに戻る', style: TextStyle(fontSize: 18)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 旧バージョン（削除済み）
 }
