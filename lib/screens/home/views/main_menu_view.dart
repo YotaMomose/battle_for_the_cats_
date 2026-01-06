@@ -37,11 +37,7 @@ class _MainMenuViewState extends State<MainMenuView> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(
-                Icons.pets,
-                size: 80,
-                color: Colors.orange,
-              ),
+              const Icon(Icons.pets, size: 80, color: Colors.orange),
               const SizedBox(height: 24),
               const Text(
                 'ねこ争奪戦！',
@@ -64,7 +60,9 @@ class _MainMenuViewState extends State<MainMenuView> {
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: isLoading ? null : () => viewModel.startRandomMatch(),
+                onPressed: isLoading
+                    ? null
+                    : () => viewModel.startRandomMatch(),
                 icon: const Icon(Icons.shuffle),
                 label: const Text('ランダムマッチ', style: TextStyle(fontSize: 18)),
                 style: ElevatedButton.styleFrom(

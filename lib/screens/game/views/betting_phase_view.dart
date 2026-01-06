@@ -7,10 +7,21 @@ import '../game_screen_view_model.dart';
 class BettingPhaseView extends StatelessWidget {
   final GameRoom room;
 
-  const BettingPhaseView({
-    super.key,
-    required this.room,
-  });
+  const BettingPhaseView({super.key, required this.room});
+
+  /// 猫の名前に応じて色を返す
+  Color _getCatColor(String catName) {
+    switch (catName) {
+      case '茶トラねこ':
+        return Colors.orange;
+      case '白ねこ':
+        return Colors.grey.shade300;
+      case '黒ねこ':
+        return Colors.black;
+      default:
+        return Colors.orange;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +45,9 @@ class BettingPhaseView extends StatelessWidget {
                     Text(
                       'ターン ${room.currentTurn}',
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -56,8 +69,10 @@ class BettingPhaseView extends StatelessWidget {
                   children: [
                     const Text(
                       '対戦相手',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -103,8 +118,11 @@ class BettingPhaseView extends StatelessWidget {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.pets,
-                                  size: 24, color: Colors.orange),
+                              Icon(
+                                Icons.pets,
+                                size: 24,
+                                color: _getCatColor(catName),
+                              ),
                               const SizedBox(height: 2),
                               Flexible(
                                 child: Text(
@@ -134,34 +152,44 @@ class BettingPhaseView extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      onPressed: viewModel.hasPlacedBet ||
+                                      onPressed:
+                                          viewModel.hasPlacedBet ||
                                               currentBet == 0
                                           ? null
                                           : () {
                                               viewModel.updateBet(
-                                                  catIndex, currentBet - 1);
+                                                catIndex,
+                                                currentBet - 1,
+                                              );
                                             },
                                       icon: const Icon(Icons.remove_circle),
                                       iconSize: 20,
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(
-                                          minWidth: 32, minHeight: 32),
+                                        minWidth: 32,
+                                        minHeight: 32,
+                                      ),
                                     ),
                                     const SizedBox(width: 4),
                                     IconButton(
-                                      onPressed: viewModel.hasPlacedBet ||
+                                      onPressed:
+                                          viewModel.hasPlacedBet ||
                                               viewModel.totalBet >=
                                                   playerData.myFishCount
                                           ? null
                                           : () {
                                               viewModel.updateBet(
-                                                  catIndex, currentBet + 1);
+                                                catIndex,
+                                                currentBet + 1,
+                                              );
                                             },
                                       icon: const Icon(Icons.add_circle),
                                       iconSize: 20,
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(
-                                          minWidth: 32, minHeight: 32),
+                                        minWidth: 32,
+                                        minHeight: 32,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -187,13 +215,16 @@ class BettingPhaseView extends StatelessWidget {
                     Text(
                       '残りの魚: ${playerData.myFishCount - viewModel.totalBet} / ${playerData.myFishCount} 🐟',
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     if (!playerData.myReady) ...[
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed:
-                            viewModel.hasPlacedBet ? null : viewModel.placeBets,
+                        onPressed: viewModel.hasPlacedBet
+                            ? null
+                            : viewModel.placeBets,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
                         ),

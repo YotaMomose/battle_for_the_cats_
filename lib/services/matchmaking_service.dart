@@ -1,4 +1,5 @@
 import '../constants/game_constants.dart';
+import '../domain/game_logic.dart';
 import '../models/game_room.dart';
 import '../repositories/firestore_repository.dart';
 import 'room_service.dart';
@@ -7,13 +8,16 @@ import 'room_service.dart';
 class MatchmakingService {
   final FirestoreRepository _repository;
   final RoomService _roomService;
+  final GameLogic _gameLogic;
   static const String _collection = 'matchmaking';
 
   MatchmakingService({
     required FirestoreRepository repository,
     required RoomService roomService,
-  })  : _repository = repository,
-        _roomService = roomService;
+    GameLogic? gameLogic,
+  }) : _repository = repository,
+       _roomService = roomService,
+       _gameLogic = gameLogic ?? GameLogic();
 
   /// 待機リストに登録
   Future<String> joinMatchmaking(String playerId) async {
@@ -30,8 +34,10 @@ class MatchmakingService {
 
   /// マッチングを監視
   Stream<String?> watchMatchmaking(String playerId) async* {
-    await for (final snapshot
-        in _repository.watchDocument(_collection, playerId)) {
+    await for (final snapshot in _repository.watchDocument(
+      _collection,
+      playerId,
+    )) {
       if (!snapshot.exists || snapshot.data() == null) {
         yield null;
         return;
@@ -83,8 +89,10 @@ class MatchmakingService {
       // トランザクションでマッチング処理
       await _repository.runTransaction((transaction) async {
         final myRef = _repository.getDocumentReference(_collection, playerId);
-        final opponentRef =
-            _repository.getDocumentReference(_collection, opponentId!);
+        final opponentRef = _repository.getDocumentReference(
+          _collection,
+          opponentId!,
+        );
 
         final myDoc = await transaction.get(myRef);
         final opponentDoc = await transaction.get(opponentRef);
@@ -104,11 +112,13 @@ class MatchmakingService {
 
         // ルームを作成
         final roomCode = _roomService.generateRoomCode();
+        final cats = _gameLogic.generateRandomCats();
         final room = GameRoom(
           roomId: roomCode,
           hostId: playerId,
           guestId: opponentId,
           status: GameStatus.rolling.value, // サイコロフェーズから開始
+          cats: cats,
         );
 
         // トランザクション内でルームを作成

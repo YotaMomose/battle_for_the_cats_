@@ -4,7 +4,8 @@ import '../models/game_room.dart';
 
 /// ラウンド結果
 class RoundResult {
-  final Map<String, String> winners; // 各猫の勝者（'0', '1', '2' -> 'host'/'guest'/'draw'）
+  final Map<String, String>
+  winners; // 各猫の勝者（'0', '1', '2' -> 'host'/'guest'/'draw'）
   final int hostWins; // ホストが獲得した猫の数
   final int guestWins; // ゲストが獲得した猫の数
   final GameStatus finalStatus; // 最終ステータス
@@ -32,9 +33,22 @@ class GameLogic {
   String generateRoomCode() {
     return List.generate(
       GameConstants.roomCodeLength,
-      (index) => GameConstants.roomCodeChars[
-          _random.nextInt(GameConstants.roomCodeChars.length)],
+      (index) =>
+          GameConstants.roomCodeChars[_random.nextInt(
+            GameConstants.roomCodeChars.length,
+          )],
     ).join();
+  }
+
+  /// 3匹の猫をランダムに選択（重複OK）
+  List<String> generateRandomCats() {
+    return List.generate(
+      GameConstants.catCount,
+      (index) =>
+          GameConstants.catTypes[_random.nextInt(
+            GameConstants.catTypes.length,
+          )],
+    );
   }
 
   /// ラウンドの結果を判定

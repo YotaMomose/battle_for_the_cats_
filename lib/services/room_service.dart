@@ -8,11 +8,9 @@ class RoomService {
   final RoomRepository _repository;
   final GameLogic _gameLogic;
 
-  RoomService({
-    required RoomRepository repository,
-    GameLogic? gameLogic,
-  })  : _repository = repository,
-        _gameLogic = gameLogic ?? GameLogic();
+  RoomService({required RoomRepository repository, GameLogic? gameLogic})
+    : _repository = repository,
+      _gameLogic = gameLogic ?? GameLogic();
 
   /// ルームコードを生成
   String generateRoomCode() {
@@ -22,7 +20,8 @@ class RoomService {
   /// ルームを作成
   Future<String> createRoom(String hostId) async {
     final roomCode = generateRoomCode();
-    final room = GameRoom(roomId: roomCode, hostId: hostId);
+    final cats = _gameLogic.generateRandomCats();
+    final room = GameRoom(roomId: roomCode, hostId: hostId, cats: cats);
 
     await _repository.createRoom(room);
     return roomCode;
