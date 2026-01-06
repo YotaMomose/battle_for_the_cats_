@@ -1,0 +1,65 @@
+import '../constants/game_constants.dart';
+import '../domain/game_logic.dart';
+import '../models/game_room.dart';
+import '../repositories/room_repository.dart';
+
+/// ルーム管理を担当するサービス
+class RoomService {
+  final RoomRepository _repository;
+  final GameLogic _gameLogic;
+
+  RoomService({
+    required RoomRepository repository,
+    GameLogic? gameLogic,
+  })  : _repository = repository,
+        _gameLogic = gameLogic ?? GameLogic();
+
+  /// ルームコードを生成
+  String generateRoomCode() {
+    return _gameLogic.generateRoomCode();
+  }
+
+  /// ルームを作成
+  Future<String> createRoom(String hostId) async {
+    final roomCode = generateRoomCode();
+    final room = GameRoom(roomId: roomCode, hostId: hostId);
+
+    await _repository.createRoom(room);
+    return roomCode;
+  }
+
+  /// ルームに参加
+  Future<bool> joinRoom(String roomCode, String guestId) async {
+    final room = await _repository.getRoom(roomCode);
+
+    if (room == null) {
+      return false; // ルームが存在しない
+    }
+
+    if (room.guestId != null) {
+      return false; // すでにゲストがいる
+    }
+
+    await _repository.updateRoom(roomCode, {
+      'guestId': guestId,
+      'status': GameStatus.rolling.value, // サイコロフェーズから開始
+    });
+
+    return true;
+  }
+
+  /// ルームを監視
+  Stream<GameRoom> watchRoom(String roomCode) {
+    return _repository.watchRoom(roomCode);
+  }
+
+  /// ルームを削除
+  Future<void> deleteRoom(String roomCode) async {
+    await _repository.deleteRoom(roomCode);
+  }
+
+  /// プレイヤーがホストかどうかを判定
+  bool isHost(GameRoom room, String playerId) {
+    return _repository.isHost(room, playerId);
+  }
+}
