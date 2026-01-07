@@ -4,6 +4,7 @@ import '../../services/game_service.dart';
 import 'home_screen_state.dart';
 
 /// ホーム画面のViewModel
+/// ホーム画面の状態管理とビジネスロジックを担当する
 class HomeScreenViewModel extends ChangeNotifier {
   final GameService _gameService;
   final Function(String roomCode, String playerId, bool isHost) onNavigateToGame;

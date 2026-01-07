@@ -1,3 +1,6 @@
+/// GameRoomモデル
+/// ゲームルームの状態を表すデータモデルクラス
+/// 各フィールドはゲームの進行状況やプレイヤーの情報を保持する
 class GameRoom {
   final String roomId;
   final String hostId;

@@ -5,7 +5,7 @@ import 'game_flow_service.dart';
 import 'matchmaking_service.dart';
 import 'room_service.dart';
 
-/// ゲームサービスのファサード
+/// ゲームサービスのファサード　複数のクラスやオブジェクトから構成される複雑な処理を、一つのシンプルなクラス（ファサード）に集約する
 /// 各専門サービスへのアクセスを提供
 class GameService {
   late final RoomService _roomService;

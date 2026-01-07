@@ -4,7 +4,7 @@ import '../models/game_room.dart';
 import '../repositories/firestore_repository.dart';
 import 'room_service.dart';
 
-/// マッチング処理を担当するサービス
+/// ランダムマッチング処理を担当するサービス
 class MatchmakingService {
   final FirestoreRepository _repository;
   final RoomService _roomService;
