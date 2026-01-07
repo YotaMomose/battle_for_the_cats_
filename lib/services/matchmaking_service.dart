@@ -113,12 +113,14 @@ class MatchmakingService {
         // ルームを作成
         final roomCode = _roomService.generateRoomCode();
         final cats = _gameLogic.generateRandomCats();
+        final catCosts = _gameLogic.generateRandomCosts(cats.length);
         final room = GameRoom(
           roomId: roomCode,
           hostId: playerId,
           guestId: opponentId,
           status: GameStatus.rolling.value, // サイコロフェーズから開始
           cats: cats,
+          catCosts: catCosts,
         );
 
         // トランザクション内でルームを作成

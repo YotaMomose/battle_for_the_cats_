@@ -21,6 +21,7 @@ class GameRoom {
 
   // 3匹の猫（猫の種類を格納）
   List<String> cats;
+  List<int> catCosts; // 各猫の獲得に必要な魚の数
 
   // 各プレイヤーの各猫への賭け（猫のインデックス -> 魚の数）
   Map<String, int> hostBets;
@@ -50,6 +51,7 @@ class GameRoom {
     this.hostFishCount = 0,
     this.guestFishCount = 0,
     List<String>? cats,
+    List<int>? catCosts,
     Map<String, int>? hostBets,
     Map<String, int>? guestBets,
     this.hostReady = false,
@@ -57,6 +59,7 @@ class GameRoom {
     this.winners,
     this.finalWinner,
   }) : cats = cats ?? ['通常ネコ', '通常ネコ', '通常ネコ'],
+       catCosts = catCosts ?? [1, 1, 1],
        hostCatsWon = hostCatsWon ?? [],
        guestCatsWon = guestCatsWon ?? [],
        hostBets = hostBets ?? {'0': 0, '1': 0, '2': 0},
@@ -78,6 +81,7 @@ class GameRoom {
       'hostFishCount': hostFishCount,
       'guestFishCount': guestFishCount,
       'cats': cats,
+      'catCosts': catCosts,
       'hostBets': hostBets,
       'guestBets': guestBets,
       'hostReady': hostReady,
@@ -103,6 +107,7 @@ class GameRoom {
       hostFishCount: map['hostFishCount'] ?? 0,
       guestFishCount: map['guestFishCount'] ?? 0,
       cats: List<String>.from(map['cats'] ?? ['通常ネコ', '通常ネコ', '通常ネコ']),
+      catCosts: List<int>.from(map['catCosts'] ?? [1, 1, 1]),
       hostBets: Map<String, int>.from(
         map['hostBets'] ?? {'0': 0, '1': 0, '2': 0},
       ),

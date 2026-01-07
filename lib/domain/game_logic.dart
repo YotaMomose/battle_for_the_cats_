@@ -51,6 +51,11 @@ class GameLogic {
     );
   }
 
+  /// 3匹の猫のコスト（必要魚数）をランダムに決定（1〜4）
+  List<int> generateRandomCosts(int count) {
+    return List.generate(count, (_) => _random.nextInt(4) + 1);
+  }
+
   /// ラウンドの結果を判定
   RoundResult resolveRound(GameRoom room) {
     final Map<String, String> winners = {};
@@ -61,16 +66,38 @@ class GameLogic {
     for (int i = 0; i < GameConstants.catCount; i++) {
       final catIndex = i.toString();
       final catName = room.cats[i];
+      final cost = room.catCosts.length > i
+          ? room.catCosts[i]
+          : 1; // コスト取得（デフォルト1）
+
       final hostBet = room.hostBets[catIndex] ?? 0;
       final guestBet = room.guestBets[catIndex] ?? 0;
 
-      if (hostBet > guestBet) {
+      // 足切り判定
+      final hostQualified = hostBet >= cost;
+      final guestQualified = guestBet >= cost;
+
+      if (hostQualified && guestQualified) {
+        // 両者条件クリア → 数が多い方
+        if (hostBet > guestBet) {
+          winners[catIndex] = Winner.host.value;
+          hostWonCats.add(catName);
+        } else if (guestBet > hostBet) {
+          winners[catIndex] = Winner.guest.value;
+          guestWonCats.add(catName);
+        } else {
+          winners[catIndex] = Winner.draw.value;
+        }
+      } else if (hostQualified) {
+        // ホストのみ条件クリア → ホスト獲得
         winners[catIndex] = Winner.host.value;
         hostWonCats.add(catName);
-      } else if (guestBet > hostBet) {
+      } else if (guestQualified) {
+        // ゲストのみ条件クリア → ゲスト獲得
         winners[catIndex] = Winner.guest.value;
         guestWonCats.add(catName);
       } else {
+        // 両者条件満たさず → 獲得なし（引き分け扱い）
         winners[catIndex] = Winner.draw.value;
       }
     }

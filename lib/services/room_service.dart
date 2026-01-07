@@ -21,7 +21,13 @@ class RoomService {
   Future<String> createRoom(String hostId) async {
     final roomCode = generateRoomCode();
     final cats = _gameLogic.generateRandomCats();
-    final room = GameRoom(roomId: roomCode, hostId: hostId, cats: cats);
+    final catCosts = _gameLogic.generateRandomCosts(cats.length);
+    final room = GameRoom(
+      roomId: roomCode,
+      hostId: hostId,
+      cats: cats,
+      catCosts: catCosts,
+    );
 
     await _repository.createRoom(room);
     return roomCode;
