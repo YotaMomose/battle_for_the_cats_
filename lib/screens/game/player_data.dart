@@ -4,8 +4,8 @@ import '../../models/game_room.dart';
 class PlayerData {
   final int myFishCount;
   final int opponentFishCount;
-  final int myCatsWon;
-  final int opponentCatsWon;
+  final List<String> myCatsWon;
+  final List<String> opponentCatsWon;
   final int? myDiceRoll;
   final int? opponentDiceRoll;
   final bool myRolled;

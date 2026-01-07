@@ -7,11 +7,9 @@ class GameFlowService {
   final RoomRepository _repository;
   final GameLogic _gameLogic;
 
-  GameFlowService({
-    required RoomRepository repository,
-    GameLogic? gameLogic,
-  })  : _repository = repository,
-        _gameLogic = gameLogic ?? GameLogic();
+  GameFlowService({required RoomRepository repository, GameLogic? gameLogic})
+    : _repository = repository,
+      _gameLogic = gameLogic ?? GameLogic();
 
   /// サイコロを振る
   Future<void> rollDice(String roomCode, String playerId) async {
@@ -20,10 +18,14 @@ class GameFlowService {
 
     final diceRoll = _gameLogic.rollDice();
 
+    final isHost = _repository.isHost(room, playerId);
+    final currentFish = isHost ? room.hostFishCount : room.guestFishCount;
+    final newFishCount = currentFish + diceRoll;
+
     await _repository.updatePlayerData(roomCode, playerId, {
       'DiceRoll': diceRoll,
       'Rolled': true,
-      'FishCount': diceRoll,
+      'FishCount': newFishCount,
     });
 
     // 両者がサイコロを振ったかチェック
@@ -66,9 +68,9 @@ class GameFlowService {
   Future<void> _resolveRound(String roomCode, room) async {
     final result = _gameLogic.resolveRound(room);
 
-    // 累計獲得猫数を更新
-    final newHostCatsWon = room.hostCatsWon + result.hostWins;
-    final newGuestCatsWon = room.guestCatsWon + result.guestWins;
+    // 累計獲得猫リストを更新
+    final newHostCatsWon = [...room.hostCatsWon, ...result.hostWonCats];
+    final newGuestCatsWon = [...room.guestCatsWon, ...result.guestWonCats];
 
     await _repository.updateRoom(roomCode, {
       'winners': result.winners,
@@ -84,6 +86,16 @@ class GameFlowService {
     final room = await _repository.getRoom(roomCode);
     if (room == null) return;
 
+    // 次のターンの猫を生成
+    final nextCats = _gameLogic.generateRandomCats();
+
+    // 賭ケた魚の総数を計算して、残りの魚を算出（持ち越し）
+    final hostBetTotal = room.hostBets.values.fold(0, (a, b) => a + b);
+    final guestBetTotal = room.guestBets.values.fold(0, (a, b) => a + b);
+
+    final remainingHostFish = room.hostFishCount - hostBetTotal;
+    final remainingGuestFish = room.guestFishCount - guestBetTotal;
+
     await _repository.updateRoom(roomCode, {
       'currentTurn': room.currentTurn + 1,
       'status': GameStatus.rolling.value, // サイコロフェーズに移行
@@ -91,13 +103,14 @@ class GameFlowService {
       'guestDiceRoll': null,
       'hostRolled': false,
       'guestRolled': false,
-      'hostFishCount': 0,
-      'guestFishCount': 0,
+      'hostFishCount': remainingHostFish, // 残った魚を持ち越し
+      'guestFishCount': remainingGuestFish, // 残った魚を持ち越し
       'hostBets': {'0': 0, '1': 0, '2': 0},
       'guestBets': {'0': 0, '1': 0, '2': 0},
       'hostReady': false,
       'guestReady': false,
       'winners': null,
+      'cats': nextCats, // 新しい猫を設定
     });
   }
 }

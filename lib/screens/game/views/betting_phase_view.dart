@@ -23,6 +23,17 @@ class BettingPhaseView extends StatelessWidget {
     }
   }
 
+  /// 獲得した猫を種類別にフォーマット
+  String _formatCatsWon(List<String> catsWon) {
+    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
+    for (final cat in catsWon) {
+      if (counts.containsKey(cat)) {
+        counts[cat] = counts[cat]! + 1;
+      }
+    }
+    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
@@ -51,8 +62,12 @@ class BettingPhaseView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'あなた: ${playerData.myCatsWon}匹  |  相手: ${playerData.opponentCatsWon}匹',
-                      style: const TextStyle(fontSize: 16),
+                      'あなた: ${_formatCatsWon(playerData.myCatsWon)}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '相手: ${_formatCatsWon(playerData.opponentCatsWon)}',
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ],
                 ),

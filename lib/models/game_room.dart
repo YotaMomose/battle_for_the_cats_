@@ -6,8 +6,8 @@ class GameRoom {
 
   // ターン情報
   int currentTurn;
-  int hostCatsWon; // ホストが獲得した猫の累計数
-  int guestCatsWon; // ゲストが獲得した猫の累計数
+  List<String> hostCatsWon; // ホストが獲得した猫の種類リスト
+  List<String> guestCatsWon; // ゲストが獲得した猫の種類リスト
 
   // サイコロ
   int? hostDiceRoll; // ホストのサイコロの目（1-6）
@@ -41,8 +41,8 @@ class GameRoom {
     this.guestId,
     this.status = 'waiting',
     this.currentTurn = 1,
-    this.hostCatsWon = 0,
-    this.guestCatsWon = 0,
+    List<String>? hostCatsWon,
+    List<String>? guestCatsWon,
     this.hostDiceRoll,
     this.guestDiceRoll,
     this.hostRolled = false,
@@ -57,6 +57,8 @@ class GameRoom {
     this.winners,
     this.finalWinner,
   }) : cats = cats ?? ['通常ネコ', '通常ネコ', '通常ネコ'],
+       hostCatsWon = hostCatsWon ?? [],
+       guestCatsWon = guestCatsWon ?? [],
        hostBets = hostBets ?? {'0': 0, '1': 0, '2': 0},
        guestBets = guestBets ?? {'0': 0, '1': 0, '2': 0};
 
@@ -92,8 +94,8 @@ class GameRoom {
       guestId: map['guestId'],
       status: map['status'] ?? 'waiting',
       currentTurn: map['currentTurn'] ?? 1,
-      hostCatsWon: map['hostCatsWon'] ?? 0,
-      guestCatsWon: map['guestCatsWon'] ?? 0,
+      hostCatsWon: List<String>.from(map['hostCatsWon'] ?? []),
+      guestCatsWon: List<String>.from(map['guestCatsWon'] ?? []),
       hostDiceRoll: map['hostDiceRoll'],
       guestDiceRoll: map['guestDiceRoll'],
       hostRolled: map['hostRolled'] ?? false,

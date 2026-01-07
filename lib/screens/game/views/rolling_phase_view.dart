@@ -7,10 +7,18 @@ import '../game_screen_view_model.dart';
 class RollingPhaseView extends StatelessWidget {
   final GameRoom room;
 
-  const RollingPhaseView({
-    super.key,
-    required this.room,
-  });
+  const RollingPhaseView({super.key, required this.room});
+
+  /// 獲得した猫を種類別にフォーマット
+  String _formatCatsWon(List<String> catsWon) {
+    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
+    for (final cat in catsWon) {
+      if (counts.containsKey(cat)) {
+        counts[cat] = counts[cat]! + 1;
+      }
+    }
+    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +40,19 @@ class RollingPhaseView extends StatelessWidget {
                   children: [
                     Text(
                       'ターン ${room.currentTurn}',
-                      style:
-                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'あなた: ${playerData.myCatsWon}匹  |  相手: ${playerData.opponentCatsWon}匹',
-                      style: const TextStyle(fontSize: 16),
+                      'あなた: ${_formatCatsWon(playerData.myCatsWon)}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '相手: ${_formatCatsWon(playerData.opponentCatsWon)}',
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ],
                 ),
@@ -62,7 +76,10 @@ class RollingPhaseView extends StatelessWidget {
                   children: [
                     const Text(
                       '対戦相手',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     if (playerData.opponentRolled &&
@@ -70,11 +87,16 @@ class RollingPhaseView extends StatelessWidget {
                       Text(
                         '🎲 ${playerData.opponentDiceRoll}',
                         style: const TextStyle(
-                            fontSize: 48, fontWeight: FontWeight.bold),
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         '魚を ${playerData.opponentDiceRoll} 匹獲得しました！',
-                        style: const TextStyle(fontSize: 16, color: Colors.green),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.green,
+                        ),
                       ),
                     ] else ...[
                       const Text(
@@ -97,14 +119,20 @@ class RollingPhaseView extends StatelessWidget {
                   children: [
                     const Text(
                       'あなた',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    if (playerData.myRolled && playerData.myDiceRoll != null) ...[
+                    if (playerData.myRolled &&
+                        playerData.myDiceRoll != null) ...[
                       Text(
                         '🎲 ${playerData.myDiceRoll}',
                         style: const TextStyle(
-                            fontSize: 64, fontWeight: FontWeight.bold),
+                          fontSize: 64,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -122,7 +150,9 @@ class RollingPhaseView extends StatelessWidget {
                       ),
                     ] else ...[
                       ElevatedButton.icon(
-                        onPressed: viewModel.hasRolled ? null : viewModel.rollDice,
+                        onPressed: viewModel.hasRolled
+                            ? null
+                            : viewModel.rollDice,
                         icon: const Icon(Icons.casino, size: 32),
                         label: Text(
                           viewModel.hasRolled ? '振りました' : 'サイコロを振る',
@@ -130,9 +160,12 @@ class RollingPhaseView extends StatelessWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 20),
-                          backgroundColor:
-                              viewModel.hasRolled ? Colors.grey : Colors.orange,
+                            horizontal: 32,
+                            vertical: 20,
+                          ),
+                          backgroundColor: viewModel.hasRolled
+                              ? Colors.grey
+                              : Colors.orange,
                         ),
                       ),
                     ],

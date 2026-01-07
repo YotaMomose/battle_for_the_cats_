@@ -6,15 +6,15 @@ import '../models/game_room.dart';
 class RoundResult {
   final Map<String, String>
   winners; // 各猫の勝者（'0', '1', '2' -> 'host'/'guest'/'draw'）
-  final int hostWins; // ホストが獲得した猫の数
-  final int guestWins; // ゲストが獲得した猫の数
+  final List<String> hostWonCats; // ホストがこのラウンドで獲得した猫の種類
+  final List<String> guestWonCats; // ゲストがこのラウンドで獲得した猫の種類
   final GameStatus finalStatus; // 最終ステータス
   final Winner? finalWinner; // 最終勝者
 
   RoundResult({
     required this.winners,
-    required this.hostWins,
-    required this.guestWins,
+    required this.hostWonCats,
+    required this.guestWonCats,
     required this.finalStatus,
     this.finalWinner,
   });
@@ -54,44 +54,47 @@ class GameLogic {
   /// ラウンドの結果を判定
   RoundResult resolveRound(GameRoom room) {
     final Map<String, String> winners = {};
-    int hostWins = 0;
-    int guestWins = 0;
+    final List<String> hostWonCats = [];
+    final List<String> guestWonCats = [];
 
     // 各猫について勝敗を判定
     for (int i = 0; i < GameConstants.catCount; i++) {
       final catIndex = i.toString();
+      final catName = room.cats[i];
       final hostBet = room.hostBets[catIndex] ?? 0;
       final guestBet = room.guestBets[catIndex] ?? 0;
 
       if (hostBet > guestBet) {
         winners[catIndex] = Winner.host.value;
-        hostWins++;
+        hostWonCats.add(catName);
       } else if (guestBet > hostBet) {
         winners[catIndex] = Winner.guest.value;
-        guestWins++;
+        guestWonCats.add(catName);
       } else {
         winners[catIndex] = Winner.draw.value;
       }
     }
 
-    // 累計獲得猫数を計算
-    final newHostCatsWon = room.hostCatsWon + hostWins;
-    final newGuestCatsWon = room.guestCatsWon + guestWins;
+    // 累計獲得猫リストを計算
+    final newHostCatsWon = [...room.hostCatsWon, ...hostWonCats];
+    final newGuestCatsWon = [...room.guestCatsWon, ...guestWonCats];
 
     // 勝利条件判定
+    final hostWins = checkWinCondition(newHostCatsWon);
+    final guestWins = checkWinCondition(newGuestCatsWon);
+
     final GameStatus finalStatus;
     final Winner? finalWinner;
 
-    if (newHostCatsWon >= GameConstants.winCondition &&
-        newGuestCatsWon >= GameConstants.winCondition) {
-      // 同時に3匹到達 → 引き分け
+    if (hostWins && guestWins) {
+      // 同時に勝利条件達成 → 引き分け
       finalStatus = GameStatus.finished;
       finalWinner = Winner.draw;
-    } else if (newHostCatsWon >= GameConstants.winCondition) {
+    } else if (hostWins) {
       // ホストの勝利
       finalStatus = GameStatus.finished;
       finalWinner = Winner.host;
-    } else if (newGuestCatsWon >= GameConstants.winCondition) {
+    } else if (guestWins) {
       // ゲストの勝利
       finalStatus = GameStatus.finished;
       finalWinner = Winner.guest;
@@ -103,15 +106,26 @@ class GameLogic {
 
     return RoundResult(
       winners: winners,
-      hostWins: hostWins,
-      guestWins: guestWins,
+      hostWonCats: hostWonCats,
+      guestWonCats: guestWonCats,
       finalStatus: finalStatus,
       finalWinner: finalWinner,
     );
   }
 
-  /// 勝利条件をチェック
-  bool checkWinCondition(int catsWon) {
-    return catsWon >= GameConstants.winCondition;
+  /// 勝利条件をチェック（同種3匹 or 3種類）
+  bool checkWinCondition(List<String> catsWon) {
+    if (catsWon.length < 3) return false;
+
+    // 各種類のカウント
+    final counts = <String, int>{};
+    for (final cat in catsWon) {
+      counts[cat] = (counts[cat] ?? 0) + 1;
+      // 同じ種類が3匹以上
+      if (counts[cat]! >= 3) return true;
+    }
+
+    // 3種類以上
+    return counts.keys.length >= 3;
   }
 }

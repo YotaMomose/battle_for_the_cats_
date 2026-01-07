@@ -7,10 +7,18 @@ import '../game_screen_view_model.dart';
 class FinalResultView extends StatelessWidget {
   final GameRoom room;
 
-  const FinalResultView({
-    super.key,
-    required this.room,
-  });
+  const FinalResultView({super.key, required this.room});
+
+  /// 獲得した猫を種類別にフォーマット
+  String _formatCatsWon(List<String> catsWon) {
+    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
+    for (final cat in catsWon) {
+      if (counts.containsKey(cat)) {
+        counts[cat] = counts[cat]! + 1;
+      }
+    }
+    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,23 +60,28 @@ class FinalResultView extends StatelessWidget {
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    const Icon(Icons.emoji_events,
-                        size: 80, color: Colors.amber),
+                    const Icon(
+                      Icons.emoji_events,
+                      size: 80,
+                      color: Colors.amber,
+                    ),
                     const SizedBox(height: 16),
                     const Text(
                       '最終スコア',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'あなた: ${playerData.myCatsWon}匹',
-                      style: const TextStyle(fontSize: 28),
+                      'あなた: ${_formatCatsWon(playerData.myCatsWon)}',
+                      style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '相手: ${playerData.opponentCatsWon}匹',
-                      style: const TextStyle(fontSize: 28),
+                      '相手: ${_formatCatsWon(playerData.opponentCatsWon)}',
+                      style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 16),
                     Text(

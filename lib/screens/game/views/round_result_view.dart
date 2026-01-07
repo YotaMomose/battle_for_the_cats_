@@ -7,10 +7,32 @@ import '../game_screen_view_model.dart';
 class RoundResultView extends StatelessWidget {
   final GameRoom room;
 
-  const RoundResultView({
-    super.key,
-    required this.room,
-  });
+  const RoundResultView({super.key, required this.room});
+
+  /// 猫の名前に応じて色を返す
+  Color _getCatColor(String catName) {
+    switch (catName) {
+      case '茶トラねこ':
+        return Colors.orange;
+      case '白ねこ':
+        return Colors.grey.shade300;
+      case '黒ねこ':
+        return Colors.black;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  /// 獲得した猫を種類別にフォーマット
+  String _formatCatsWon(List<String> catsWon) {
+    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
+    for (final cat in catsWon) {
+      if (counts.containsKey(cat)) {
+        counts[cat] = counts[cat]! + 1;
+      }
+    }
+    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +78,18 @@ class RoundResultView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '累計: あなた ${playerData.myCatsWon}匹 - ${playerData.opponentCatsWon}匹 相手',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                '累計: あなた ${_formatCatsWon(playerData.myCatsWon)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '累計: 相手 ${_formatCatsWon(playerData.opponentCatsWon)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
 
@@ -97,8 +129,11 @@ class RoundResultView extends StatelessWidget {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.pets,
-                                    size: 24, color: Colors.orange),
+                                Icon(
+                                  Icons.pets,
+                                  size: 24,
+                                  color: _getCatColor(catName),
+                                ),
                                 const SizedBox(height: 4),
                                 Flexible(
                                   child: Text(
@@ -121,8 +156,8 @@ class RoundResultView extends StatelessWidget {
                                     color: winner == 'draw'
                                         ? Colors.grey
                                         : (winner == myId
-                                            ? Colors.green
-                                            : Colors.red),
+                                              ? Colors.green
+                                              : Colors.red),
                                   ),
                                   textAlign: TextAlign.center,
                                   maxLines: 1,
