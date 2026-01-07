@@ -6,6 +6,8 @@ class PlayerData {
   final int opponentFishCount;
   final List<String> myCatsWon;
   final List<String> opponentCatsWon;
+  final List<int> myWonCatCosts;
+  final List<int> opponentWonCatCosts;
   final int? myDiceRoll;
   final int? opponentDiceRoll;
   final bool myRolled;
@@ -20,6 +22,8 @@ class PlayerData {
     required this.opponentFishCount,
     required this.myCatsWon,
     required this.opponentCatsWon,
+    required this.myWonCatCosts,
+    required this.opponentWonCatCosts,
     required this.myDiceRoll,
     required this.opponentDiceRoll,
     required this.myRolled,
@@ -37,6 +41,10 @@ class PlayerData {
       opponentFishCount: isHost ? room.guestFishCount : room.hostFishCount,
       myCatsWon: isHost ? room.hostCatsWon : room.guestCatsWon,
       opponentCatsWon: isHost ? room.guestCatsWon : room.hostCatsWon,
+      myWonCatCosts: isHost ? room.hostWonCatCosts : room.guestWonCatCosts,
+      opponentWonCatCosts: isHost
+          ? room.guestWonCatCosts
+          : room.hostWonCatCosts,
       myDiceRoll: isHost ? room.hostDiceRoll : room.guestDiceRoll,
       opponentDiceRoll: isHost ? room.guestDiceRoll : room.hostDiceRoll,
       myRolled: isHost ? room.hostRolled : room.guestRolled,

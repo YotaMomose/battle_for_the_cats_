@@ -72,10 +72,22 @@ class GameFlowService {
     final newHostCatsWon = [...room.hostCatsWon, ...result.hostWonCats];
     final newGuestCatsWon = [...room.guestCatsWon, ...result.guestWonCats];
 
+    // 累計獲得コストリストを更新
+    final newHostWonCatCosts = [
+      ...room.hostWonCatCosts,
+      ...result.hostWonCosts,
+    ];
+    final newGuestWonCatCosts = [
+      ...room.guestWonCatCosts,
+      ...result.guestWonCosts,
+    ];
+
     await _repository.updateRoom(roomCode, {
       'winners': result.winners,
       'hostCatsWon': newHostCatsWon,
       'guestCatsWon': newGuestCatsWon,
+      'hostWonCatCosts': newHostWonCatCosts,
+      'guestWonCatCosts': newGuestWonCatCosts,
       'status': result.finalStatus.value,
       'finalWinner': result.finalWinner?.value,
     });

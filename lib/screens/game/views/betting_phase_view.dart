@@ -23,15 +23,70 @@ class BettingPhaseView extends StatelessWidget {
     }
   }
 
-  /// 獲得した猫を種類別にフォーマット
-  String _formatCatsWon(List<String> catsWon) {
-    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
-    for (final cat in catsWon) {
-      if (counts.containsKey(cat)) {
-        counts[cat] = counts[cat]! + 1;
-      }
+  /// 獲得した猫リストを表示するウィジェット
+  Widget _buildWonCatsList(List<String> cats, List<int> costs) {
+    if (cats.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Text('まだ獲得していません', style: TextStyle(color: Colors.grey)),
+      );
     }
-    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(cats.length, (index) {
+        final cat = cats[index];
+        final cost = costs.length > index ? costs[index] : 1;
+
+        return Container(
+          width: 70,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.pets, size: 20, color: _getCatColor(cat)),
+              Text(
+                cat,
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(
+                  '★$cost',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
   }
 
   @override
@@ -52,6 +107,7 @@ class BettingPhaseView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       'ターン ${room.currentTurn}',
@@ -59,15 +115,27 @@ class BettingPhaseView extends StatelessWidget {
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'あなた: ${_formatCatsWon(playerData.myCatsWon)}',
-                      style: const TextStyle(fontSize: 14),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'あなたの獲得カード:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    Text(
-                      '相手: ${_formatCatsWon(playerData.opponentCatsWon)}',
-                      style: const TextStyle(fontSize: 14),
+                    const SizedBox(height: 4),
+                    _buildWonCatsList(
+                      playerData.myCatsWon,
+                      playerData.myWonCatCosts,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      '相手の獲得カード:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    _buildWonCatsList(
+                      playerData.opponentCatsWon,
+                      playerData.opponentWonCatCosts,
                     ),
                   ],
                 ),

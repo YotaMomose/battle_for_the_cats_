@@ -8,6 +8,8 @@ class RoundResult {
   winners; // 各猫の勝者（'0', '1', '2' -> 'host'/'guest'/'draw'）
   final List<String> hostWonCats; // ホストがこのラウンドで獲得した猫の種類
   final List<String> guestWonCats; // ゲストがこのラウンドで獲得した猫の種類
+  final List<int> hostWonCosts; // ホストがこのラウンドで獲得した猫のコスト
+  final List<int> guestWonCosts; // ゲストがこのラウンドで獲得した猫のコスト
   final GameStatus finalStatus; // 最終ステータス
   final Winner? finalWinner; // 最終勝者
 
@@ -15,6 +17,8 @@ class RoundResult {
     required this.winners,
     required this.hostWonCats,
     required this.guestWonCats,
+    required this.hostWonCosts,
+    required this.guestWonCosts,
     required this.finalStatus,
     this.finalWinner,
   });
@@ -61,6 +65,8 @@ class GameLogic {
     final Map<String, String> winners = {};
     final List<String> hostWonCats = [];
     final List<String> guestWonCats = [];
+    final List<int> hostWonCosts = [];
+    final List<int> guestWonCosts = [];
 
     // 各猫について勝敗を判定
     for (int i = 0; i < GameConstants.catCount; i++) {
@@ -82,9 +88,11 @@ class GameLogic {
         if (hostBet > guestBet) {
           winners[catIndex] = Winner.host.value;
           hostWonCats.add(catName);
+          hostWonCosts.add(cost);
         } else if (guestBet > hostBet) {
           winners[catIndex] = Winner.guest.value;
           guestWonCats.add(catName);
+          guestWonCosts.add(cost);
         } else {
           winners[catIndex] = Winner.draw.value;
         }
@@ -92,10 +100,12 @@ class GameLogic {
         // ホストのみ条件クリア → ホスト獲得
         winners[catIndex] = Winner.host.value;
         hostWonCats.add(catName);
+        hostWonCosts.add(cost);
       } else if (guestQualified) {
         // ゲストのみ条件クリア → ゲスト獲得
         winners[catIndex] = Winner.guest.value;
         guestWonCats.add(catName);
+        guestWonCosts.add(cost);
       } else {
         // 両者条件満たさず → 獲得なし（引き分け扱い）
         winners[catIndex] = Winner.draw.value;
@@ -106,6 +116,10 @@ class GameLogic {
     final newHostCatsWon = [...room.hostCatsWon, ...hostWonCats];
     final newGuestCatsWon = [...room.guestCatsWon, ...guestWonCats];
 
+    // 累計獲得コストリストを計算
+    final newHostWonCatCosts = [...room.hostWonCatCosts, ...hostWonCosts];
+    final newGuestWonCatCosts = [...room.guestWonCatCosts, ...guestWonCosts];
+
     // 勝利条件判定
     final hostWins = checkWinCondition(newHostCatsWon);
     final guestWins = checkWinCondition(newGuestCatsWon);
@@ -114,9 +128,18 @@ class GameLogic {
     final Winner? finalWinner;
 
     if (hostWins && guestWins) {
-      // 同時に勝利条件達成 → 引き分け
+      // 同時に勝利条件達成 → コスト合計で判定
+      final hostTotalCost = newHostWonCatCosts.fold(0, (a, b) => a + b);
+      final guestTotalCost = newGuestWonCatCosts.fold(0, (a, b) => a + b);
+
       finalStatus = GameStatus.finished;
-      finalWinner = Winner.draw;
+      if (hostTotalCost > guestTotalCost) {
+        finalWinner = Winner.host;
+      } else if (guestTotalCost > hostTotalCost) {
+        finalWinner = Winner.guest;
+      } else {
+        finalWinner = Winner.draw;
+      }
     } else if (hostWins) {
       // ホストの勝利
       finalStatus = GameStatus.finished;
@@ -135,6 +158,8 @@ class GameLogic {
       winners: winners,
       hostWonCats: hostWonCats,
       guestWonCats: guestWonCats,
+      hostWonCosts: hostWonCosts,
+      guestWonCosts: guestWonCosts,
       finalStatus: finalStatus,
       finalWinner: finalWinner,
     );
