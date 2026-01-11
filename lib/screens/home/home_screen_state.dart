@@ -13,7 +13,7 @@ abstract class HomeScreenState {
 
 /// 待機中（初期状態）
 class IdleState extends HomeScreenState {
-  const IdleState({String? errorMessage}) : super(errorMessage: errorMessage);
+  const IdleState({super.errorMessage});
 
   @override
   HomeScreenState copyWithError(String error) {
@@ -23,7 +23,7 @@ class IdleState extends HomeScreenState {
 
 /// ローディング中（ルーム作成・参加処理中）
 class LoadingState extends HomeScreenState {
-  const LoadingState({String? errorMessage}) : super(errorMessage: errorMessage);
+  const LoadingState({super.errorMessage});
 
   @override
   HomeScreenState copyWithError(String error) {
@@ -35,8 +35,7 @@ class LoadingState extends HomeScreenState {
 class MatchmakingState extends HomeScreenState {
   final String playerId;
 
-  const MatchmakingState(this.playerId, {String? errorMessage})
-      : super(errorMessage: errorMessage);
+  const MatchmakingState(this.playerId, {super.errorMessage});
 
   @override
   HomeScreenState copyWithError(String error) {

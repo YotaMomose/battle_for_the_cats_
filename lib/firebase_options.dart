@@ -62,12 +62,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_IOS_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    iosBundleId: 'com.example.battleForTheCats',
+    apiKey: 'AIzaSyAV7tlLC_FNYoU9EPNRdscb2ZE_4rHTxhs',
+    appId: '1:1048849462348:ios:cac4beae94d07429a7f0e9',
+    messagingSenderId: '1048849462348',
+    projectId: 'battleforthecat',
+    storageBucket: 'battleforthecat.firebasestorage.app',
+    iosBundleId: 'com.tonkatsu440.battle.for.the.cats',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

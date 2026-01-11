@@ -18,7 +18,7 @@ abstract class GameScreenState {
 
 /// ローディング中
 class LoadingState extends GameScreenState {
-  const LoadingState({String? errorMessage}) : super(errorMessage: errorMessage);
+  const LoadingState({super.errorMessage});
 
   @override
   GameScreenState copyWithError(String error) {
@@ -28,7 +28,7 @@ class LoadingState extends GameScreenState {
 
 /// 対戦相手待ち
 class WaitingState extends GameScreenState {
-  const WaitingState({String? errorMessage}) : super(errorMessage: errorMessage);
+  const WaitingState({super.errorMessage});
 
   @override
   GameScreenState copyWithError(String error) {
@@ -40,8 +40,7 @@ class WaitingState extends GameScreenState {
 class RollingState extends GameScreenState {
   final GameRoom room;
 
-  const RollingState(this.room, {String? errorMessage})
-      : super(errorMessage: errorMessage);
+  const RollingState(this.room, {super.errorMessage});
 
   @override
   GameScreenState copyWithError(String error) {
@@ -53,8 +52,7 @@ class RollingState extends GameScreenState {
 class PlayingState extends GameScreenState {
   final GameRoom room;
 
-  const PlayingState(this.room, {String? errorMessage})
-      : super(errorMessage: errorMessage);
+  const PlayingState(this.room, {super.errorMessage});
 
   @override
   GameScreenState copyWithError(String error) {
@@ -66,8 +64,7 @@ class PlayingState extends GameScreenState {
 class RoundResultState extends GameScreenState {
   final GameRoom room;
 
-  const RoundResultState(this.room, {String? errorMessage})
-      : super(errorMessage: errorMessage);
+  const RoundResultState(this.room, {super.errorMessage});
 
   @override
   GameScreenState copyWithError(String error) {
@@ -79,8 +76,7 @@ class RoundResultState extends GameScreenState {
 class FinishedState extends GameScreenState {
   final GameRoom room;
 
-  const FinishedState(this.room, {String? errorMessage})
-      : super(errorMessage: errorMessage);
+  const FinishedState(this.room, {super.errorMessage});
 
   @override
   GameScreenState copyWithError(String error) {
