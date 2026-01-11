@@ -102,7 +102,7 @@ class GameFlowService {
     final nextCats = _gameLogic.generateRandomCats();
     final nextCosts = _gameLogic.generateRandomCosts(nextCats.length);
 
-    // 賭ケた魚の総数を計算して、残りの魚を算出（持ち越し）
+    // 賭けた魚の総数を計算して、残りの魚を算出（持ち越し）
     final hostBetTotal = room.hostBets.values.fold(0, (a, b) => a + b);
     final guestBetTotal = room.guestBets.values.fold(0, (a, b) => a + b);
 

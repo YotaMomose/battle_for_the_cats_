@@ -22,6 +22,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   /// Player ID を生成
   /// TODO: Player ID の生成方法を変更する
+  /// Firebase Authentication の「匿名認証 (Anonymous Auth)」 を利用するのが最もスタンダードで安全な方法
   String _generatePlayerId() {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }

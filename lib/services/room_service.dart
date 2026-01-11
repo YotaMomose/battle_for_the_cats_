@@ -19,7 +19,12 @@ class RoomService {
 
   /// ルームを作成
   Future<String> createRoom(String hostId) async {
-    final roomCode = generateRoomCode();
+    String roomCode;
+    // 重複チェック: 生成されたコードが既に存在する場合は再生成
+    do {
+      roomCode = generateRoomCode();
+    } while (await _repository.getRoom(roomCode) != null);
+
     final cats = _gameLogic.generateRandomCats();
     final catCosts = _gameLogic.generateRandomCosts(cats.length);
     final room = GameRoom(
