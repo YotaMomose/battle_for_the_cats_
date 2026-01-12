@@ -49,18 +49,20 @@ class GameScreenViewModel extends ChangeNotifier {
 
   // ===== 初期化 =====
   void _init() {
-    _roomSubscription = _gameService.watchRoom(roomCode).listen(
-      (room) {
-        _currentRoom = room;
-        _updateUiState(room);
-        _checkTurnChange(room);
-        notifyListeners();
-      },
-      onError: (error) {
-        _uiState = _uiState.copyWithError('データの取得に失敗しました: $error');
-        notifyListeners();
-      },
-    );
+    _roomSubscription = _gameService
+        .watchRoom(roomCode)
+        .listen(
+          (room) {
+            _currentRoom = room;
+            _updateUiState(room);
+            _checkTurnChange(room);
+            notifyListeners();
+          },
+          onError: (error) {
+            _uiState = _uiState.copyWithError('データの取得に失敗しました: $error');
+            notifyListeners();
+          },
+        );
   }
 
   // ===== 状態更新ロジック =====
@@ -86,6 +88,8 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
+  /// ターン変更チェック
+  /// ターンが変更された場合、ローカル状態をリセットし、_lastTurnを更新する
   void _checkTurnChange(GameRoom room) {
     if (room.currentTurn != _lastTurn &&
         (room.status == 'playing' || room.status == 'rolling')) {
@@ -94,6 +98,7 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
+  /// ローカル状態をリセットする
   void resetLocalState() {
     _hasRolled = false;
     _hasPlacedBet = false;
@@ -112,13 +117,8 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
+  /// 賭けを置く
   Future<void> placeBets() async {
-    if (totalBet == 0) {
-      _uiState = _uiState.copyWithError('少なくとも1匹以上の魚を置いてください');
-      notifyListeners();
-      return;
-    }
-
     try {
       await _gameService.placeBets(roomCode, playerId, _bets);
       _hasPlacedBet = true;

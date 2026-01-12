@@ -162,16 +162,7 @@ class GameLogic {
     final guestWins = checkWinCondition(guestCats);
 
     if (hostWins && guestWins) {
-      final hostTotalCost = hostCosts.fold(0, (a, b) => a + b);
-      final guestTotalCost = guestCosts.fold(0, (a, b) => a + b);
-
-      if (hostTotalCost > guestTotalCost) {
-        return _GameFinalResult(GameStatus.finished, Winner.host);
-      }
-      if (guestTotalCost > hostTotalCost) {
-        return _GameFinalResult(GameStatus.finished, Winner.guest);
-      }
-      return _GameFinalResult(GameStatus.finished, Winner.draw);
+      return _resolveDoubleWin(hostCosts, guestCosts);
     }
 
     if (hostWins) {
@@ -183,6 +174,23 @@ class GameLogic {
     }
 
     return _GameFinalResult(GameStatus.roundResult, null);
+  }
+
+  /// 両者が同時に勝利条件を満たした場合の判定（累計コストで判定）
+  _GameFinalResult _resolveDoubleWin(
+    List<int> hostCosts,
+    List<int> guestCosts,
+  ) {
+    final hostTotalCost = hostCosts.fold(0, (a, b) => a + b);
+    final guestTotalCost = guestCosts.fold(0, (a, b) => a + b);
+
+    if (hostTotalCost > guestTotalCost) {
+      return _GameFinalResult(GameStatus.finished, Winner.host);
+    }
+    if (guestTotalCost > hostTotalCost) {
+      return _GameFinalResult(GameStatus.finished, Winner.guest);
+    }
+    return _GameFinalResult(GameStatus.finished, Winner.draw);
   }
 
   /// 勝利条件をチェック（同種3匹 or 3種類）
