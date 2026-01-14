@@ -29,10 +29,33 @@ class GameFlowService {
     });
 
     // 両者がサイコロを振ったかチェック
-    final updatedRoom = await _repository.getRoom(roomCode);
-    if (updatedRoom == null) return;
+    // ※自動遷移は廃止し、個別の確認待ちとする
+    // final updatedRoom = await _repository.getRoom(roomCode);
+    // if (updatedRoom == null) return;
+    //
+    // if (updatedRoom.hostRolled && updatedRoom.guestRolled) {
+    //   await _repository.updateRoom(roomCode, {
+    //     'status': GameStatus.playing.value,
+    //   });
+    // }
+  }
 
-    if (updatedRoom.hostRolled && updatedRoom.guestRolled) {
+  /// サイコロ結果を確認し、フェーズを進める準備をする
+  Future<void> confirmRoll(String roomCode, String playerId) async {
+    final room = await _repository.getRoom(roomCode);
+    if (room == null) return;
+
+    final isHost = _repository.isHost(room, playerId);
+
+    await _repository.updateRoom(roomCode, {
+      isHost ? 'hostConfirmedRoll' : 'guestConfirmedRoll': true,
+    });
+
+    // 両者が確認済みになったら、ステータスを playing に変更（整合性のため）
+    final updatedRoom = await _repository.getRoom(roomCode);
+    if (updatedRoom != null &&
+        updatedRoom.hostConfirmedRoll &&
+        updatedRoom.guestConfirmedRoll) {
       await _repository.updateRoom(roomCode, {
         'status': GameStatus.playing.value,
       });
@@ -123,6 +146,8 @@ class GameFlowService {
       'hostReady': false,
       'guestReady': false,
       'winners': null,
+      'hostConfirmedRoll': false,
+      'guestConfirmedRoll': false,
       'cats': nextCats, // 新しい猫を設定
       'catCosts': nextCosts, // コストを設定
     });

@@ -19,6 +19,8 @@ class GameRoom {
   int? guestDiceRoll; // ゲストのサイコロの目（1-6）
   bool hostRolled; // ホストがサイコロを振ったか
   bool guestRolled; // ゲストがサイコロを振ったか
+  bool hostConfirmedRoll; // ホストがサイコロ結果を確認したか
+  bool guestConfirmedRoll; // ゲストがサイコロ結果を確認したか
 
   // ゲーム状態
   int hostFishCount;
@@ -55,6 +57,8 @@ class GameRoom {
     this.guestDiceRoll,
     this.hostRolled = false,
     this.guestRolled = false,
+    this.hostConfirmedRoll = false,
+    this.guestConfirmedRoll = false,
     this.hostFishCount = 0,
     this.guestFishCount = 0,
     List<String>? cats,
@@ -99,6 +103,8 @@ class GameRoom {
       'guestReady': guestReady,
       'winners': winners,
       'finalWinner': finalWinner,
+      'hostConfirmedRoll': hostConfirmedRoll,
+      'guestConfirmedRoll': guestConfirmedRoll,
     };
   }
 
@@ -133,6 +139,8 @@ class GameRoom {
           ? Map<String, String>.from(map['winners'])
           : null,
       finalWinner: map['finalWinner'],
+      hostConfirmedRoll: map['hostConfirmedRoll'] ?? false,
+      guestConfirmedRoll: map['guestConfirmedRoll'] ?? false,
     );
   }
 }

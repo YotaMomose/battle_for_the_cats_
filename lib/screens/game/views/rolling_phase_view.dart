@@ -144,10 +144,30 @@ class RollingPhaseView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        '相手を待っています...',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
+                      if (playerData.opponentRolled)
+                        ElevatedButton(
+                          onPressed: viewModel.confirmRoll,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 48,
+                              vertical: 16,
+                            ),
+                            backgroundColor: Colors.blue,
+                          ),
+                          child: const Text(
+                            '次へ進む',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        )
+                      else
+                        const Text(
+                          '相手を待っています...',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
                     ] else ...[
                       ElevatedButton.icon(
                         onPressed: viewModel.hasRolled

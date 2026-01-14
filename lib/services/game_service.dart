@@ -47,8 +47,11 @@ class GameService {
   Future<void> rollDice(String roomCode, String playerId) =>
       _gameFlowService.rollDice(roomCode, playerId);
   Future<void> placeBets(
-          String roomCode, String playerId, Map<String, int> bets) =>
-      _gameFlowService.placeBets(roomCode, playerId, bets);
-  Future<void> nextTurn(String roomCode) =>
-      _gameFlowService.nextTurn(roomCode);
+    String roomCode,
+    String playerId,
+    Map<String, int> bets,
+  ) => _gameFlowService.placeBets(roomCode, playerId, bets);
+  Future<void> confirmRoll(String roomCode, String playerId) =>
+      _gameFlowService.confirmRoll(roomCode, playerId);
+  Future<void> nextTurn(String roomCode) => _gameFlowService.nextTurn(roomCode);
 }

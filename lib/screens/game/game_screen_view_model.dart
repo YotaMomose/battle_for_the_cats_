@@ -72,7 +72,18 @@ class GameScreenViewModel extends ChangeNotifier {
         _uiState = GameScreenState.waiting();
         break;
       case 'rolling':
-        _uiState = GameScreenState.rolling(room);
+        // 両者がサイコロを振り終え、かつ自分が確認済みの場合は
+        // UI上は賭けフェーズ(playing)と同様に扱う
+        final bothRolled = room.hostRolled && room.guestRolled;
+        final myConfirmed = isHost
+            ? room.hostConfirmedRoll
+            : room.guestConfirmedRoll;
+
+        if (bothRolled && myConfirmed) {
+          _uiState = GameScreenState.playing(room);
+        } else {
+          _uiState = GameScreenState.rolling(room);
+        }
         break;
       case 'playing':
         _uiState = GameScreenState.playing(room);
@@ -103,6 +114,16 @@ class GameScreenViewModel extends ChangeNotifier {
     _hasRolled = false;
     _hasPlacedBet = false;
     _bets = {'0': 0, '1': 0, '2': 0};
+  }
+
+  Future<void> confirmRoll() async {
+    try {
+      await _gameService.confirmRoll(roomCode, playerId);
+      notifyListeners();
+    } catch (e) {
+      _uiState = _uiState.copyWithError('確認に失敗しました: $e');
+      notifyListeners();
+    }
   }
 
   // ===== ユーザーアクション（Viewから呼ばれる） =====
