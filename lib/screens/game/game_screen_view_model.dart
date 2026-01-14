@@ -67,19 +67,35 @@ class GameScreenViewModel extends ChangeNotifier {
 
   // ===== 状態更新ロジック =====
   void _updateUiState(GameRoom room) {
+    // --- 個別遷移の整合性チェック ---
+    final myConfirmedRound = isHost
+        ? room.hostConfirmedRoundResult
+        : room.guestConfirmedRoundResult;
+    final myConfirmedRoll = isHost
+        ? room.hostConfirmedRoll
+        : room.guestConfirmedRoll;
+
+    // 1. ラウンド結果の確認待ち
+    // ルームが既に次のターン（rolling, playing）に進んでいても、
+    // 自分がまだ前ターンの結果を未確認なら、結果画面を表示し続ける。
+    if (!myConfirmedRound &&
+        room.lastRoundWinners != null &&
+        (room.status == 'rolling' || room.status == 'playing')) {
+      _uiState = GameScreenState.roundResult(room);
+      return;
+    }
+
     switch (room.status) {
       case 'waiting':
         _uiState = GameScreenState.waiting();
         break;
       case 'rolling':
-        // 両者がサイコロを振り終え、かつ自分が確認済みの場合は
-        // UI上は賭けフェーズ(playing)と同様に扱う
+        // 2. サイコロ結果の確認待ち
+        // 両者がサイコロを振り終え、かつ自分が未確認の場合はサイコロ画面（結果表示）を維持。
+        // 確認済みであれば、内部的に賭けフェーズ(playing)へ進む。
         final bothRolled = room.hostRolled && room.guestRolled;
-        final myConfirmed = isHost
-            ? room.hostConfirmedRoll
-            : room.guestConfirmedRoll;
 
-        if (bothRolled && myConfirmed) {
+        if (bothRolled && myConfirmedRoll) {
           _uiState = GameScreenState.playing(room);
         } else {
           _uiState = GameScreenState.rolling(room);
@@ -104,8 +120,15 @@ class GameScreenViewModel extends ChangeNotifier {
   void _checkTurnChange(GameRoom room) {
     if (room.currentTurn != _lastTurn &&
         (room.status == 'playing' || room.status == 'rolling')) {
-      resetLocalState();
-      _lastTurn = room.currentTurn;
+      // 自分が結果画面を確認し終えるまでは、ローカル状態をリセットしない
+      final myConfirmedRound = isHost
+          ? room.hostConfirmedRoundResult
+          : room.guestConfirmedRoundResult;
+
+      if (myConfirmedRound) {
+        resetLocalState();
+        _lastTurn = room.currentTurn;
+      }
     }
   }
 
@@ -152,7 +175,7 @@ class GameScreenViewModel extends ChangeNotifier {
 
   Future<void> nextTurn() async {
     try {
-      await _gameService.nextTurn(roomCode);
+      await _gameService.nextTurn(roomCode, playerId);
     } catch (e) {
       _uiState = _uiState.copyWithError('次のターンに進めませんでした: $e');
       notifyListeners();

@@ -38,7 +38,11 @@ class RoundResultView extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
     final playerData = viewModel.playerData!;
-    final winners = room.winners ?? {};
+    final winners = room.lastRoundWinners ?? room.winners ?? {};
+    final cats = room.lastRoundCats ?? room.cats;
+    final displayTurn = room.status == 'roundResult'
+        ? room.currentTurn
+        : room.currentTurn - 1;
 
     // このラウンドで獲得した猫数をカウント
     int myRoundWins = 0;
@@ -65,7 +69,7 @@ class RoundResultView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'ターン ${room.currentTurn} 結果',
+                'ターン $displayTurn 結果',
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -99,9 +103,19 @@ class RoundResultView extends StatelessWidget {
                 child: Row(
                   children: List.generate(3, (index) {
                     final catIndex = index.toString();
-                    final catName = room.cats[index];
-                    final myBet = playerData.myBets[catIndex] ?? 0;
-                    final opponentBet = playerData.opponentBets[catIndex] ?? 0;
+                    final catName = index < cats.length ? cats[index] : '???';
+                    final myBet =
+                        (viewModel.isHost
+                            ? room.lastRoundHostBets
+                            : room.lastRoundGuestBets)?[catIndex] ??
+                        playerData.myBets[catIndex] ??
+                        0;
+                    final opponentBet =
+                        (viewModel.isHost
+                            ? room.lastRoundGuestBets
+                            : room.lastRoundHostBets)?[catIndex] ??
+                        playerData.opponentBets[catIndex] ??
+                        0;
                     final winner = winners[catIndex];
                     final myId = viewModel.isHost ? 'host' : 'guest';
                     final opponentId = viewModel.isHost ? 'guest' : 'host';

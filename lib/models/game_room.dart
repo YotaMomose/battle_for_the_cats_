@@ -21,6 +21,15 @@ class GameRoom {
   bool guestRolled; // ゲストがサイコロを振ったか
   bool hostConfirmedRoll; // ホストがサイコロ結果を確認したか
   bool guestConfirmedRoll; // ゲストがサイコロ結果を確認したか
+  bool hostConfirmedRoundResult; // ホストがラウンド結果を確認したか
+  bool guestConfirmedRoundResult; // ゲストがラウンド結果を確認したか
+
+  // 前回のラウンド情報（画面表示用、個別に次へ進むために必要）
+  List<String>? lastRoundCats;
+  List<int>? lastRoundCatCosts;
+  Map<String, String>? lastRoundWinners;
+  Map<String, int>? lastRoundHostBets;
+  Map<String, int>? lastRoundGuestBets;
 
   // ゲーム状態
   int hostFishCount;
@@ -59,6 +68,13 @@ class GameRoom {
     this.guestRolled = false,
     this.hostConfirmedRoll = false,
     this.guestConfirmedRoll = false,
+    this.hostConfirmedRoundResult = false,
+    this.guestConfirmedRoundResult = false,
+    this.lastRoundCats,
+    this.lastRoundCatCosts,
+    this.lastRoundWinners,
+    this.lastRoundHostBets,
+    this.lastRoundGuestBets,
     this.hostFishCount = 0,
     this.guestFishCount = 0,
     List<String>? cats,
@@ -105,6 +121,13 @@ class GameRoom {
       'finalWinner': finalWinner,
       'hostConfirmedRoll': hostConfirmedRoll,
       'guestConfirmedRoll': guestConfirmedRoll,
+      'hostConfirmedRoundResult': hostConfirmedRoundResult,
+      'guestConfirmedRoundResult': guestConfirmedRoundResult,
+      'lastRoundCats': lastRoundCats,
+      'lastRoundCatCosts': lastRoundCatCosts,
+      'lastRoundWinners': lastRoundWinners,
+      'lastRoundHostBets': lastRoundHostBets,
+      'lastRoundGuestBets': lastRoundGuestBets,
     };
   }
 
@@ -141,6 +164,23 @@ class GameRoom {
       finalWinner: map['finalWinner'],
       hostConfirmedRoll: map['hostConfirmedRoll'] ?? false,
       guestConfirmedRoll: map['guestConfirmedRoll'] ?? false,
+      hostConfirmedRoundResult: map['hostConfirmedRoundResult'] ?? false,
+      guestConfirmedRoundResult: map['guestConfirmedRoundResult'] ?? false,
+      lastRoundCats: map['lastRoundCats'] != null
+          ? List<String>.from(map['lastRoundCats'])
+          : null,
+      lastRoundCatCosts: map['lastRoundCatCosts'] != null
+          ? List<int>.from(map['lastRoundCatCosts'])
+          : null,
+      lastRoundWinners: map['lastRoundWinners'] != null
+          ? Map<String, String>.from(map['lastRoundWinners'])
+          : null,
+      lastRoundHostBets: map['lastRoundHostBets'] != null
+          ? Map<String, int>.from(map['lastRoundHostBets'])
+          : null,
+      lastRoundGuestBets: map['lastRoundGuestBets'] != null
+          ? Map<String, int>.from(map['lastRoundGuestBets'])
+          : null,
     );
   }
 }
