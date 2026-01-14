@@ -95,7 +95,7 @@ class FinalResultView extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
+                viewModel.leaveRoom();
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),

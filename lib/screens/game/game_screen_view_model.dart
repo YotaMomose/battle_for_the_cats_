@@ -23,7 +23,10 @@ class GameScreenViewModel extends ChangeNotifier {
   int _lastTurn = 0;
 
   // Stream購読
-  StreamSubscription<GameRoom>? _roomSubscription;
+  StreamSubscription<GameRoom?>? _roomSubscription;
+
+  // コールバック
+  final VoidCallback? onOpponentLeft;
 
   // ===== Getters (Viewから参照) =====
   GameScreenState get uiState => _uiState;
@@ -43,6 +46,7 @@ class GameScreenViewModel extends ChangeNotifier {
     required this.roomCode,
     required this.playerId,
     required this.isHost,
+    this.onOpponentLeft,
   }) : _gameService = gameService {
     _init();
   }
@@ -53,6 +57,11 @@ class GameScreenViewModel extends ChangeNotifier {
         .watchRoom(roomCode)
         .listen(
           (room) {
+            if (room == null) {
+              // ルームが削除された場合
+              _handleOpponentLeft();
+              return;
+            }
             _currentRoom = room;
             _updateUiState(room);
             _checkTurnChange(room);
@@ -85,6 +94,13 @@ class GameScreenViewModel extends ChangeNotifier {
       return;
     }
 
+    // --- 相手の退出チェック ---
+    final opponentAbandoned = isHost ? room.guestAbandoned : room.hostAbandoned;
+    if (opponentAbandoned) {
+      _handleOpponentLeft();
+      return;
+    }
+
     switch (room.status) {
       case 'waiting':
         _uiState = GameScreenState.waiting();
@@ -113,6 +129,11 @@ class GameScreenViewModel extends ChangeNotifier {
       default:
         _uiState = GameScreenState.loading();
     }
+  }
+
+  void _handleOpponentLeft() {
+    _uiState = _uiState.copyWithOpponentLeft();
+    notifyListeners();
   }
 
   /// ターン変更チェック
@@ -188,6 +209,16 @@ class GameScreenViewModel extends ChangeNotifier {
 
     _bets[catIndex] = amount;
     notifyListeners();
+  }
+
+  Future<void> leaveRoom() async {
+    try {
+      await _gameService.leaveRoom(roomCode, playerId);
+      onOpponentLeft?.call();
+    } catch (e) {
+      _uiState = _uiState.copyWithError('退出に失敗しました: $e');
+      notifyListeners();
+    }
   }
 
   @override

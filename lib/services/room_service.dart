@@ -59,8 +59,19 @@ class RoomService {
   }
 
   /// ルームを監視
-  Stream<GameRoom> watchRoom(String roomCode) {
+  Stream<GameRoom?> watchRoom(String roomCode) {
     return _repository.watchRoom(roomCode);
+  }
+
+  /// ルームを退出する（削除ではなく、フラグを立てる）
+  Future<void> leaveRoom(String roomCode, String playerId) async {
+    final room = await _repository.getRoom(roomCode);
+    if (room == null) return;
+
+    final isHost = _repository.isHost(room, playerId);
+    await _repository.updateRoom(roomCode, {
+      isHost ? 'hostAbandoned' : 'guestAbandoned': true,
+    });
   }
 
   /// ルームを削除

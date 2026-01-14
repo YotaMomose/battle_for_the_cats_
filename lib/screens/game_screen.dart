@@ -31,6 +31,11 @@ class GameScreen extends StatelessWidget {
         roomCode: roomCode,
         playerId: playerId,
         isHost: isHost,
+        onOpponentLeft: () {
+          if (context.mounted) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        },
       ),
       child: const _GameScreenContent(),
     );
@@ -52,13 +57,23 @@ class _GameScreenContent extends StatelessWidget {
   }
 
   Widget _buildBody(
-      BuildContext context, GameScreenState state, GameScreenViewModel vm) {
+    BuildContext context,
+    GameScreenState state,
+    GameScreenViewModel vm,
+  ) {
     // エラー表示
     if (state.errorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.errorMessage!)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+      });
+    }
+
+    // 相手が退出した場合のポップアップ表示
+    if (state.isOpponentLeft) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showOpponentLeftDialog(context, vm);
       });
     }
 
@@ -83,13 +98,62 @@ class _GameScreenContent extends StatelessWidget {
           icon: const Icon(Icons.copy),
           onPressed: () {
             Clipboard.setData(ClipboardData(text: vm.roomCode));
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('ルームコードをコピーしました')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('ルームコードをコピーしました')));
           },
           tooltip: 'ルームコードをコピー',
         ),
+        IconButton(
+          icon: const Icon(Icons.exit_to_app),
+          onPressed: () {
+            _showLeaveDialog(context, vm);
+          },
+          tooltip: '退出する',
+        ),
       ],
+    );
+  }
+
+  void _showLeaveDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('退出しますか？'),
+        content: const Text('退出するとゲームが中断されます。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              vm.leaveRoom();
+            },
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOpponentLeftDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // 閉じられないようにする
+      builder: (context) => AlertDialog(
+        title: const Text('対戦相手が退出しました'),
+        content: const Text('対戦相手が退出したため、ゲームを終了します。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            child: const Text('ホームに戻る'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -29,8 +29,10 @@ class GameService {
   Future<String> createRoom(String hostId) => _roomService.createRoom(hostId);
   Future<bool> joinRoom(String roomCode, String guestId) =>
       _roomService.joinRoom(roomCode, guestId);
-  Stream<GameRoom> watchRoom(String roomCode) =>
+  Stream<GameRoom?> watchRoom(String roomCode) =>
       _roomService.watchRoom(roomCode);
+  Future<void> leaveRoom(String roomCode, String playerId) =>
+      _roomService.leaveRoom(roomCode, playerId);
   Future<void> deleteRoom(String roomCode) => _roomService.deleteRoom(roomCode);
 
   // マッチング

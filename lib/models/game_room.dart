@@ -52,6 +52,9 @@ class GameRoom {
   // 最終勝者
   String? finalWinner;
 
+  bool hostAbandoned; // ホストが退出したか
+  bool guestAbandoned; // ゲストが退出したか
+
   GameRoom({
     required this.roomId,
     required this.hostId,
@@ -85,6 +88,8 @@ class GameRoom {
     this.guestReady = false,
     this.winners,
     this.finalWinner,
+    this.hostAbandoned = false,
+    this.guestAbandoned = false,
   }) : cats = cats ?? ['通常ネコ', '通常ネコ', '通常ネコ'],
        catCosts = catCosts ?? [1, 1, 1],
        hostCatsWon = hostCatsWon ?? [],
@@ -123,11 +128,9 @@ class GameRoom {
       'guestConfirmedRoll': guestConfirmedRoll,
       'hostConfirmedRoundResult': hostConfirmedRoundResult,
       'guestConfirmedRoundResult': guestConfirmedRoundResult,
-      'lastRoundCats': lastRoundCats,
-      'lastRoundCatCosts': lastRoundCatCosts,
-      'lastRoundWinners': lastRoundWinners,
-      'lastRoundHostBets': lastRoundHostBets,
       'lastRoundGuestBets': lastRoundGuestBets,
+      'hostAbandoned': hostAbandoned,
+      'guestAbandoned': guestAbandoned,
     };
   }
 
@@ -181,6 +184,8 @@ class GameRoom {
       lastRoundGuestBets: map['lastRoundGuestBets'] != null
           ? Map<String, int>.from(map['lastRoundGuestBets'])
           : null,
+      hostAbandoned: map['hostAbandoned'] ?? false,
+      guestAbandoned: map['guestAbandoned'] ?? false,
     );
   }
 }

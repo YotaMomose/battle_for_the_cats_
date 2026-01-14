@@ -7,16 +7,16 @@ class RoomRepository {
   static const String _collection = 'rooms';
 
   RoomRepository({required FirestoreRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   /// ルームを取得
   Future<GameRoom?> getRoom(String roomCode) async {
     final doc = await _repository.getDocument(_collection, roomCode);
-    
+
     if (!doc.exists || doc.data() == null) {
       return null;
     }
-    
+
     return GameRoom.fromMap(doc.data()!);
   }
 
@@ -36,10 +36,13 @@ class RoomRepository {
   }
 
   /// ルームを監視
-  Stream<GameRoom> watchRoom(String roomCode) {
-    return _repository.watchDocument(_collection, roomCode).map(
-          (snapshot) => GameRoom.fromMap(snapshot.data()!),
-        );
+  Stream<GameRoom?> watchRoom(String roomCode) {
+    return _repository.watchDocument(_collection, roomCode).map((snapshot) {
+      if (!snapshot.exists || snapshot.data() == null) {
+        return null;
+      }
+      return GameRoom.fromMap(snapshot.data()!);
+    });
   }
 
   /// プレイヤーがホストかどうかを判定
