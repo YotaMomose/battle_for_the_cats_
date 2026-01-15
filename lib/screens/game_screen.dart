@@ -71,7 +71,8 @@ class _GameScreenContent extends StatelessWidget {
     }
 
     // 相手が退出した場合のポップアップ表示
-    if (state.isOpponentLeft) {
+    // 最終画面(FinishedState)以外の場合のみ表示する
+    if (state.isOpponentLeft && state is! FinishedState) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showOpponentLeftDialog(context, vm);
       });
