@@ -90,20 +90,25 @@ class _GameScreenContent extends StatelessWidget {
   }
 
   AppBar _buildAppBar(BuildContext context, GameScreenViewModel vm) {
+    final state = vm.uiState;
+    final isWaiting = state is WaitingState;
+
     return AppBar(
-      title: Text('ルーム: ${vm.roomCode}'),
+      automaticallyImplyLeading: false,
+      title: isWaiting ? Text('ルーム: ${vm.roomCode}') : null,
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.copy),
-          onPressed: () {
-            Clipboard.setData(ClipboardData(text: vm.roomCode));
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('ルームコードをコピーしました')));
-          },
-          tooltip: 'ルームコードをコピー',
-        ),
+        if (isWaiting)
+          IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: vm.roomCode));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('ルームコードをコピーしました')));
+            },
+            tooltip: 'ルームコードをコピー',
+          ),
         IconButton(
           icon: const Icon(Icons.exit_to_app),
           onPressed: () {
