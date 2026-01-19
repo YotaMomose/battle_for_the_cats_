@@ -12,16 +12,30 @@ class GameService {
   late final MatchmakingService _matchmakingService;
   late final GameFlowService _gameFlowService;
 
-  GameService() {
-    final firestoreRepository = FirestoreRepository();
-    final roomRepository = RoomRepository(repository: firestoreRepository);
+  // テスト用の依存注入コンストラクタ
+  GameService({
+    FirestoreRepository? firestoreRepository,
+    RoomService? roomService,
+    MatchmakingService? matchmakingService,
+    GameFlowService? gameFlowService,
+  }) {
+    if (roomService != null && matchmakingService != null && gameFlowService != null) {
+      // テストから直接サービスが提供された場合
+      _roomService = roomService;
+      _matchmakingService = matchmakingService;
+      _gameFlowService = gameFlowService;
+    } else {
+      // 通常使用時（本番環境）
+      final repo = firestoreRepository ?? FirestoreRepository();
+      final roomRepo = RoomRepository(repository: repo);
 
-    _roomService = RoomService(repository: roomRepository);
-    _matchmakingService = MatchmakingService(
-      repository: firestoreRepository,
-      roomService: _roomService,
-    );
-    _gameFlowService = GameFlowService(repository: roomRepository);
+      _roomService = RoomService(repository: roomRepo);
+      _matchmakingService = MatchmakingService(
+        repository: repo,
+        roomService: _roomService,
+      );
+      _gameFlowService = GameFlowService(repository: roomRepo);
+    }
   }
 
   // ルーム管理
