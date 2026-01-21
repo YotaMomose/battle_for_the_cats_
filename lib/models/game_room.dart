@@ -90,7 +90,7 @@ class GameRoom {
     this.finalWinner,
     this.hostAbandoned = false,
     this.guestAbandoned = false,
-  }) : cats = cats ?? ['通常ネコ', '通常ネコ', '通常ネコ'],
+  }) : cats = cats ?? ['茶トラねこ', '茶トラねこ', '茶トラねこ'],
        catCosts = catCosts ?? [1, 1, 1],
        hostCatsWon = hostCatsWon ?? [],
        guestCatsWon = guestCatsWon ?? [],
@@ -151,7 +151,7 @@ class GameRoom {
       guestRolled: map['guestRolled'] ?? false,
       hostFishCount: map['hostFishCount'] ?? 0,
       guestFishCount: map['guestFishCount'] ?? 0,
-      cats: List<String>.from(map['cats'] ?? ['通常ネコ', '通常ネコ', '通常ネコ']),
+      cats: List<String>.from(map['cats'] ?? ['茶トラねこ', '茶トラねこ', '茶トラねこ']),
       catCosts: List<int>.from(map['catCosts'] ?? [1, 1, 1]),
       hostBets: Map<String, int>.from(
         map['hostBets'] ?? {'0': 0, '1': 0, '2': 0},

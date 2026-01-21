@@ -43,7 +43,7 @@ void main() {
       final room = GameRoom(roomId: 'room-123', hostId: 'host-456');
 
       expect(room.cats, hasLength(3));
-      expect(room.cats, everyElement('通常ネコ'));
+      expect(room.cats, everyElement('茶トラねこ'));
       expect(room.catCosts, hasLength(3));
       expect(room.catCosts, everyElement(1));
     });
