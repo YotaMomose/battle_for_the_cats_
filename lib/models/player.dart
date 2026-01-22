@@ -62,4 +62,42 @@ class Player {
       abandoned: map['abandoned'] ?? false,
     );
   }
+
+  // ===== Domain Methods =====
+
+  /// 魚を増やす
+  void addFish(int amount) {
+    fishCount += amount;
+  }
+
+  /// サイコロの目を記録する
+  void recordDiceRoll(int value) {
+    diceRoll = value;
+    rolled = true;
+    addFish(value);
+  }
+
+  /// 賭けを設定する
+  void placeBets(Map<String, int> bets) {
+    currentBets = Map<String, int>.from(bets);
+    ready = true;
+  }
+
+  /// 獲得した猫を記録する
+  void addWonCat(String name, int cost) {
+    catsWon.add(name);
+    wonCatCosts.add(cost);
+  }
+
+  /// 次のターンのために状態をリセットし、残りの魚を算出する
+  void prepareForNextTurn() {
+    final totalBet = currentBets.values.fold(0, (a, b) => a + b);
+    fishCount -= totalBet;
+    currentBets = {'0': 0, '1': 0, '2': 0};
+    ready = false;
+    diceRoll = null;
+    rolled = false;
+    confirmedRoll = false;
+    confirmedRoundResult = false;
+  }
 }

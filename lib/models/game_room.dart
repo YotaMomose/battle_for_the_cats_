@@ -96,4 +96,62 @@ class GameRoom {
           : null,
     );
   }
+
+  // ===== Domain Methods =====
+
+  /// 両プレイヤーが準備完了か
+  bool get canStartRound => host.ready && (guest?.ready ?? false);
+
+  /// 両プレイヤーがサイコロを振ったか
+  bool get bothRolled => host.rolled && (guest?.rolled ?? false);
+
+  /// 両プレイヤーがサイコロ結果を確認したか
+  bool get bothConfirmedRoll =>
+      host.confirmedRoll && (guest?.confirmedRoll ?? false);
+
+  /// ラウンド結果を自分自身に適用する
+  void resolveRound(dynamic result) {
+    // GameLogic.RoundResult を想定
+    final g = guest;
+    if (g == null) return;
+
+    // 獲得情報を個別に保存（画面表示用）
+    lastRoundCats = currentRound?.toList().map((c) => c.displayName).toList();
+    lastRoundCatCosts = currentRound?.getCosts();
+    lastRoundWinners = Map<String, String>.from(result.winners);
+    lastRoundHostBets = Map<String, int>.from(host.currentBets);
+    lastRoundGuestBets = Map<String, int>.from(g.currentBets);
+
+    // プレイヤーの獲得リストを更新
+    for (var i = 0; i < result.hostWonCats.length; i++) {
+      host.addWonCat(result.hostWonCats[i], result.hostWonCosts[i]);
+    }
+    for (var i = 0; i < result.guestWonCats.length; i++) {
+      g.addWonCat(result.guestWonCats[i], result.guestWonCosts[i]);
+    }
+
+    // ルーム状態を更新
+    winners = Map<String, String>.from(result.winners);
+    status = result.finalStatus.value;
+    finalWinner = result.finalWinner?.value;
+
+    // 確認フラグをリセット
+    host.confirmedRoundResult = false;
+    g.confirmedRoundResult = false;
+  }
+
+  /// 次のターンの準備をする
+  void prepareNextTurn(RoundCards nextRoundCards) {
+    currentTurn++;
+    status = 'rolling';
+
+    host.prepareForNextTurn();
+    guest?.prepareForNextTurn();
+
+    currentRound = nextRoundCards;
+    winners = null;
+  }
+
+  /// 指定されたプレイヤーIDがホストか
+  bool isHost(String playerId) => host.id == playerId;
 }
