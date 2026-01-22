@@ -47,7 +47,7 @@ void main() {
       expect(player.diceRoll, isNull);
       expect(player.rolled, isFalse);
       expect(player.confirmedRoll, isFalse);
-      expect(player.confirmedRoundResult, isFalse);
+      expect(player.confirmedRoundResult, isTrue);
     });
   });
 }

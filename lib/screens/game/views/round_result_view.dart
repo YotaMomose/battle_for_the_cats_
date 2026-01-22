@@ -39,11 +39,16 @@ class RoundResultView extends StatelessWidget {
     final viewModel = context.watch<GameScreenViewModel>();
     final playerData = viewModel.playerData!;
     final winners = room.lastRoundWinners ?? room.winners ?? {};
-    final cats = room.lastRoundCats ?? 
-        (room.currentRound?.toList().map((card) => card.displayName).toList() ?? []);
+    final cats =
+        room.lastRoundCats ??
+        (room.currentRound?.toList().map((card) => card.displayName).toList() ??
+            []);
     final displayTurn = room.status == 'roundResult'
         ? room.currentTurn
         : room.currentTurn - 1;
+    final myConfirmedRound = viewModel.isHost
+        ? room.host.confirmedRoundResult
+        : (room.guest?.confirmedRoundResult ?? false);
 
     // このラウンドで獲得した猫数をカウント
     int myRoundWins = 0;
@@ -201,12 +206,17 @@ class RoundResultView extends StatelessWidget {
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: viewModel.nextTurn,
+                onPressed: myConfirmedRound ? null : viewModel.nextTurn,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: myConfirmedRound
+                      ? Colors.grey
+                      : Colors.orange,
                 ),
-                child: const Text('次のターンへ', style: TextStyle(fontSize: 18)),
+                child: Text(
+                  myConfirmedRound ? '相手の確認待ち...' : '次のターンへ',
+                  style: const TextStyle(fontSize: 18),
+                ),
               ),
             ],
           ),

@@ -97,9 +97,9 @@ class GameFlowService {
         player.confirmedRoundResult = true;
       }
 
-      // すでに他の誰かが更新済みでないか（status が roundResult のままであること）を再確認
-      if (room.status == GameStatus.roundResult.value) {
-        // 次のターンの準備
+      // 両者が確認済みになったら、次のターンの準備をする
+      if (room.bothConfirmedRoundResult &&
+          room.status == GameStatus.roundResult.value) {
         room.prepareNextTurn(RoundCards.random());
       }
 

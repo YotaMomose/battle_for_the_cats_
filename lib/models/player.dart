@@ -105,6 +105,5 @@ class Player {
     diceRoll = null;
     rolled = false;
     confirmedRoll = false;
-    confirmedRoundResult = false;
   }
 }
