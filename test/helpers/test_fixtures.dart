@@ -1,4 +1,5 @@
 import 'package:battle_for_the_cats/models/game_room.dart';
+import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
@@ -30,7 +31,7 @@ GameRoom createTestGameRoom({
   String roomId = 'test-room-123',
   String hostId = 'host-user-123',
   String? guestId = 'guest-user-456',
-  String status = 'playing',
+  GameStatus status = GameStatus.playing,
   int currentTurn = 1,
   int hostFishCount = 10,
   int guestFishCount = 10,

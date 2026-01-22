@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/game_room.dart';
+import '../../../constants/game_constants.dart';
 import '../game_screen_view_model.dart';
 
 /// 最終結果画面
@@ -28,11 +29,11 @@ class FinalResultView extends StatelessWidget {
     String resultText;
     Color resultColor;
 
-    if (room.finalWinner == 'draw') {
+    if (room.finalWinner == Winner.draw) {
       resultText = '引き分け';
       resultColor = Colors.grey;
-    } else if ((room.finalWinner == 'host' && viewModel.isHost) ||
-        (room.finalWinner == 'guest' && !viewModel.isHost)) {
+    } else if ((room.finalWinner == Winner.host && viewModel.isHost) ||
+        (room.finalWinner == Winner.guest && !viewModel.isHost)) {
       resultText = 'あなたの勝利！';
       resultColor = Colors.green;
     } else {

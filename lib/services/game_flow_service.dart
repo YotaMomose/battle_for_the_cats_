@@ -41,7 +41,7 @@ class GameFlowService {
 
     // 両者が確認済みになったら、ステータスを playing に変更
     if (room.bothConfirmedRoll) {
-      room.status = GameStatus.playing.value;
+      room.status = GameStatus.playing;
     }
 
     await _repository.updateRoom(roomCode, room.toMap());
@@ -99,7 +99,7 @@ class GameFlowService {
 
       // 両者が確認済みになったら、次のターンの準備をする
       if (room.bothConfirmedRoundResult &&
-          room.status == GameStatus.roundResult.value) {
+          room.status == GameStatus.roundResult) {
         room.prepareNextTurn(RoundCards.random());
       }
 

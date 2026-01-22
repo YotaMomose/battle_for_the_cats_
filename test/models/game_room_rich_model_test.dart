@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/models/game_room.dart';
+import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
@@ -46,7 +47,7 @@ void main() {
 
       expect(room.host.catsWon, contains('Cat1'));
       expect(room.guest?.catsWon, contains('Cat2'));
-      expect(room.status, 'roundResult');
+      expect(room.status, GameStatus.roundResult);
       expect(room.lastRoundWinners, isNotNull);
       expect(room.host.confirmedRoundResult, isFalse);
       expect(room.guest?.confirmedRoundResult, isFalse);
@@ -54,14 +55,14 @@ void main() {
 
     test('prepareNextTurn should increment turn and reset players', () {
       room.currentTurn = 1;
-      room.status = 'roundResult';
+      room.status = GameStatus.roundResult;
       room.host.rolled = true;
 
       final nextCards = RoundCards.random();
       room.prepareNextTurn(nextCards);
 
       expect(room.currentTurn, 2);
-      expect(room.status, 'rolling');
+      expect(room.status, GameStatus.rolling);
       expect(room.host.rolled, isFalse);
       expect(room.currentRound, nextCards);
     });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/game_room.dart';
+import '../../../constants/game_constants.dart';
 import '../game_screen_view_model.dart';
 
 /// ラウンド結果画面
@@ -43,7 +44,7 @@ class RoundResultView extends StatelessWidget {
         room.lastRoundCats ??
         (room.currentRound?.toList().map((card) => card.displayName).toList() ??
             []);
-    final displayTurn = room.status == 'roundResult'
+    final displayTurn = room.status == GameStatus.roundResult
         ? room.currentTurn
         : room.currentTurn - 1;
     final myConfirmedRound = viewModel.isHost

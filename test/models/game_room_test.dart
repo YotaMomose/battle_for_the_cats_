@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/models/game_room.dart';
+import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 
@@ -23,7 +24,7 @@ void main() {
       );
 
       // ゲーム状態
-      expect(room.status, equals('waiting'));
+      expect(room.status, equals(GameStatus.waiting));
       expect(room.currentTurn, equals(1));
 
       // ホスト側
@@ -66,13 +67,13 @@ void main() {
         roomId: 'room-123',
         host: Player(id: 'host-456', fishCount: 10),
         guest: Player(id: 'guest-789', fishCount: 8),
-        status: 'playing',
+        status: GameStatus.playing,
         currentTurn: 2,
         currentRound: roundCards,
       );
 
       expect(room.guestId, equals('guest-789'));
-      expect(room.status, equals('playing'));
+      expect(room.status, equals(GameStatus.playing));
       expect(room.currentTurn, equals(2));
       expect(room.currentRound, equals(roundCards));
       expect(room.host.fishCount, equals(10));
@@ -85,10 +86,10 @@ void main() {
           host: Player(id: 'host-456'),
         );
 
-        expect(room.status, equals('waiting'));
+        expect(room.status, equals(GameStatus.waiting));
 
-        room.status = 'rolling';
-        expect(room.status, equals('rolling'));
+        room.status = GameStatus.rolling;
+        expect(room.status, equals(GameStatus.rolling));
       });
 
       test('currentTurn を更新できる', () {
@@ -116,14 +117,14 @@ void main() {
             ready: true,
           ),
           guest: Player(id: 'guest-789', fishCount: 8, diceRoll: 3),
-          status: 'playing',
+          status: GameStatus.playing,
           currentTurn: 2,
         );
 
         final map = room.toMap();
 
         expect(map['roomId'], equals('room-123'));
-        expect(map['status'], equals('playing'));
+        expect(map['status'], equals(GameStatus.playing.value));
         expect(map['currentTurn'], equals(2));
 
         // Playerの検証
@@ -174,7 +175,7 @@ void main() {
         expect(room.roomId, equals('room-123'));
         expect(room.host.id, equals('host-456'));
         expect(room.guest?.id, equals('guest-789'));
-        expect(room.status, equals('playing'));
+        expect(room.status, equals(GameStatus.playing));
         expect(room.currentTurn, equals(2));
         expect(room.host.fishCount, equals(10));
         expect(room.guest?.fishCount, equals(8));
@@ -206,7 +207,7 @@ void main() {
             ready: true,
             currentBets: {'0': 1, '1': 2, '2': 3},
           ),
-          status: 'roundResult',
+          status: GameStatus.roundResult,
           currentTurn: 3,
           currentRound: RoundCards.random(),
         );

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../models/game_room.dart';
+import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
 import 'game_screen_state.dart';
 import 'player_data.dart';
@@ -105,10 +106,10 @@ class GameScreenViewModel extends ChangeNotifier {
     }
 
     switch (room.status) {
-      case 'waiting':
+      case GameStatus.waiting:
         _uiState = GameScreenState.waiting();
         break;
-      case 'rolling':
+      case GameStatus.rolling:
         // 2. サイコロ結果の確認待ち
         final bothRolled = host.rolled && (guest?.rolled ?? false);
 
@@ -118,17 +119,15 @@ class GameScreenViewModel extends ChangeNotifier {
           _uiState = GameScreenState.rolling(room);
         }
         break;
-      case 'playing':
+      case GameStatus.playing:
         _uiState = GameScreenState.playing(room);
         break;
-      case 'roundResult':
+      case GameStatus.roundResult:
         _uiState = GameScreenState.roundResult(room);
         break;
-      case 'finished':
+      case GameStatus.finished:
         _uiState = GameScreenState.finished(room);
         break;
-      default:
-        _uiState = GameScreenState.loading();
     }
   }
 
@@ -139,16 +138,10 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// ターン変更チェック
   void _checkTurnChange(GameRoom room) {
-    if (room.currentTurn != _lastTurn &&
-        (room.status == 'playing' || room.status == 'rolling')) {
-      final myConfirmedRound = isHost
-          ? room.host.confirmedRoundResult
-          : (room.guest?.confirmedRoundResult ?? false);
-
-      if (myConfirmedRound) {
-        resetLocalState();
-        _lastTurn = room.currentTurn;
-      }
+    // ターン番号が増えたらローカル状態をリセット
+    if (room.currentTurn > _lastTurn) {
+      resetLocalState();
+      _lastTurn = room.currentTurn;
     }
   }
 

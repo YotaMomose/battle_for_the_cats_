@@ -155,7 +155,7 @@ class MatchmakingService {
       roomId: roomCode,
       host: Player(id: hostId),
       guest: Player(id: guestId),
-      status: GameStatus.rolling.value, // サイコロフェーズから開始
+      status: GameStatus.rolling,
       currentRound: RoundCards.random(),
     );
   }

@@ -6,7 +6,7 @@ import 'player.dart';
 
 class GameRoom {
   final String roomId;
-  String status; // 'waiting', 'rolling', 'playing', 'roundResult', 'finished'
+  GameStatus status;
   int currentTurn;
 
   // プレイヤー情報
@@ -27,13 +27,13 @@ class GameRoom {
   Map<String, String>? winners;
 
   // 最終勝者
-  String? finalWinner;
+  Winner? finalWinner;
 
   GameRoom({
     required this.roomId,
     required this.host,
     this.guest,
-    this.status = 'waiting',
+    this.status = GameStatus.waiting,
     this.currentTurn = 1,
     this.lastRoundCats,
     this.lastRoundCatCosts,
@@ -51,13 +51,13 @@ class GameRoom {
   Map<String, dynamic> toMap() {
     return {
       'roomId': roomId,
-      'status': status,
+      'status': status.value,
       'currentTurn': currentTurn,
       'host': host.toMap(),
       'guest': guest?.toMap(),
       'currentRound': currentRound?.toMap(),
       'winners': winners,
-      'finalWinner': finalWinner,
+      'finalWinner': finalWinner?.value,
       'lastRoundCats': lastRoundCats,
       'lastRoundCatCosts': lastRoundCatCosts,
       'lastRoundWinners': lastRoundWinners,
@@ -69,7 +69,7 @@ class GameRoom {
   factory GameRoom.fromMap(Map<String, dynamic> map) {
     return GameRoom(
       roomId: map['roomId'] ?? '',
-      status: map['status'] ?? 'waiting',
+      status: GameStatus.fromString(map['status'] ?? 'waiting'),
       currentTurn: map['currentTurn'] ?? 1,
       host: Player.fromMap(map['host'] ?? {'id': map['hostId'] ?? ''}),
       guest: map['guest'] != null
@@ -81,7 +81,9 @@ class GameRoom {
       winners: map['winners'] != null
           ? Map<String, String>.from(map['winners'])
           : null,
-      finalWinner: map['finalWinner'],
+      finalWinner: map['finalWinner'] != null
+          ? Winner.fromString(map['finalWinner'])
+          : null,
       lastRoundCats: map['lastRoundCats'] != null
           ? List<String>.from(map['lastRoundCats'])
           : null,
@@ -179,21 +181,21 @@ class GameRoom {
       final hostTotalCost = host.wonCatCosts.fold(0, (a, b) => a + b);
       final guestTotalCost = g.wonCatCosts.fold(0, (a, b) => a + b);
       if (hostTotalCost > guestTotalCost) {
-        finalWinner = 'host';
+        finalWinner = Winner.host;
       } else if (guestTotalCost > hostTotalCost) {
-        finalWinner = 'guest';
+        finalWinner = Winner.guest;
       } else {
-        finalWinner = 'draw';
+        finalWinner = Winner.draw;
       }
-      status = 'finished';
+      status = GameStatus.finished;
     } else if (hostWins) {
-      finalWinner = 'host';
-      status = 'finished';
+      finalWinner = Winner.host;
+      status = GameStatus.finished;
     } else if (guestWins) {
-      finalWinner = 'guest';
-      status = 'finished';
+      finalWinner = Winner.guest;
+      status = GameStatus.finished;
     } else {
-      status = 'roundResult';
+      status = GameStatus.roundResult;
     }
 
     winners = winnersMap;
@@ -206,7 +208,7 @@ class GameRoom {
   /// 次のターンの準備をする
   void prepareNextTurn(RoundCards nextRoundCards) {
     currentTurn++;
-    status = 'rolling';
+    status = GameStatus.rolling;
 
     host.prepareForNextTurn();
     guest?.prepareForNextTurn();
