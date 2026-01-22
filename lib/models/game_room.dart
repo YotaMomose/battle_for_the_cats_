@@ -1,3 +1,6 @@
+import 'dart:math';
+import '../constants/game_constants.dart';
+import '../domain/win_condition.dart';
 import 'cards/round_cards.dart';
 import 'player.dart';
 
@@ -109,31 +112,87 @@ class GameRoom {
   bool get bothConfirmedRoll =>
       host.confirmedRoll && (guest?.confirmedRoll ?? false);
 
-  /// ラウンド結果を自分自身に適用する
-  void resolveRound(dynamic result) {
-    // GameLogic.RoundResult を想定
+  /// ラウンド結果を判定し、自身に適用する
+  void resolveRound({WinCondition? winCondition}) {
     final g = guest;
     if (g == null) return;
 
-    // 獲得情報を個別に保存（画面表示用）
-    lastRoundCats = currentRound?.toList().map((c) => c.displayName).toList();
+    final condition = winCondition ?? StandardWinCondition();
+    final cards = currentRound?.toList() ?? [];
+
+    // 1. 各猫について勝敗を判定
+    final winnersMap = <String, String>{};
+    final List<String> hostWonNames = [];
+    final List<String> guestWonNames = [];
+    final List<int> hostWonCosts = [];
+    final List<int> guestWonCosts = [];
+
+    for (int i = 0; i < cards.length; i++) {
+      final catIndex = i.toString();
+      final card = cards[i];
+      final cost = card.baseCost;
+
+      final hostBet = host.currentBets[catIndex] ?? 0;
+      final guestBet = g.currentBets[catIndex] ?? 0;
+
+      final hostQualified = hostBet >= cost;
+      final guestQualified = guestBet >= cost;
+
+      if (hostQualified && (!guestQualified || hostBet > guestBet)) {
+        winnersMap[catIndex] = 'host';
+        hostWonNames.add(card.displayName);
+        hostWonCosts.add(cost);
+      } else if (guestQualified && (!hostQualified || guestBet > hostBet)) {
+        winnersMap[catIndex] = 'guest';
+        guestWonNames.add(card.displayName);
+        guestWonCosts.add(cost);
+      } else {
+        winnersMap[catIndex] = 'draw';
+      }
+    }
+
+    // 獲得情報を画面表示用に保存
+    lastRoundCats = cards.map((c) => c.displayName).toList();
     lastRoundCatCosts = currentRound?.getCosts();
-    lastRoundWinners = Map<String, String>.from(result.winners);
+    lastRoundWinners = Map<String, String>.from(winnersMap);
     lastRoundHostBets = Map<String, int>.from(host.currentBets);
     lastRoundGuestBets = Map<String, int>.from(g.currentBets);
 
     // プレイヤーの獲得リストを更新
-    for (var i = 0; i < result.hostWonCats.length; i++) {
-      host.addWonCat(result.hostWonCats[i], result.hostWonCosts[i]);
+    for (var i = 0; i < hostWonNames.length; i++) {
+      host.addWonCat(hostWonNames[i], hostWonCosts[i]);
     }
-    for (var i = 0; i < result.guestWonCats.length; i++) {
-      g.addWonCat(result.guestWonCats[i], result.guestWonCosts[i]);
+    for (var i = 0; i < guestWonNames.length; i++) {
+      g.addWonCat(guestWonNames[i], guestWonCosts[i]);
     }
 
-    // ルーム状態を更新
-    winners = Map<String, String>.from(result.winners);
-    status = result.finalStatus.value;
-    finalWinner = result.finalWinner?.value;
+    // 最終勝利判定
+    final hostWins = condition.checkWin(host.catsWon);
+    final guestWins = condition.checkWin(g.catsWon);
+
+    if (hostWins && guestWins) {
+      // 両者勝利時は合計コストで判定
+      final hostTotalCost = host.wonCatCosts.fold(0, (a, b) => a + b);
+      final guestTotalCost = g.wonCatCosts.fold(0, (a, b) => a + b);
+      if (hostTotalCost > guestTotalCost) {
+        finalWinner = 'host';
+      } else if (guestTotalCost > hostTotalCost) {
+        finalWinner = 'guest';
+      } else {
+        finalWinner = 'draw';
+      }
+      status = 'finished';
+    } else if (hostWins) {
+      finalWinner = 'host';
+      status = 'finished';
+    } else if (guestWins) {
+      finalWinner = 'guest';
+      status = 'finished';
+    } else {
+      status = 'roundResult';
+    }
+
+    winners = winnersMap;
 
     // 確認フラグをリセット
     host.confirmedRoundResult = false;
@@ -154,4 +213,16 @@ class GameRoom {
 
   /// 指定されたプレイヤーIDがホストか
   bool isHost(String playerId) => host.id == playerId;
+
+  /// ランダムなルームID（6桁の英数字）を生成
+  static String generateRandomId() {
+    final random = Random();
+    return List.generate(
+      GameConstants.roomCodeLength,
+      (index) =>
+          GameConstants.roomCodeChars[random.nextInt(
+            GameConstants.roomCodeChars.length,
+          )],
+    ).join();
+  }
 }

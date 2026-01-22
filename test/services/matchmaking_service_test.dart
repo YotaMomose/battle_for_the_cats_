@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/services/matchmaking_service.dart';
 import 'package:battle_for_the_cats/services/room_service.dart';
-import 'package:battle_for_the_cats/domain/game_logic.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 import '../mocks/mock_firestore_repository.dart';
 import '../mocks/mock_room_repository.dart';
@@ -11,18 +10,14 @@ void main() {
     late MatchmakingService matchmakingService;
     late MockFirestoreRepository mockFirestoreRepository;
     late RoomService roomService;
-    late GameLogic gameLogic;
-
     setUp(() {
       mockFirestoreRepository = MockFirestoreRepository();
       final mockRoomRepository = MockRoomRepository();
       roomService = RoomService(repository: mockRoomRepository);
-      gameLogic = GameLogic();
       
       matchmakingService = MatchmakingService(
         repository: mockFirestoreRepository,
         roomService: roomService,
-        gameLogic: gameLogic,
       );
     });
 

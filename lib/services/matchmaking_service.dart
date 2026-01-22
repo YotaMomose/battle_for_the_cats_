@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../constants/game_constants.dart';
-import '../domain/game_logic.dart';
+import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
 import '../models/player.dart';
 import '../repositories/firestore_repository.dart';
@@ -10,16 +10,13 @@ import 'room_service.dart';
 class MatchmakingService {
   final FirestoreRepository _repository;
   final RoomService _roomService;
-  final GameLogic _gameLogic;
   static const String _collection = 'matchmaking';
 
   MatchmakingService({
     required FirestoreRepository repository,
     required RoomService roomService,
-    GameLogic? gameLogic,
   }) : _repository = repository,
-       _roomService = roomService,
-       _gameLogic = gameLogic ?? GameLogic();
+       _roomService = roomService;
 
   /// 待機リストに登録
   Future<String> joinMatchmaking(String playerId) async {
@@ -154,14 +151,12 @@ class MatchmakingService {
     String hostId,
     String guestId,
   ) {
-    final roundCards = _gameLogic.generateRandomCards();
-
     return GameRoom(
       roomId: roomCode,
       host: Player(id: hostId),
       guest: Player(id: guestId),
       status: GameStatus.rolling.value, // サイコロフェーズから開始
-      currentRound: roundCards,
+      currentRound: RoundCards.random(),
     );
   }
 

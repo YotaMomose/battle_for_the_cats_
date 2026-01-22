@@ -1,17 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../constants/game_constants.dart';
-import '../domain/game_logic.dart';
+import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
+import '../domain/dice.dart';
 import '../repositories/room_repository.dart';
 
 /// ゲーム進行（サイコロ、賭け、ターン進行）を担当するサービス
 class GameFlowService {
   final RoomRepository _repository;
-  final GameLogic _gameLogic;
+  final Dice _dice;
 
-  GameFlowService({required RoomRepository repository, GameLogic? gameLogic})
+  GameFlowService({required RoomRepository repository, Dice? dice})
     : _repository = repository,
-      _gameLogic = gameLogic ?? GameLogic();
+      _dice = dice ?? StandardDice();
 
   /// サイコロを振る
   Future<void> rollDice(String roomCode, String playerId) async {
@@ -22,8 +23,7 @@ class GameFlowService {
     final player = isHost ? room.host : room.guest;
     if (player == null) return;
 
-    final diceResult = _gameLogic.rollDice();
-    player.recordDiceRoll(diceResult);
+    player.roll(_dice);
 
     await _repository.updateRoom(roomCode, room.toMap());
   }
@@ -72,8 +72,7 @@ class GameFlowService {
 
   /// ラウンド結果を判定
   Future<void> _resolveRound(String roomCode, GameRoom room) async {
-    final result = _gameLogic.resolveRound(room);
-    room.resolveRound(result);
+    room.resolveRound();
 
     await _repository.updateRoom(roomCode, room.toMap());
   }
@@ -101,8 +100,7 @@ class GameFlowService {
       // すでに他の誰かが更新済みでないか（status が roundResult のままであること）を再確認
       if (room.status == GameStatus.roundResult.value) {
         // 次のターンの準備
-        final roundCards = _gameLogic.generateRandomCards();
-        room.prepareNextTurn(roundCards);
+        room.prepareNextTurn(RoundCards.random());
       }
 
       transaction.update(roomRef, room.toMap());

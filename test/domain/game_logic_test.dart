@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/domain/game_logic.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
+import 'package:battle_for_the_cats/models/game_room.dart';
 import '../helpers/test_fixtures.dart';
 
 void main() {
@@ -60,24 +61,24 @@ void main() {
 
     group('generateRoomCode', () {
       test('6文字のコードを生成', () {
-        final code = gameLogic.generateRoomCode();
+        final code = GameRoom.generateRandomId();
         expect(code.length, equals(6));
       });
 
       test('英数字のみで構成される', () {
-        final code = gameLogic.generateRoomCode();
+        final code = GameRoom.generateRandomId();
         expect(code, matches(RegExp(r'^[A-Z0-9]{6}$')));
       });
 
       test('複数回実行時にほぼユニークなコードが生成される', () {
-        final codes = List.generate(100, (_) => gameLogic.generateRoomCode());
+        final codes = List.generate(100, (_) => GameRoom.generateRandomId());
         final uniqueCodes = codes.toSet();
         // 100回中95%以上がユニークであるはず
         expect(uniqueCodes.length, greaterThan(94));
       });
 
       test('許可されていない文字は含まない', () {
-        final code = gameLogic.generateRoomCode();
+        final code = GameRoom.generateRandomId();
         // 小文字を含まない
         expect(code, isNot(matches(RegExp(r'[a-z]'))));
         // 特殊文字を含まない

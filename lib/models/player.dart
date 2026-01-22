@@ -1,3 +1,5 @@
+import '../domain/dice.dart';
+
 /// Playerモデル
 /// プレイヤー（ホストまたはゲスト）の状態を保持するデータモデル
 class Player {
@@ -68,6 +70,11 @@ class Player {
   /// 魚を増やす
   void addFish(int amount) {
     fishCount += amount;
+  }
+
+  /// サイコロを振る
+  void roll(Dice dice) {
+    recordDiceRoll(dice.roll());
   }
 
   /// サイコロの目を記録する

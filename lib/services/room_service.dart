@@ -1,5 +1,5 @@
 import '../constants/game_constants.dart';
-import '../domain/game_logic.dart';
+import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
 import '../models/player.dart';
 import '../repositories/room_repository.dart';
@@ -7,15 +7,12 @@ import '../repositories/room_repository.dart';
 /// ルーム管理を担当するサービス
 class RoomService {
   final RoomRepository _repository;
-  final GameLogic _gameLogic;
 
-  RoomService({required RoomRepository repository, GameLogic? gameLogic})
-    : _repository = repository,
-      _gameLogic = gameLogic ?? GameLogic();
+  RoomService({required RoomRepository repository}) : _repository = repository;
 
   /// ルームコードを生成
   String generateRoomCode() {
-    return _gameLogic.generateRoomCode();
+    return GameRoom.generateRandomId();
   }
 
   /// ルームを作成
@@ -26,11 +23,10 @@ class RoomService {
       roomCode = generateRoomCode();
     } while (await _repository.getRoom(roomCode) != null);
 
-    final roundCards = _gameLogic.generateRandomCards();
     final room = GameRoom(
       roomId: roomCode,
       host: Player(id: hostId),
-      currentRound: roundCards,
+      currentRound: RoundCards.random(),
     );
 
     await _repository.createRoom(room);

@@ -19,7 +19,9 @@ class GameService {
     MatchmakingService? matchmakingService,
     GameFlowService? gameFlowService,
   }) {
-    if (roomService != null && matchmakingService != null && gameFlowService != null) {
+    if (roomService != null &&
+        matchmakingService != null &&
+        gameFlowService != null) {
       // テストから直接サービスが提供された場合
       _roomService = roomService;
       _matchmakingService = matchmakingService;

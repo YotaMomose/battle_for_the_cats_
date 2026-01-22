@@ -3,7 +3,6 @@ import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
-import 'package:battle_for_the_cats/domain/game_logic.dart';
 
 void main() {
   group('GameRoom Rich Domain Model Tests', () {
@@ -43,10 +42,7 @@ void main() {
       room.host.placeBets({'0': 2, '1': 0, '2': 0});
       room.guest?.placeBets({'0': 0, '1': 3, '2': 0});
 
-      final logic = GameLogic();
-      final result = logic.resolveRound(room);
-
-      room.resolveRound(result);
+      room.resolveRound();
 
       expect(room.host.catsWon, contains('Cat1'));
       expect(room.guest?.catsWon, contains('Cat2'));
