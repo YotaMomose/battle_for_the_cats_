@@ -2,6 +2,7 @@ import 'dart:math';
 import '../constants/game_constants.dart';
 import '../models/game_room.dart';
 import '../models/cards/round_cards.dart';
+import 'dice.dart';
 
 /// ラウンド結果
 class RoundResult {
@@ -27,19 +28,22 @@ class RoundResult {
 
 /// ゲームロジック（純粋な関数として実装、Firestoreに依存しない）
 class GameLogic {
-  final Random _random = Random();
+  final Dice _dice;
 
-  /// サイコロを振る（1-6のランダムな目）
+  GameLogic({Dice? dice}) : _dice = dice ?? StandardDice();
+
+  /// サイコロを振る
   int rollDice() {
-    return _random.nextInt(GameConstants.diceMax) + GameConstants.diceMin;
+    return _dice.roll();
   }
 
   /// ルームコードを生成（6桁の英数字）
   String generateRoomCode() {
+    final random = Random();
     return List.generate(
       GameConstants.roomCodeLength,
       (index) =>
-          GameConstants.roomCodeChars[_random.nextInt(
+          GameConstants.roomCodeChars[random.nextInt(
             GameConstants.roomCodeChars.length,
           )],
     ).join();
