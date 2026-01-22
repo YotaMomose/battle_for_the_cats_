@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../constants/game_constants.dart';
 import '../domain/game_logic.dart';
 import '../models/game_room.dart';
+import '../models/player.dart';
 import '../repositories/firestore_repository.dart';
 import 'room_service.dart';
 
@@ -157,8 +158,8 @@ class MatchmakingService {
 
     return GameRoom(
       roomId: roomCode,
-      hostId: hostId,
-      guestId: guestId,
+      host: Player(id: hostId),
+      guest: Player(id: guestId),
       status: GameStatus.rolling.value, // サイコロフェーズから開始
       currentRound: roundCards,
     );

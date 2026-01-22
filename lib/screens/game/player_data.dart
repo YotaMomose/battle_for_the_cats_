@@ -36,23 +36,27 @@ class PlayerData {
 
   /// GameRoomとisHostから自分と相手のデータを抽出
   factory PlayerData.fromRoom(GameRoom room, bool isHost) {
+    final host = room.host;
+    final guest = room.guest;
+
+    final my = isHost ? host : guest;
+    final opponent = isHost ? guest : host;
+
     return PlayerData(
-      myFishCount: isHost ? room.hostFishCount : room.guestFishCount,
-      opponentFishCount: isHost ? room.guestFishCount : room.hostFishCount,
-      myCatsWon: isHost ? room.hostCatsWon : room.guestCatsWon,
-      opponentCatsWon: isHost ? room.guestCatsWon : room.hostCatsWon,
-      myWonCatCosts: isHost ? room.hostWonCatCosts : room.guestWonCatCosts,
-      opponentWonCatCosts: isHost
-          ? room.guestWonCatCosts
-          : room.hostWonCatCosts,
-      myDiceRoll: isHost ? room.hostDiceRoll : room.guestDiceRoll,
-      opponentDiceRoll: isHost ? room.guestDiceRoll : room.hostDiceRoll,
-      myRolled: isHost ? room.hostRolled : room.guestRolled,
-      opponentRolled: isHost ? room.guestRolled : room.hostRolled,
-      myReady: isHost ? room.hostReady : room.guestReady,
-      opponentReady: isHost ? room.guestReady : room.hostReady,
-      myBets: isHost ? room.hostBets : room.guestBets,
-      opponentBets: isHost ? room.guestBets : room.hostBets,
+      myFishCount: my?.fishCount ?? 0,
+      opponentFishCount: opponent?.fishCount ?? 0,
+      myCatsWon: my?.catsWon ?? [],
+      opponentCatsWon: opponent?.catsWon ?? [],
+      myWonCatCosts: my?.wonCatCosts ?? [],
+      opponentWonCatCosts: opponent?.wonCatCosts ?? [],
+      myDiceRoll: my?.diceRoll,
+      opponentDiceRoll: opponent?.diceRoll,
+      myRolled: my?.rolled ?? false,
+      opponentRolled: opponent?.rolled ?? false,
+      myReady: my?.ready ?? false,
+      opponentReady: opponent?.ready ?? false,
+      myBets: my?.currentBets ?? {},
+      opponentBets: opponent?.currentBets ?? {},
     );
   }
 }

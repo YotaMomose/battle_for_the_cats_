@@ -1,12 +1,10 @@
 import 'package:battle_for_the_cats/models/game_room.dart';
+import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
 
 /// テスト用のRoundCardsを作成（特定の猫データで）
-RoundCards createTestRoundCards(
-  List<String> displayNames, [
-  List<int>? costs,
-]) {
+RoundCards createTestRoundCards(List<String> displayNames, [List<int>? costs]) {
   final cats = [
     RegularCat(
       id: 'test_cat_1',
@@ -24,11 +22,7 @@ RoundCards createTestRoundCards(
       baseCost: costs != null ? costs[2] : 1,
     ),
   ];
-  return RoundCards(
-    card1: cats[0],
-    card2: cats[1],
-    card3: cats[2],
-  );
+  return RoundCards(card1: cats[0], card2: cats[1], card3: cats[2]);
 }
 
 /// テスト用のGameRoomを作成するファクトリ関数
@@ -50,18 +44,24 @@ GameRoom createTestGameRoom({
 }) {
   return GameRoom(
     roomId: roomId,
-    hostId: hostId,
-    guestId: guestId,
+    host: Player(
+      id: hostId,
+      fishCount: hostFishCount,
+      currentBets: hostBets ?? {'0': 0, '1': 0, '2': 0},
+      catsWon: hostCatsWon ?? [],
+      wonCatCosts: hostWonCatCosts ?? [],
+    ),
+    guest: guestId != null
+        ? Player(
+            id: guestId,
+            fishCount: guestFishCount,
+            currentBets: guestBets ?? {'0': 0, '1': 0, '2': 0},
+            catsWon: guestCatsWon ?? [],
+            wonCatCosts: guestWonCatCosts ?? [],
+          )
+        : null,
     status: status,
     currentTurn: currentTurn,
-    hostFishCount: hostFishCount,
-    guestFishCount: guestFishCount,
     currentRound: currentRound ?? RoundCards.random(),
-    hostBets: hostBets ?? {'0': 0, '1': 0, '2': 0},
-    guestBets: guestBets ?? {'0': 0, '1': 0, '2': 0},
-    hostCatsWon: hostCatsWon ?? [],
-    guestCatsWon: guestCatsWon ?? [],
-    hostWonCatCosts: hostWonCatCosts ?? [],
-    guestWonCatCosts: guestWonCatCosts ?? [],
   );
 }

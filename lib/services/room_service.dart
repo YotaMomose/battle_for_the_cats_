@@ -1,6 +1,7 @@
 import '../constants/game_constants.dart';
 import '../domain/game_logic.dart';
 import '../models/game_room.dart';
+import '../models/player.dart';
 import '../repositories/room_repository.dart';
 
 /// ルーム管理を担当するサービス
@@ -28,7 +29,7 @@ class RoomService {
     final roundCards = _gameLogic.generateRandomCards();
     final room = GameRoom(
       roomId: roomCode,
-      hostId: hostId,
+      host: Player(id: hostId),
       currentRound: roundCards,
     );
 
@@ -49,7 +50,7 @@ class RoomService {
     }
 
     await _repository.updateRoom(roomCode, {
-      'guestId': guestId,
+      'guest': Player(id: guestId).toMap(),
       'status': GameStatus.rolling.value, // サイコロフェーズから開始
     });
 
@@ -68,7 +69,7 @@ class RoomService {
 
     final isHost = _repository.isHost(room, playerId);
     await _repository.updateRoom(roomCode, {
-      isHost ? 'hostAbandoned' : 'guestAbandoned': true,
+      '${isHost ? 'host' : 'guest'}.abandoned': true,
     });
   }
 

@@ -76,17 +76,18 @@ class GameScreenViewModel extends ChangeNotifier {
 
   // ===== 状態更新ロジック =====
   void _updateUiState(GameRoom room) {
+    final host = room.host;
+    final guest = room.guest;
+
     // --- 個別遷移の整合性チェック ---
     final myConfirmedRound = isHost
-        ? room.hostConfirmedRoundResult
-        : room.guestConfirmedRoundResult;
+        ? host.confirmedRoundResult
+        : (guest?.confirmedRoundResult ?? false);
     final myConfirmedRoll = isHost
-        ? room.hostConfirmedRoll
-        : room.guestConfirmedRoll;
+        ? host.confirmedRoll
+        : (guest?.confirmedRoll ?? false);
 
     // 1. ラウンド結果の確認待ち
-    // ルームが既に次のターン（rolling, playing）に進んでいても、
-    // 自分がまだ前ターンの結果を未確認なら、結果画面を表示し続ける。
     if (!myConfirmedRound &&
         room.lastRoundWinners != null &&
         (room.status == 'rolling' || room.status == 'playing')) {
@@ -95,7 +96,9 @@ class GameScreenViewModel extends ChangeNotifier {
     }
 
     // --- 相手の退出チェック ---
-    final opponentAbandoned = isHost ? room.guestAbandoned : room.hostAbandoned;
+    final opponentAbandoned = isHost
+        ? (guest?.abandoned ?? false)
+        : host.abandoned;
     if (opponentAbandoned) {
       _handleOpponentLeft();
       return;
@@ -107,9 +110,7 @@ class GameScreenViewModel extends ChangeNotifier {
         break;
       case 'rolling':
         // 2. サイコロ結果の確認待ち
-        // 両者がサイコロを振り終え、かつ自分が未確認の場合はサイコロ画面（結果表示）を維持。
-        // 確認済みであれば、内部的に賭けフェーズ(playing)へ進む。
-        final bothRolled = room.hostRolled && room.guestRolled;
+        final bothRolled = host.rolled && (guest?.rolled ?? false);
 
         if (bothRolled && myConfirmedRoll) {
           _uiState = GameScreenState.playing(room);
@@ -137,14 +138,12 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   /// ターン変更チェック
-  /// ターンが変更された場合、ローカル状態をリセットし、_lastTurnを更新する
   void _checkTurnChange(GameRoom room) {
     if (room.currentTurn != _lastTurn &&
         (room.status == 'playing' || room.status == 'rolling')) {
-      // 自分が結果画面を確認し終えるまでは、ローカル状態をリセットしない
       final myConfirmedRound = isHost
-          ? room.hostConfirmedRoundResult
-          : room.guestConfirmedRoundResult;
+          ? room.host.confirmedRoundResult
+          : (room.guest?.confirmedRoundResult ?? false);
 
       if (myConfirmedRound) {
         resetLocalState();

@@ -31,11 +31,13 @@ class RoundCards {
     };
   }
 
-  /// Firestore復元用（後でカード工場パターンで実装）
+  /// Firestore復元用
   factory RoundCards.fromMap(Map<String, dynamic> map) {
-    // 簡易実装：タイムスタンプに基づいてランダムカードを再生成
-    // 本来はデータベースから復元すべきだが、ゲーム中のみ使用されるため
-    return RoundCards.random();
+    return RoundCards(
+      card1: GameCard.fromMap(map['card1'] as Map<String, dynamic>),
+      card2: GameCard.fromMap(map['card2'] as Map<String, dynamic>),
+      card3: GameCard.fromMap(map['card3'] as Map<String, dynamic>),
+    );
   }
 
   /// ランダムなカード3枚を生成する

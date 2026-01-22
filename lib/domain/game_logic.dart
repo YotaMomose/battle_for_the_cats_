@@ -52,21 +52,23 @@ class GameLogic {
 
   /// ラウンドの結果を判定
   RoundResult resolveRound(GameRoom room) {
+    final guest = room.guest;
+    if (guest == null) {
+      throw StateError('Guest must be present to resolve round');
+    }
+
     // 1. 各猫について勝敗を判定
     final perCatResults = _resolveCatResults(room);
 
     // 2. 累計獲得リストを計算
-    final newHostCatsWon = [...room.hostCatsWon, ...perCatResults.hostWonCats];
-    final newGuestCatsWon = [
-      ...room.guestCatsWon,
-      ...perCatResults.guestWonCats,
-    ];
+    final newHostCatsWon = [...room.host.catsWon, ...perCatResults.hostWonCats];
+    final newGuestCatsWon = [...guest.catsWon, ...perCatResults.guestWonCats];
     final newHostWonCosts = [
-      ...room.hostWonCatCosts,
+      ...room.host.wonCatCosts,
       ...perCatResults.hostWonCosts,
     ];
     final newGuestWonCosts = [
-      ...room.guestWonCatCosts,
+      ...guest.wonCatCosts,
       ...perCatResults.guestWonCosts,
     ];
 
@@ -91,6 +93,11 @@ class GameLogic {
 
   /// 各猫の勝敗判定を行う
   _PerCatResults _resolveCatResults(GameRoom room) {
+    final guest = room.guest;
+    if (guest == null) {
+      throw StateError('Guest must be present to resolve cat results');
+    }
+
     final Map<String, String> winners = {};
     final List<String> hostWonCats = [];
     final List<String> guestWonCats = [];
@@ -105,11 +112,10 @@ class GameLogic {
     for (int i = 0; i < GameConstants.catsPerRound && i < cards.length; i++) {
       final catIndex = i.toString();
       final card = cards[i];
-      final catName = card.displayName;
       final cost = card.baseCost;
 
-      final hostBet = room.hostBets[catIndex] ?? 0;
-      final guestBet = room.guestBets[catIndex] ?? 0;
+      final hostBet = room.host.currentBets[catIndex] ?? 0;
+      final guestBet = guest.currentBets[catIndex] ?? 0;
 
       final hostQualified = hostBet >= cost;
       final guestQualified = guestBet >= cost;
@@ -128,12 +134,12 @@ class GameLogic {
       winners[catIndex] = winner.value;
 
       if (winner == Winner.host) {
-        hostWonCats.add(catName);
+        hostWonCats.add(card.displayName);
         hostWonCosts.add(cost);
       }
 
       if (winner == Winner.guest) {
-        guestWonCats.add(catName);
+        guestWonCats.add(card.displayName);
         guestWonCosts.add(cost);
       }
     }

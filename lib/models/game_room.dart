@@ -1,30 +1,14 @@
-/// GameRoomモデル
-/// ゲームルームの状態を表すデータモデルクラス
-/// 各フィールドはゲームの進行状況やプレイヤーの情報を保持する
 import 'cards/round_cards.dart';
+import 'player.dart';
 
 class GameRoom {
   final String roomId;
-  final String hostId;
-  String? guestId;
   String status; // 'waiting', 'rolling', 'playing', 'roundResult', 'finished'
-
-  // ターン情報
   int currentTurn;
-  List<String> hostCatsWon; // ホストが獲得した猫の種類リスト
-  List<String> guestCatsWon; // ゲストが獲得した猫の種類リスト
-  List<int> hostWonCatCosts; // ホストが獲得した猫のコストリスト
-  List<int> guestWonCatCosts; // ゲストが獲得した猫のコストリスト
 
-  // サイコロ
-  int? hostDiceRoll; // ホストのサイコロの目（1-6）
-  int? guestDiceRoll; // ゲストのサイコロの目（1-6）
-  bool hostRolled; // ホストがサイコロを振ったか
-  bool guestRolled; // ゲストがサイコロを振ったか
-  bool hostConfirmedRoll; // ホストがサイコロ結果を確認したか
-  bool guestConfirmedRoll; // ゲストがサイコロ結果を確認したか
-  bool hostConfirmedRoundResult; // ホストがラウンド結果を確認したか
-  bool guestConfirmedRoundResult; // ゲストがラウンド結果を確認したか
+  // プレイヤー情報
+  Player host;
+  Player? guest;
 
   // 前回のラウンド情報（画面表示用、個別に次へ進むために必要）
   List<String>? lastRoundCats;
@@ -33,19 +17,8 @@ class GameRoom {
   Map<String, int>? lastRoundHostBets;
   Map<String, int>? lastRoundGuestBets;
 
-  // ゲーム状態
-  int hostFishCount;
-  int guestFishCount;
-
-  // 現在のラウンドの3匹の猫（型安全化）
+  // 現在のラウンドの3匹の猫
   RoundCards? currentRound;
-
-  // 各プレイヤーの各猫への賭け（猫のインデックス -> 魚の数）
-  Map<String, int> hostBets;
-  Map<String, int> guestBets;
-
-  bool hostReady;
-  bool guestReady;
 
   // 各猫の勝者（猫のインデックス -> 'host'/'guest'/'draw'）
   Map<String, String>? winners;
@@ -53,120 +26,59 @@ class GameRoom {
   // 最終勝者
   String? finalWinner;
 
-  bool hostAbandoned; // ホストが退出したか
-  bool guestAbandoned; // ゲストが退出したか
-
   GameRoom({
     required this.roomId,
-    required this.hostId,
-    this.guestId,
+    required this.host,
+    this.guest,
     this.status = 'waiting',
     this.currentTurn = 1,
-    List<String>? hostCatsWon,
-    List<String>? guestCatsWon,
-    List<int>? hostWonCatCosts,
-    List<int>? guestWonCatCosts,
-    this.hostDiceRoll,
-    this.guestDiceRoll,
-    this.hostRolled = false,
-    this.guestRolled = false,
-    this.hostConfirmedRoll = false,
-    this.guestConfirmedRoll = false,
-    this.hostConfirmedRoundResult = false,
-    this.guestConfirmedRoundResult = false,
     this.lastRoundCats,
     this.lastRoundCatCosts,
     this.lastRoundWinners,
     this.lastRoundHostBets,
     this.lastRoundGuestBets,
-    this.hostFishCount = 0,
-    this.guestFishCount = 0,
     this.currentRound,
-    Map<String, int>? hostBets,
-    Map<String, int>? guestBets,
-    this.hostReady = false,
-    this.guestReady = false,
     this.winners,
     this.finalWinner,
-    this.hostAbandoned = false,
-    this.guestAbandoned = false,
-  }) : hostCatsWon = hostCatsWon ?? [],
-       guestCatsWon = guestCatsWon ?? [],
-       hostWonCatCosts = hostWonCatCosts ?? [],
-       guestWonCatCosts = guestWonCatCosts ?? [],
-       hostBets = hostBets ?? {'0': 0, '1': 0, '2': 0},
-       guestBets = guestBets ?? {'0': 0, '1': 0, '2': 0};
+  });
+
+  String get hostId => host.id;
+  String? get guestId => guest?.id;
 
   Map<String, dynamic> toMap() {
     return {
       'roomId': roomId,
-      'hostId': hostId,
-      'guestId': guestId,
       'status': status,
       'currentTurn': currentTurn,
-      'hostCatsWon': hostCatsWon,
-      'guestCatsWon': guestCatsWon,
-      'hostWonCatCosts': hostWonCatCosts,
-      'guestWonCatCosts': guestWonCatCosts,
-      'hostDiceRoll': hostDiceRoll,
-      'guestDiceRoll': guestDiceRoll,
-      'hostRolled': hostRolled,
-      'guestRolled': guestRolled,
-      'hostFishCount': hostFishCount,
-      'guestFishCount': guestFishCount,
+      'host': host.toMap(),
+      'guest': guest?.toMap(),
       'currentRound': currentRound?.toMap(),
-      'hostBets': hostBets,
-      'guestBets': guestBets,
-      'hostReady': hostReady,
-      'guestReady': guestReady,
       'winners': winners,
       'finalWinner': finalWinner,
-      'hostConfirmedRoll': hostConfirmedRoll,
-      'guestConfirmedRoll': guestConfirmedRoll,
-      'hostConfirmedRoundResult': hostConfirmedRoundResult,
-      'guestConfirmedRoundResult': guestConfirmedRoundResult,
+      'lastRoundCats': lastRoundCats,
+      'lastRoundCatCosts': lastRoundCatCosts,
+      'lastRoundWinners': lastRoundWinners,
+      'lastRoundHostBets': lastRoundHostBets,
       'lastRoundGuestBets': lastRoundGuestBets,
-      'hostAbandoned': hostAbandoned,
-      'guestAbandoned': guestAbandoned,
     };
   }
 
   factory GameRoom.fromMap(Map<String, dynamic> map) {
     return GameRoom(
       roomId: map['roomId'] ?? '',
-      hostId: map['hostId'] ?? '',
-      guestId: map['guestId'],
       status: map['status'] ?? 'waiting',
       currentTurn: map['currentTurn'] ?? 1,
-      hostCatsWon: List<String>.from(map['hostCatsWon'] ?? []),
-      guestCatsWon: List<String>.from(map['guestCatsWon'] ?? []),
-      hostWonCatCosts: List<int>.from(map['hostWonCatCosts'] ?? []),
-      guestWonCatCosts: List<int>.from(map['guestWonCatCosts'] ?? []),
-      hostDiceRoll: map['hostDiceRoll'],
-      guestDiceRoll: map['guestDiceRoll'],
-      hostRolled: map['hostRolled'] ?? false,
-      guestRolled: map['guestRolled'] ?? false,
-      hostFishCount: map['hostFishCount'] ?? 0,
-      guestFishCount: map['guestFishCount'] ?? 0,
+      host: Player.fromMap(map['host'] ?? {'id': map['hostId'] ?? ''}),
+      guest: map['guest'] != null
+          ? Player.fromMap(map['guest'])
+          : (map['guestId'] != null ? Player(id: map['guestId']) : null),
       currentRound: map['currentRound'] != null
           ? RoundCards.fromMap(map['currentRound'])
           : null,
-      hostBets: Map<String, int>.from(
-        map['hostBets'] ?? {'0': 0, '1': 0, '2': 0},
-      ),
-      guestBets: Map<String, int>.from(
-        map['guestBets'] ?? {'0': 0, '1': 0, '2': 0},
-      ),
-      hostReady: map['hostReady'] ?? false,
-      guestReady: map['guestReady'] ?? false,
       winners: map['winners'] != null
           ? Map<String, String>.from(map['winners'])
           : null,
       finalWinner: map['finalWinner'],
-      hostConfirmedRoll: map['hostConfirmedRoll'] ?? false,
-      guestConfirmedRoll: map['guestConfirmedRoll'] ?? false,
-      hostConfirmedRoundResult: map['hostConfirmedRoundResult'] ?? false,
-      guestConfirmedRoundResult: map['guestConfirmedRoundResult'] ?? false,
       lastRoundCats: map['lastRoundCats'] != null
           ? List<String>.from(map['lastRoundCats'])
           : null,
@@ -182,8 +94,6 @@ class GameRoom {
       lastRoundGuestBets: map['lastRoundGuestBets'] != null
           ? Map<String, int>.from(map['lastRoundGuestBets'])
           : null,
-      hostAbandoned: map['hostAbandoned'] ?? false,
-      guestAbandoned: map['guestAbandoned'] ?? false,
     );
   }
 }

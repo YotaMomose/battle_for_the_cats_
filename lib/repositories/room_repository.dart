@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/game_room.dart';
 import 'firestore_repository.dart';
 
@@ -8,6 +9,15 @@ class RoomRepository {
 
   RoomRepository({required FirestoreRepository repository})
     : _repository = repository;
+
+  FirestoreRepository get firestoreRepository => _repository;
+
+  /// トランザクションを実行
+  Future<T> runTransaction<T>(
+    Future<T> Function(Transaction transaction) transactionHandler,
+  ) async {
+    return await _repository.runTransaction(transactionHandler);
+  }
 
   /// ルームを取得
   Future<GameRoom?> getRoom(String roomCode) async {
@@ -66,11 +76,14 @@ class RoomRepository {
     if (room == null) return;
 
     final isHost = this.isHost(room, playerId);
+    final prefix = isHost ? 'host' : 'guest';
     final prefixedData = <String, dynamic>{};
 
     for (final entry in data.entries) {
-      final key = isHost ? 'host${entry.key}' : 'guest${entry.key}';
-      prefixedData[key] = entry.value;
+      // キャメルケースを維持しつつネストを表現 ('host.diceRoll' など)
+      final field = entry.key;
+      final lowercaseField = field[0].toLowerCase() + field.substring(1);
+      prefixedData['$prefix.$lowercaseField'] = entry.value;
     }
 
     await updateRoom(roomCode, prefixedData);

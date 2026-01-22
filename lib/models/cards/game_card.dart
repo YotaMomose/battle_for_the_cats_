@@ -1,5 +1,6 @@
 import 'card_type.dart';
 import 'card_effect.dart';
+import 'regular_cat.dart';
 
 /// ゲーム内の全カード（猫、犬、漁師など）が実装すべきインターフェース
 abstract class GameCard {
@@ -31,8 +32,12 @@ abstract class GameCard {
   }
 
   /// Firestore復元用のファクトリコンストラクタ
-  /// （各実装クラスで実装される）
   static GameCard fromMap(Map<String, dynamic> map) {
-    throw UnimplementedError('fromMap must be implemented by subclass');
+    final type = map['cardType'] as String?;
+    if (type == CardType.regularCat.value) {
+      return RegularCat.fromMap(map);
+    }
+    // 将来的に他のカードタイプが追加されたらここに分岐を追加
+    return RegularCat.fromMap(map);
   }
 }
