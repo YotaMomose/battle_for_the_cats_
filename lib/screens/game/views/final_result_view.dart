@@ -10,6 +10,20 @@ class FinalResultView extends StatelessWidget {
 
   const FinalResultView({super.key, required this.room});
 
+  /// 猫の名前に応じて色を返す
+  Color _getCatColor(String catName) {
+    switch (catName) {
+      case '茶トラねこ':
+        return Colors.orange;
+      case '白ねこ':
+        return Colors.grey.shade300;
+      case '黒ねこ':
+        return Colors.black;
+      default:
+        return Colors.orange;
+    }
+  }
+
   /// 獲得した猫を種類別にフォーマット
   String _formatCatsWon(List<String> catsWon) {
     final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
@@ -41,8 +55,11 @@ class FinalResultView extends StatelessWidget {
       resultColor = Colors.red;
     }
 
+    final winners = room.lastRoundWinners ?? {};
+    final cats = room.lastRoundCats ?? [];
+
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -56,6 +73,108 @@ class FinalResultView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+
+            // 最終ターンの詳細
+            if (cats.isNotEmpty) ...[
+              const Text(
+                '最終ターンの結果',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 150,
+                child: Row(
+                  children: List.generate(3, (index) {
+                    final catIndex = index.toString();
+                    final catName = index < cats.length ? cats[index] : '???';
+                    final myBet =
+                        (viewModel.isHost
+                            ? room.lastRoundHostBets
+                            : room.lastRoundGuestBets)?[catIndex] ??
+                        0;
+                    final opponentBet =
+                        (viewModel.isHost
+                            ? room.lastRoundGuestBets
+                            : room.lastRoundHostBets)?[catIndex] ??
+                        0;
+                    final winner = winners[catIndex];
+                    final myId = viewModel.isHost ? 'host' : 'guest';
+                    final opponentId = viewModel.isHost ? 'guest' : 'host';
+
+                    Color cardColor;
+                    String winnerText;
+                    if (winner == myId) {
+                      cardColor = Colors.green.shade50;
+                      winnerText = '獲得';
+                    } else if (winner == opponentId) {
+                      cardColor = Colors.red.shade50;
+                      winnerText = '取られた';
+                    } else {
+                      cardColor = Colors.grey.shade50;
+                      winnerText = '引き分け';
+                    }
+
+                    return Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Card(
+                          color: cardColor,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 8,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.pets,
+                                  size: 20,
+                                  color: _getCatColor(catName),
+                                ),
+                                const SizedBox(height: 4),
+                                Flexible(
+                                  child: Text(
+                                    catName,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  winnerText,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: winner == 'draw'
+                                        ? Colors.grey
+                                        : (winner == myId
+                                              ? Colors.green
+                                              : Colors.red),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '自: $myBet 敵: $opponentBet',
+                                  style: const TextStyle(fontSize: 9),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -63,7 +182,7 @@ class FinalResultView extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.emoji_events,
-                      size: 80,
+                      size: 60,
                       color: Colors.amber,
                     ),
                     const SizedBox(height: 16),
@@ -99,7 +218,10 @@ class FinalResultView extends StatelessWidget {
                 viewModel.leaveRoom();
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 48,
+                  vertical: 16,
+                ),
               ),
               child: const Text('ホームに戻る', style: TextStyle(fontSize: 18)),
             ),
