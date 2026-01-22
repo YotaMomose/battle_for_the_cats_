@@ -3,6 +3,7 @@ import '../constants/game_constants.dart';
 import '../models/game_room.dart';
 import '../models/cards/round_cards.dart';
 import 'dice.dart';
+import 'win_condition.dart';
 
 /// ラウンド結果
 class RoundResult {
@@ -29,8 +30,11 @@ class RoundResult {
 /// ゲームロジック（純粋な関数として実装、Firestoreに依存しない）
 class GameLogic {
   final Dice _dice;
+  final WinCondition _winCondition;
 
-  GameLogic({Dice? dice}) : _dice = dice ?? StandardDice();
+  GameLogic({Dice? dice, WinCondition? winCondition})
+    : _dice = dice ?? StandardDice(),
+      _winCondition = winCondition ?? StandardWinCondition();
 
   /// サイコロを振る
   int rollDice() {
@@ -164,8 +168,8 @@ class GameLogic {
     List<int> hostCosts,
     List<int> guestCosts,
   ) {
-    final hostWins = checkWinCondition(hostCats);
-    final guestWins = checkWinCondition(guestCats);
+    final hostWins = _winCondition.checkWin(hostCats);
+    final guestWins = _winCondition.checkWin(guestCats);
 
     if (hostWins && guestWins) {
       return _resolveDoubleWin(hostCosts, guestCosts);
@@ -193,26 +197,9 @@ class GameLogic {
     if (hostTotalCost > guestTotalCost) {
       return _GameFinalResult(GameStatus.finished, Winner.host);
     }
-    if (guestTotalCost > hostTotalCost) {
-      return _GameFinalResult(GameStatus.finished, Winner.guest);
-    }
-    return _GameFinalResult(GameStatus.finished, Winner.draw);
-  }
-
-  /// 勝利条件をチェック（同種3匹 or 3種類）
-  bool checkWinCondition(List<String> catsWon) {
-    if (catsWon.length < 3) return false;
-
-    // 各種類のカウント
-    final counts = <String, int>{};
-    for (final cat in catsWon) {
-      counts[cat] = (counts[cat] ?? 0) + 1;
-      // 同じ種類が3匹以上
-      if (counts[cat]! >= 3) return true;
-    }
-
-    // 3種類以上
-    return counts.keys.length >= 3;
+    return guestTotalCost > hostTotalCost
+        ? _GameFinalResult(GameStatus.finished, Winner.guest)
+        : _GameFinalResult(GameStatus.finished, Winner.draw);
   }
 }
 
