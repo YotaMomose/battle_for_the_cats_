@@ -104,7 +104,7 @@ void main() {
 
       test('ゲーム定義にコートがある', () {
         // Assert
-        expect(GameConstants.catCount, equals(3));
+        expect(GameConstants.catsPerRound, equals(3));
         expect(GameConstants.winCondition, equals(3));
       });
 
@@ -203,7 +203,7 @@ void main() {
       test('ゲーム定数が有効な値である', () {
         // Assert
         expect(GameConstants.diceMin, lessThan(GameConstants.diceMax));
-        expect(GameConstants.catCount, equals(3));
+        expect(GameConstants.catsPerRound, equals(3));
         expect(GameConstants.winCondition, equals(3));
       });
 

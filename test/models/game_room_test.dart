@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/models/game_room.dart';
+import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 
 void main() {
   group('GameRoom - 初期化', () {
@@ -39,13 +40,10 @@ void main() {
       expect(room.guestAbandoned, isFalse);
     });
 
-    test('デフォルト猫が3匹設定される', () {
+    test('デフォルト currentRound が null で初期化される', () {
       final room = GameRoom(roomId: 'room-123', hostId: 'host-456');
 
-      expect(room.cats, hasLength(3));
-      expect(room.cats, everyElement('茶トラねこ'));
-      expect(room.catCosts, hasLength(3));
-      expect(room.catCosts, everyElement(1));
+      expect(room.currentRound, isNull);
     });
 
     test('デフォルト賭けが初期化される', () {
@@ -56,16 +54,14 @@ void main() {
     });
 
     test('カスタム値で初期化できる', () {
-      final customCats = ['茶トラねこ', '白ねこ', '黒ねこ'];
-      final customCosts = [2, 3, 1];
+      final roundCards = RoundCards.random();
       final room = GameRoom(
         roomId: 'room-123',
         hostId: 'host-456',
         guestId: 'guest-789',
         status: 'playing',
         currentTurn: 2,
-        cats: customCats,
-        catCosts: customCosts,
+        currentRound: roundCards,
         hostFishCount: 10,
         guestFishCount: 8,
       );
@@ -73,8 +69,7 @@ void main() {
       expect(room.guestId, equals('guest-789'));
       expect(room.status, equals('playing'));
       expect(room.currentTurn, equals(2));
-      expect(room.cats, equals(customCats));
-      expect(room.catCosts, equals(customCosts));
+      expect(room.currentRound, equals(roundCards));
       expect(room.hostFishCount, equals(10));
       expect(room.guestFishCount, equals(8));
     });
@@ -275,8 +270,7 @@ void main() {
         currentTurn: 3,
         hostFishCount: 15,
         guestFishCount: 12,
-        cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-        catCosts: [2, 3, 1],
+        currentRound: RoundCards.random(),
         hostCatsWon: ['茶トラねこ', '白ねこ'],
         guestCatsWon: ['黒ねこ'],
         hostWonCatCosts: [2, 3],
@@ -302,8 +296,6 @@ void main() {
       expect(restored.currentTurn, equals(original.currentTurn));
       expect(restored.hostFishCount, equals(original.hostFishCount));
       expect(restored.guestFishCount, equals(original.guestFishCount));
-      expect(restored.cats, equals(original.cats));
-      expect(restored.catCosts, equals(original.catCosts));
       expect(restored.hostCatsWon, equals(original.hostCatsWon));
       expect(restored.guestCatsWon, equals(original.guestCatsWon));
       expect(restored.hostWonCatCosts, equals(original.hostWonCatCosts));

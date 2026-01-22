@@ -9,7 +9,8 @@ class GameConstants {
   static const int diceMax = 6;
 
   // ゲームルール
-  static const int catCount = 3; // 1ターンに登場する猫の数
+  static const int catsPerRound = 3; // 1ターンに登場する猫の数
+  static const int maxCatCost = 4; // 猫のコストの最大値（1～4）
   static const int winCondition = 3; // 勝利に必要な猫の数
   static const List<String> catTypes = ['茶トラねこ', '白ねこ', '黒ねこ'];
 

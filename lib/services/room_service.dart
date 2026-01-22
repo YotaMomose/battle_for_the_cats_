@@ -25,13 +25,11 @@ class RoomService {
       roomCode = generateRoomCode();
     } while (await _repository.getRoom(roomCode) != null);
 
-    final cats = _gameLogic.generateRandomCats();
-    final catCosts = _gameLogic.generateRandomCosts(cats.length);
+    final roundCards = _gameLogic.generateRandomCards();
     final room = GameRoom(
       roomId: roomCode,
       hostId: hostId,
-      cats: cats,
-      catCosts: catCosts,
+      currentRound: roundCards,
     );
 
     await _repository.createRoom(room);

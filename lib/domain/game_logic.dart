@@ -1,6 +1,7 @@
 import 'dart:math';
 import '../constants/game_constants.dart';
 import '../models/game_room.dart';
+import '../models/cards/round_cards.dart';
 
 /// ラウンド結果
 class RoundResult {
@@ -44,20 +45,9 @@ class GameLogic {
     ).join();
   }
 
-  /// 3匹の猫をランダムに選択（重複OK）
-  List<String> generateRandomCats() {
-    return List.generate(
-      GameConstants.catCount,
-      (index) =>
-          GameConstants.catTypes[_random.nextInt(
-            GameConstants.catTypes.length,
-          )],
-    );
-  }
-
-  /// 3匹の猫のコスト（必要魚数）をランダムに決定（1〜4）
-  List<int> generateRandomCosts(int count) {
-    return List.generate(count, (_) => _random.nextInt(4) + 1);
+  /// ランダムに3匹の猫を生成する（各猫は独立したコスト付き）
+  RoundCards generateRandomCards() {
+    return RoundCards.random();
   }
 
   /// ラウンドの結果を判定
@@ -107,10 +97,16 @@ class GameLogic {
     final List<int> hostWonCosts = [];
     final List<int> guestWonCosts = [];
 
-    for (int i = 0; i < GameConstants.catCount; i++) {
+    final cards = room.currentRound?.toList() ?? [];
+    if (cards.isEmpty) {
+      return _PerCatResults({}, [], [], [], []);
+    }
+
+    for (int i = 0; i < GameConstants.catsPerRound && i < cards.length; i++) {
       final catIndex = i.toString();
-      final catName = room.cats[i];
-      final cost = room.catCosts.length > i ? room.catCosts[i] : 1;
+      final card = cards[i];
+      final catName = card.displayName;
+      final cost = card.baseCost;
 
       final hostBet = room.hostBets[catIndex] ?? 0;
       final guestBet = room.guestBets[catIndex] ?? 0;

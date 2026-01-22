@@ -157,7 +157,7 @@ void main() {
         when(mockMatchmakingService.joinMatchmaking('player_001'))
             .thenAnswer((_) async => 'match_001');
 
-        final roomCode = gameService.generateRoomCode();
+        gameService.generateRoomCode();
         await gameService.createRoom('host_001');
         await gameService.joinMatchmaking('player_001');
 

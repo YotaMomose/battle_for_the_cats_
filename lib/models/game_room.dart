@@ -1,6 +1,8 @@
 /// GameRoomモデル
 /// ゲームルームの状態を表すデータモデルクラス
 /// 各フィールドはゲームの進行状況やプレイヤーの情報を保持する
+import 'cards/round_cards.dart';
+
 class GameRoom {
   final String roomId;
   final String hostId;
@@ -35,9 +37,8 @@ class GameRoom {
   int hostFishCount;
   int guestFishCount;
 
-  // 3匹の猫（猫の種類を格納）
-  List<String> cats;
-  List<int> catCosts; // 各猫の獲得に必要な魚の数
+  // 現在のラウンドの3匹の猫（型安全化）
+  RoundCards? currentRound;
 
   // 各プレイヤーの各猫への賭け（猫のインデックス -> 魚の数）
   Map<String, int> hostBets;
@@ -80,8 +81,7 @@ class GameRoom {
     this.lastRoundGuestBets,
     this.hostFishCount = 0,
     this.guestFishCount = 0,
-    List<String>? cats,
-    List<int>? catCosts,
+    this.currentRound,
     Map<String, int>? hostBets,
     Map<String, int>? guestBets,
     this.hostReady = false,
@@ -90,9 +90,7 @@ class GameRoom {
     this.finalWinner,
     this.hostAbandoned = false,
     this.guestAbandoned = false,
-  }) : cats = cats ?? ['茶トラねこ', '茶トラねこ', '茶トラねこ'],
-       catCosts = catCosts ?? [1, 1, 1],
-       hostCatsWon = hostCatsWon ?? [],
+  }) : hostCatsWon = hostCatsWon ?? [],
        guestCatsWon = guestCatsWon ?? [],
        hostWonCatCosts = hostWonCatCosts ?? [],
        guestWonCatCosts = guestWonCatCosts ?? [],
@@ -116,8 +114,7 @@ class GameRoom {
       'guestRolled': guestRolled,
       'hostFishCount': hostFishCount,
       'guestFishCount': guestFishCount,
-      'cats': cats,
-      'catCosts': catCosts,
+      'currentRound': currentRound?.toMap(),
       'hostBets': hostBets,
       'guestBets': guestBets,
       'hostReady': hostReady,
@@ -151,8 +148,9 @@ class GameRoom {
       guestRolled: map['guestRolled'] ?? false,
       hostFishCount: map['hostFishCount'] ?? 0,
       guestFishCount: map['guestFishCount'] ?? 0,
-      cats: List<String>.from(map['cats'] ?? ['茶トラねこ', '茶トラねこ', '茶トラねこ']),
-      catCosts: List<int>.from(map['catCosts'] ?? [1, 1, 1]),
+      currentRound: map['currentRound'] != null
+          ? RoundCards.fromMap(map['currentRound'])
+          : null,
       hostBets: Map<String, int>.from(
         map['hostBets'] ?? {'0': 0, '1': 0, '2': 0},
       ),

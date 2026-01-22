@@ -188,7 +188,10 @@ class BettingPhaseView extends StatelessWidget {
               child: Row(
                 children: List.generate(3, (index) {
                   final catIndex = index.toString();
-                  final catName = room.cats[index];
+                  final cards = room.currentRound?.toList() ?? [];
+                  if (cards.isEmpty || index >= cards.length) return const SizedBox();
+                  
+                  final catName = cards[index].displayName;
                   final currentBet = viewModel.bets[catIndex] ?? 0;
 
                   return Flexible(
@@ -234,7 +237,7 @@ class BettingPhaseView extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  '必要: ${room.catCosts.length > index ? room.catCosts[index] : 1}',
+                                  '必要: ${cards[index].baseCost}',
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.red.shade700,

@@ -153,16 +153,14 @@ class MatchmakingService {
     String hostId,
     String guestId,
   ) {
-    final cats = _gameLogic.generateRandomCats();
-    final catCosts = _gameLogic.generateRandomCosts(cats.length);
+    final roundCards = _gameLogic.generateRandomCards();
 
     return GameRoom(
       roomId: roomCode,
       hostId: hostId,
       guestId: guestId,
       status: GameStatus.rolling.value, // サイコロフェーズから開始
-      cats: cats,
-      catCosts: catCosts,
+      currentRound: roundCards,
     );
   }
 

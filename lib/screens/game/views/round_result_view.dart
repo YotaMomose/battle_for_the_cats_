@@ -39,7 +39,8 @@ class RoundResultView extends StatelessWidget {
     final viewModel = context.watch<GameScreenViewModel>();
     final playerData = viewModel.playerData!;
     final winners = room.lastRoundWinners ?? room.winners ?? {};
-    final cats = room.lastRoundCats ?? room.cats;
+    final cats = room.lastRoundCats ?? 
+        (room.currentRound?.toList().map((card) => card.displayName).toList() ?? []);
     final displayTurn = room.status == 'roundResult'
         ? room.currentTurn
         : room.currentTurn - 1;

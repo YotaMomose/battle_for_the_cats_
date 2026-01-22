@@ -85,71 +85,48 @@ void main() {
       });
     });
 
-    group('generateRandomCats', () {
-      test('3匹の猫を生成', () {
-        final cats = gameLogic.generateRandomCats();
-        expect(cats.length, equals(GameConstants.catCount));
+    group('generateRandomCards', () {
+      test('3枚のカードを生成', () {
+        final cards = gameLogic.generateRandomCards();
+        expect(cards.toList().length, equals(GameConstants.catsPerRound));
       });
 
-      test('定義済みの猫の種類のみを生成', () {
-        final cats = gameLogic.generateRandomCats();
-        for (final cat in cats) {
+      test('すべてのカードが定義済みの猫の種類である', () {
+        final cards = gameLogic.generateRandomCards().toList();
+        for (final card in cards) {
           expect(
             GameConstants.catTypes,
-            contains(cat),
-            reason: '不正な猫のタイプ: $cat',
+            contains(card.displayName),
+            reason: '不正な猫のタイプ: ${card.displayName}',
           );
         }
       });
 
       test('複数回実行時に異なる組み合わせが生成される', () {
-        final catLists = List.generate(50, (_) => gameLogic.generateRandomCats());
-        final uniqueCombinations = catLists
-            .map((cats) => cats.join(','))
+        final cardSets = List.generate(50, (_) => gameLogic.generateRandomCards());
+        final uniqueCombinations = cardSets
+            .map((cards) => cards.toList()
+                .map((c) => c.displayName)
+                .join(','))
             .toSet();
         // 50回実行で複数の組み合わせが出るはず
         expect(uniqueCombinations.length, greaterThan(10));
       });
 
-      test('重複する猫が含まれることもある', () {
-        bool hasDuplicate = false;
-        for (int i = 0; i < 100; i++) {
-          final cats = gameLogic.generateRandomCats();
-          if (cats[0] == cats[1] || cats[1] == cats[2] || cats[0] == cats[2]) {
-            hasDuplicate = true;
-            break;
+      test('各カードのコストは1～4の範囲内', () {
+        for (int i = 0; i < 50; i++) {
+          final cards = gameLogic.generateRandomCards().toList();
+          for (final card in cards) {
+            expect(card.baseCost, greaterThanOrEqualTo(1));
+            expect(card.baseCost, lessThanOrEqualTo(GameConstants.maxCatCost));
           }
         }
-        expect(hasDuplicate, isTrue);
-      });
-    });
-
-    group('generateRandomCosts', () {
-      test('指定数のコストを生成', () {
-        for (int count in [1, 2, 3, 5]) {
-          final costs = gameLogic.generateRandomCosts(count);
-          expect(costs.length, equals(count));
-        }
       });
 
-      test('1～4の範囲内のコストを生成', () {
-        for (int i = 0; i < 100; i++) {
-          final costs = gameLogic.generateRandomCosts(3);
-          expect(costs, everyElement(greaterThanOrEqualTo(1)));
-          expect(costs, everyElement(lessThanOrEqualTo(4)));
-        }
-      });
-
-      test('複数のコストが生成される', () {
-        final costs = List.generate(100, (_) => gameLogic.generateRandomCosts(3));
-        final allValues = costs.expand((c) => c).toSet();
-        // 1～4の複数の値が出るはず
-        expect(allValues.length, greaterThan(2));
-      });
-
-      test('0個のコストを生成できる', () {
-        final costs = gameLogic.generateRandomCosts(0);
-        expect(costs, isEmpty);
+      test('各カードは一意のIDを持つ', () {
+        final cards = gameLogic.generateRandomCards().toList();
+        final ids = cards.map((c) => c.id).toSet();
+        expect(ids.length, equals(GameConstants.catsPerRound));
       });
     });
   });
@@ -233,8 +210,7 @@ void main() {
     group('猫の獲得判定', () {
       test('ホストが必要魚数以上を賭ければ獲得（ゲストが賭けなければ）', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 2, '1': 0, '2': 0},
           guestBets: {'0': 0, '1': 0, '2': 0},
         );
@@ -248,8 +224,7 @@ void main() {
 
       test('ホストが必要魚数未満なら獲得できない', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 1, '1': 0, '2': 0},
           guestBets: {'0': 0, '1': 0, '2': 0},
         );
@@ -263,8 +238,7 @@ void main() {
 
       test('両者が必要魚数以上の場合、多く賭けた方が獲得', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 3, '1': 0, '2': 0},
           guestBets: {'0': 2, '1': 0, '2': 0},
         );
@@ -277,8 +251,7 @@ void main() {
 
       test('両者が同じ量を賭ければドロー', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 3, '1': 0, '2': 0},
           guestBets: {'0': 3, '1': 0, '2': 0},
         );
@@ -292,8 +265,7 @@ void main() {
 
       test('複数の猫の獲得判定が同時に行われる', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 2, 2],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 2, 2]),
           hostBets: {'0': 3, '1': 2, '2': 1},
           guestBets: {'0': 1, '1': 3, '2': 2},
         );
@@ -309,8 +281,7 @@ void main() {
 
       test('獲得した猫のコストが記録される', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 3, '1': 4, '2': 0},
           guestBets: {'0': 1, '1': 2, '2': 0},
         );
@@ -325,8 +296,7 @@ void main() {
     group('ゲーム最終結果判定', () {
       test('ホストが異なる種類の猫3種を獲得して勝利', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 2, '1': 3, '2': 1},
           guestBets: {'0': 1, '1': 2, '2': 0},
           hostCatsWon: [],
@@ -341,8 +311,7 @@ void main() {
 
       test('ゲストが同じ種類の猫3匹獲得して勝利', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '茶トラねこ', '茶トラねこ'],
-          catCosts: [1, 1, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '茶トラねこ', '茶トラねこ'], [1, 1, 1]),
           hostBets: {'0': 0, '1': 0, '2': 0},
           guestBets: {'0': 1, '1': 1, '2': 1},
           hostCatsWon: [],
@@ -357,8 +326,7 @@ void main() {
 
       test('どちらも勝利条件を満たさない場合はゲーム継続', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
           hostBets: {'0': 2, '1': 0, '2': 0},
           guestBets: {'0': 1, '1': 3, '2': 0},
           hostCatsWon: [],
@@ -375,8 +343,7 @@ void main() {
         // ホスト: 茶トラ、白、黒を獲得（コスト: 2+3+1=6）
         // ゲスト: 茶トラ、茶トラ、白を獲得（コスト: 1+1+2=4）
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [1, 2, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [1, 2, 1]),
           hostBets: {'0': 2, '1': 3, '2': 2},
           guestBets: {'0': 1, '1': 2, '2': 1},
           hostCatsWon: ['茶トラねこ'],
@@ -396,8 +363,7 @@ void main() {
 
       test('両者が同じコストで同時勝利した場合、ドロー', () {
         final room = createTestGameRoom(
-          cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [1, 1, 1],
+          currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [1, 1, 1]),
           hostBets: {'0': 2, '1': 2, '2': 2},
           guestBets: {'0': 1, '1': 1, '2': 1},
           hostCatsWon: [],
@@ -423,8 +389,7 @@ void main() {
 
     test('ホストとゲストの両方が賭けを0で提出', () {
       final room = createTestGameRoom(
-        cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-        catCosts: [2, 3, 1],
+        currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [2, 3, 1]),
         hostBets: {'0': 0, '1': 0, '2': 0},
         guestBets: {'0': 0, '1': 0, '2': 0},
       );
@@ -438,8 +403,7 @@ void main() {
 
     test('ホストが全ての猫を獲得', () {
       final room = createTestGameRoom(
-        cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-        catCosts: [1, 1, 1],
+        currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [1, 1, 1]),
         hostBets: {'0': 2, '1': 2, '2': 2},
         guestBets: {'0': 0, '1': 0, '2': 0},
       );
@@ -453,8 +417,7 @@ void main() {
     test('複数ラウンドで獲得猫が累積される', () {
       // 1ラウンド目
       final room1 = createTestGameRoom(
-        cats: ['茶トラねこ', '白ねこ', '黒ねこ'],
-        catCosts: [1, 1, 1],
+        currentRound: createTestRoundCards(['茶トラねこ', '白ねこ', '黒ねこ'], [1, 1, 1]),
         hostBets: {'0': 2, '1': 0, '2': 0},
         guestBets: {'0': 0, '1': 2, '2': 0},
         hostCatsWon: [],
@@ -467,8 +430,7 @@ void main() {
 
       // 2ラウンド目で、ゲストが黒と白をさらに獲得して3種類に
       final room2 = createTestGameRoom(
-        cats: ['黒ねこ', '白ねこ', '茶トラねこ'],
-        catCosts: [1, 1, 1],
+        currentRound: createTestRoundCards(['黒ねこ', '白ねこ', '茶トラねこ'], [1, 1, 1]),
         hostBets: {'0': 0, '1': 0, '2': 2},
         guestBets: {'0': 2, '1': 2, '2': 0},
         hostCatsWon: result1.hostWonCats,

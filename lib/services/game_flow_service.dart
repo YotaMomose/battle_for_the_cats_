@@ -132,8 +132,7 @@ class GameFlowService {
     // status を rolling に変える。
     if (room.status == GameStatus.roundResult.value) {
       // 次のターンの猫を生成
-      final nextCats = _gameLogic.generateRandomCats();
-      final nextCosts = _gameLogic.generateRandomCosts(nextCats.length);
+      final roundCards = _gameLogic.generateRandomCards();
 
       // 賭けた魚の総数を計算して、残りの魚を算出（持ち越し）
       final hostBetTotal = room.hostBets.values.fold(0, (a, b) => a + b);
@@ -158,8 +157,7 @@ class GameFlowService {
         'winners': null,
         'hostConfirmedRoll': false,
         'guestConfirmedRoll': false,
-        'cats': nextCats, // 新しい猫を設定
-        'catCosts': nextCosts, // コストを設定
+        'currentRound': roundCards.toMap(), // 新しいカードセットを設定
       });
     }
   }
