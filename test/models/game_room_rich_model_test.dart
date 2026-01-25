@@ -48,7 +48,7 @@ void main() {
       expect(room.host.catsWon, contains('Cat1'));
       expect(room.guest?.catsWon, contains('Cat2'));
       expect(room.status, GameStatus.roundResult);
-      expect(room.lastRoundWinners, isNotNull);
+      expect(room.lastRoundResult?.winners, isNotNull);
       expect(room.host.confirmedRoundResult, isFalse);
       expect(room.guest?.confirmedRoundResult, isFalse);
     });

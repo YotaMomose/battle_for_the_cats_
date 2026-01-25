@@ -3,6 +3,7 @@ import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
+import 'package:battle_for_the_cats/models/round_result.dart';
 
 void main() {
   group('GameRoom - 初期化', () {
@@ -292,17 +293,19 @@ void main() {
           host: Player(id: 'host-456'),
         );
 
-        room.lastRoundCats = ['茶トラねこ', '白ねこ', '黒ねこ'];
-        room.lastRoundCatCosts = [2, 3, 1];
-        room.lastRoundWinners = {'0': 'host', '1': 'guest', '2': 'draw'};
-        room.lastRoundHostBets = {'0': 3, '1': 2, '2': 1};
-        room.lastRoundGuestBets = {'0': 2, '1': 3, '2': 2};
+        room.lastRoundResult = RoundResult(
+          catNames: ['茶トラねこ', '白ねこ', '黒ねこ'],
+          catCosts: [2, 3, 1],
+          winners: {'0': Winner.host, '1': Winner.guest, '2': Winner.draw},
+          hostBets: {'0': 3, '1': 2, '2': 1},
+          guestBets: {'0': 2, '1': 3, '2': 2},
+        );
 
-        expect(room.lastRoundCats, equals(['茶トラねこ', '白ねこ', '黒ねこ']));
-        expect(room.lastRoundCatCosts, equals([2, 3, 1]));
+        expect(room.lastRoundResult?.catNames, equals(['茶トラねこ', '白ねこ', '黒ねこ']));
+        expect(room.lastRoundResult?.catCosts, equals([2, 3, 1]));
         expect(
-          room.lastRoundWinners,
-          equals({'0': 'host', '1': 'guest', '2': 'draw'}),
+          room.lastRoundResult?.winners,
+          equals({'0': Winner.host, '1': Winner.guest, '2': Winner.draw}),
         );
       });
 

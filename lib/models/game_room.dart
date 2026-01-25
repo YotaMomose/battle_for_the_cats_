@@ -3,6 +3,7 @@ import '../constants/game_constants.dart';
 import '../domain/win_condition.dart';
 import 'cards/round_cards.dart';
 import 'player.dart';
+import 'round_result.dart';
 
 class GameRoom {
   final String roomId;
@@ -14,17 +15,13 @@ class GameRoom {
   Player? guest;
 
   // 前回のラウンド情報（画面表示用、個別に次へ進むために必要）
-  List<String>? lastRoundCats;
-  List<int>? lastRoundCatCosts;
-  Map<String, String>? lastRoundWinners;
-  Map<String, int>? lastRoundHostBets;
-  Map<String, int>? lastRoundGuestBets;
+  RoundResult? lastRoundResult;
 
   // 現在のラウンドの3匹の猫
   RoundCards? currentRound;
 
-  // 各猫の勝者（猫のインデックス -> 'host'/'guest'/'draw'）
-  Map<String, String>? winners;
+  // 各猫の勝者（猫のインデックス -> Winner.host/guest/draw）
+  Map<String, Winner>? winners;
 
   // 最終勝者
   Winner? finalWinner;
@@ -35,11 +32,7 @@ class GameRoom {
     this.guest,
     this.status = GameStatus.waiting,
     this.currentTurn = 1,
-    this.lastRoundCats,
-    this.lastRoundCatCosts,
-    this.lastRoundWinners,
-    this.lastRoundHostBets,
-    this.lastRoundGuestBets,
+    this.lastRoundResult,
     this.currentRound,
     this.winners,
     this.finalWinner,
@@ -56,13 +49,9 @@ class GameRoom {
       'host': host.toMap(),
       'guest': guest?.toMap(),
       'currentRound': currentRound?.toMap(),
-      'winners': winners,
+      'winners': winners?.map((k, v) => MapEntry(k, v.value)),
       'finalWinner': finalWinner?.value,
-      'lastRoundCats': lastRoundCats,
-      'lastRoundCatCosts': lastRoundCatCosts,
-      'lastRoundWinners': lastRoundWinners,
-      'lastRoundHostBets': lastRoundHostBets,
-      'lastRoundGuestBets': lastRoundGuestBets,
+      'lastRoundResult': lastRoundResult?.toMap(),
     };
   }
 
@@ -79,25 +68,15 @@ class GameRoom {
           ? RoundCards.fromMap(map['currentRound'])
           : null,
       winners: map['winners'] != null
-          ? Map<String, String>.from(map['winners'])
+          ? (map['winners'] as Map<dynamic, dynamic>).map(
+              (k, v) => MapEntry(k.toString(), Winner.fromString(v.toString())),
+            )
           : null,
       finalWinner: map['finalWinner'] != null
           ? Winner.fromString(map['finalWinner'])
           : null,
-      lastRoundCats: map['lastRoundCats'] != null
-          ? List<String>.from(map['lastRoundCats'])
-          : null,
-      lastRoundCatCosts: map['lastRoundCatCosts'] != null
-          ? List<int>.from(map['lastRoundCatCosts'])
-          : null,
-      lastRoundWinners: map['lastRoundWinners'] != null
-          ? Map<String, String>.from(map['lastRoundWinners'])
-          : null,
-      lastRoundHostBets: map['lastRoundHostBets'] != null
-          ? Map<String, int>.from(map['lastRoundHostBets'])
-          : null,
-      lastRoundGuestBets: map['lastRoundGuestBets'] != null
-          ? Map<String, int>.from(map['lastRoundGuestBets'])
+      lastRoundResult: map['lastRoundResult'] != null
+          ? RoundResult.fromMap(map['lastRoundResult'])
           : null,
     );
   }
@@ -127,7 +106,7 @@ class GameRoom {
     final cards = currentRound?.toList() ?? [];
 
     // 1. 各猫について勝敗を判定
-    final winnersMap = <String, String>{};
+    final winnersMap = <String, Winner>{};
     final List<String> hostWonNames = [];
     final List<String> guestWonNames = [];
     final List<int> hostWonCosts = [];
@@ -145,24 +124,26 @@ class GameRoom {
       final guestQualified = guestBet >= cost;
 
       if (hostQualified && (!guestQualified || hostBet > guestBet)) {
-        winnersMap[catIndex] = 'host';
+        winnersMap[catIndex] = Winner.host;
         hostWonNames.add(card.displayName);
         hostWonCosts.add(cost);
       } else if (guestQualified && (!hostQualified || guestBet > hostBet)) {
-        winnersMap[catIndex] = 'guest';
+        winnersMap[catIndex] = Winner.guest;
         guestWonNames.add(card.displayName);
         guestWonCosts.add(cost);
       } else {
-        winnersMap[catIndex] = 'draw';
+        winnersMap[catIndex] = Winner.draw;
       }
     }
 
     // 獲得情報を画面表示用に保存
-    lastRoundCats = cards.map((c) => c.displayName).toList();
-    lastRoundCatCosts = currentRound?.getCosts();
-    lastRoundWinners = Map<String, String>.from(winnersMap);
-    lastRoundHostBets = Map<String, int>.from(host.currentBets);
-    lastRoundGuestBets = Map<String, int>.from(g.currentBets);
+    lastRoundResult = RoundResult(
+      catNames: cards.map((c) => c.displayName).toList(),
+      catCosts: currentRound?.getCosts() ?? [],
+      winners: Map<String, Winner>.from(winnersMap),
+      hostBets: Map<String, int>.from(host.currentBets),
+      guestBets: Map<String, int>.from(g.currentBets),
+    );
 
     // プレイヤーの獲得リストを更新
     for (var i = 0; i < hostWonNames.length; i++) {

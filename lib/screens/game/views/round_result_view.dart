@@ -39,9 +39,9 @@ class RoundResultView extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
     final playerData = viewModel.playerData!;
-    final winners = room.lastRoundWinners ?? room.winners ?? {};
+    final winners = room.lastRoundResult?.winners ?? room.winners ?? {};
     final cats =
-        room.lastRoundCats ??
+        room.lastRoundResult?.catNames ??
         (room.currentRound?.toList().map((card) => card.displayName).toList() ??
             []);
     final displayTurn = room.status == GameStatus.roundResult
@@ -111,33 +111,43 @@ class RoundResultView extends StatelessWidget {
                   children: List.generate(3, (index) {
                     final catIndex = index.toString();
                     final catName = index < cats.length ? cats[index] : '???';
+                    final myRole = viewModel.isHost
+                        ? Winner.host
+                        : Winner.guest;
+                    final opponentRole = viewModel.isHost
+                        ? Winner.guest
+                        : Winner.host;
+
                     final myBet =
-                        (viewModel.isHost
-                            ? room.lastRoundHostBets
-                            : room.lastRoundGuestBets)?[catIndex] ??
+                        room.lastRoundResult?.getBet(
+                          index,
+                          viewModel.isHost ? 'host' : 'guest',
+                        ) ??
                         playerData.myBets[catIndex] ??
                         0;
                     final opponentBet =
-                        (viewModel.isHost
-                            ? room.lastRoundGuestBets
-                            : room.lastRoundHostBets)?[catIndex] ??
+                        room.lastRoundResult?.getBet(
+                          index,
+                          viewModel.isHost ? 'guest' : 'host',
+                        ) ??
                         playerData.opponentBets[catIndex] ??
                         0;
+
                     final winner = winners[catIndex];
-                    final myId = viewModel.isHost ? 'host' : 'guest';
-                    final opponentId = viewModel.isHost ? 'guest' : 'host';
+                    String winnerText = '引き分け';
+                    if (winner == myRole) {
+                      winnerText = 'あなた獲得';
+                    } else if (winner == opponentRole) {
+                      winnerText = '相手獲得';
+                    }
 
                     Color cardColor;
-                    String winnerText;
-                    if (winner == myId) {
+                    if (winner == myRole) {
                       cardColor = Colors.green.shade50;
-                      winnerText = 'あなた獲得';
-                    } else if (winner == opponentId) {
+                    } else if (winner == opponentRole) {
                       cardColor = Colors.red.shade50;
-                      winnerText = '相手獲得';
                     } else {
                       cardColor = Colors.grey.shade50;
-                      winnerText = '引き分け';
                     }
 
                     return Flexible(
@@ -176,7 +186,7 @@ class RoundResultView extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     color: winner == 'draw'
                                         ? Colors.grey
-                                        : (winner == myId
+                                        : (winner == myRole
                                               ? Colors.green
                                               : Colors.red),
                                   ),

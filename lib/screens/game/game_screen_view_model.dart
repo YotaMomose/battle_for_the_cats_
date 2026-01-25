@@ -90,8 +90,9 @@ class GameScreenViewModel extends ChangeNotifier {
 
     // 1. ラウンド結果の確認待ち
     if (!myConfirmedRound &&
-        room.lastRoundWinners != null &&
-        (room.status == 'rolling' || room.status == 'playing')) {
+        room.lastRoundResult?.winners != null &&
+        (room.status == GameStatus.rolling ||
+            room.status == GameStatus.playing)) {
       _uiState = GameScreenState.roundResult(room);
       return;
     }
