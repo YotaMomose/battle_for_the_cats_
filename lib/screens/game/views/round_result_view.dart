@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/game_room.dart';
-import '../../../constants/game_constants.dart';
 import '../game_screen_view_model.dart';
 
 /// ラウンド結果画面
@@ -10,63 +9,13 @@ class RoundResultView extends StatelessWidget {
 
   const RoundResultView({super.key, required this.room});
 
-  /// 猫の名前に応じて色を返す
-  Color _getCatColor(String catName) {
-    switch (catName) {
-      case '茶トラねこ':
-        return Colors.orange;
-      case '白ねこ':
-        return Colors.grey.shade300;
-      case '黒ねこ':
-        return Colors.black;
-      default:
-        return Colors.orange;
-    }
-  }
-
-  /// 獲得した猫を種類別にフォーマット
-  String _formatCatsWon(List<String> catsWon) {
-    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
-    for (final cat in catsWon) {
-      if (counts.containsKey(cat)) {
-        counts[cat] = counts[cat]! + 1;
-      }
-    }
-    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
-  }
-
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
-    final playerData = viewModel.playerData!;
-    final winners = room.lastRoundResult?.winners ?? room.winners ?? {};
-    final cats =
-        room.lastRoundResult?.catNames ??
-        (room.currentRound?.toList().map((card) => card.displayName).toList() ??
-            []);
-    final displayTurn = room.status == GameStatus.roundResult
-        ? room.currentTurn
-        : room.currentTurn - 1;
-    final myConfirmedRound = viewModel.isHost
-        ? room.host.confirmedRoundResult
-        : (room.guest?.confirmedRoundResult ?? false);
-
-    // このラウンドで獲得した猫数をカウント
-    int myRoundWins = 0;
-    int opponentRoundWins = 0;
-
-    for (int i = 0; i < 3; i++) {
-      final catIndex = i.toString();
-      final winner = winners[catIndex];
-      final myId = viewModel.isHost ? 'host' : 'guest';
-      final opponentId = viewModel.isHost ? 'guest' : 'host';
-
-      if (winner == myId) {
-        myRoundWins++;
-      } else if (winner == opponentId) {
-        opponentRoundWins++;
-      }
-    }
+    final displayTurn = viewModel.displayTurn;
+    final isConfirmed = viewModel.isRoundResultConfirmed;
+    final myRoundWins = viewModel.myRoundWinCount;
+    final opponentRoundWins = viewModel.opponentRoundWinCount;
 
     return Center(
       child: SingleChildScrollView(
@@ -89,14 +38,14 @@ class RoundResultView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '累計: あなた ${_formatCatsWon(playerData.myCatsWon)}',
+                '累計: あなた ${viewModel.myCatsWonSummary}',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '累計: 相手 ${_formatCatsWon(playerData.opponentCatsWon)}',
+                '累計: 相手 ${viewModel.opponentCatsWonSummary}',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -108,124 +57,82 @@ class RoundResultView extends StatelessWidget {
               SizedBox(
                 height: 160,
                 child: Row(
-                  children: List.generate(3, (index) {
-                    final catIndex = index.toString();
-                    final catName = index < cats.length ? cats[index] : '???';
-                    final myRole = viewModel.isHost
-                        ? Winner.host
-                        : Winner.guest;
-                    final opponentRole = viewModel.isHost
-                        ? Winner.guest
-                        : Winner.host;
+                  children: List.generate(
+                    viewModel.lastRoundDisplayItems.length,
+                    (index) {
+                      final item = viewModel.lastRoundDisplayItems[index];
 
-                    final myBet =
-                        room.lastRoundResult?.getBet(
-                          index,
-                          viewModel.isHost ? 'host' : 'guest',
-                        ) ??
-                        playerData.myBets[catIndex] ??
-                        0;
-                    final opponentBet =
-                        room.lastRoundResult?.getBet(
-                          index,
-                          viewModel.isHost ? 'guest' : 'host',
-                        ) ??
-                        playerData.opponentBets[catIndex] ??
-                        0;
-
-                    final winner = winners[catIndex];
-                    String winnerText = '引き分け';
-                    if (winner == myRole) {
-                      winnerText = 'あなた獲得';
-                    } else if (winner == opponentRole) {
-                      winnerText = '相手獲得';
-                    }
-
-                    Color cardColor;
-                    if (winner == myRole) {
-                      cardColor = Colors.green.shade50;
-                    } else if (winner == opponentRole) {
-                      cardColor = Colors.red.shade50;
-                    } else {
-                      cardColor = Colors.grey.shade50;
-                    }
-
-                    return Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: Card(
-                          color: cardColor,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.pets,
-                                  size: 24,
-                                  color: _getCatColor(catName),
-                                ),
-                                const SizedBox(height: 4),
-                                Flexible(
-                                  child: Text(
-                                    catName,
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                      return Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Card(
+                            color: item.cardColor,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.pets,
+                                    size: 24,
+                                    color: item.catIconColor,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Flexible(
+                                    child: Text(
+                                      item.catName,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    item.winnerLabel,
+                                    style: TextStyle(
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
+                                      color: item.winnerTextColor,
                                     ),
                                     textAlign: TextAlign.center,
-                                    maxLines: 2,
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  winnerText,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: winner == 'draw'
-                                        ? Colors.grey
-                                        : (winner == myRole
-                                              ? Colors.green
-                                              : Colors.red),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'あなた: ${item.myBet}',
+                                    style: const TextStyle(fontSize: 10),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'あなた: $myBet',
-                                  style: const TextStyle(fontSize: 10),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  '相手: $opponentBet',
-                                  style: const TextStyle(fontSize: 10),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                                  Text(
+                                    '相手: ${item.opponentBet}',
+                                    style: const TextStyle(fontSize: 10),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: myConfirmedRound ? null : viewModel.nextTurn,
+                onPressed: isConfirmed ? null : viewModel.nextTurn,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
-                  backgroundColor: myConfirmedRound
-                      ? Colors.grey
-                      : Colors.orange,
+                  backgroundColor: isConfirmed ? Colors.grey : Colors.orange,
                 ),
                 child: Text(
-                  myConfirmedRound ? '相手の確認待ち...' : '次のターンへ',
+                  isConfirmed ? '相手の確認待ち...' : '次のターンへ',
                   style: const TextStyle(fontSize: 18),
                 ),
               ),

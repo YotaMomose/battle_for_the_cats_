@@ -1,6 +1,7 @@
 import '../../models/game_room.dart';
 
 /// プレイヤー別にGameRoomのデータを取得するヘルパークラス
+/// ※ドメインモデルのデータを「自分から見た視点」で整理するだけの純粋なデータクラス
 class PlayerData {
   final int myFishCount;
   final int opponentFishCount;

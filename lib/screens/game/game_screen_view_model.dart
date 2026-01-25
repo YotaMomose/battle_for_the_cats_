@@ -1,10 +1,33 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../../models/game_room.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
 import 'game_screen_state.dart';
 import 'player_data.dart';
+
+/// ラウンド結果のUI表示用アイテム
+class RoundDisplayItem {
+  final String catName;
+  final int catCost;
+  final String winnerLabel;
+  final Color cardColor;
+  final Color winnerTextColor;
+  final Color catIconColor;
+  final int myBet;
+  final int opponentBet;
+
+  const RoundDisplayItem({
+    required this.catName,
+    required this.catCost,
+    required this.winnerLabel,
+    required this.cardColor,
+    required this.winnerTextColor,
+    required this.catIconColor,
+    required this.myBet,
+    required this.opponentBet,
+  });
+}
 
 /// ゲーム画面のViewModel
 class GameScreenViewModel extends ChangeNotifier {
@@ -40,6 +63,150 @@ class GameScreenViewModel extends ChangeNotifier {
   PlayerData? get playerData {
     if (_currentRoom == null) return null;
     return PlayerData.fromRoom(_currentRoom!, isHost);
+  }
+
+  /// 最終ターンの結果表示用データ
+  List<RoundDisplayItem> get lastRoundDisplayItems {
+    final room = _currentRoom;
+    final result = room?.lastRoundResult;
+    if (room == null || result == null) return [];
+
+    final myRole = isHost ? Winner.host : Winner.guest;
+    final opponentRole = isHost ? Winner.guest : Winner.host;
+
+    return List.generate(result.catNames.length, (i) {
+      final winner = result.getWinner(i);
+
+      String label = '引き分け';
+      Color cardColor = Colors.grey.shade50;
+      Color textColor = Colors.grey;
+
+      if (winner == myRole) {
+        label = 'あなた獲得';
+        cardColor = Colors.green.shade50;
+        textColor = Colors.green;
+      } else if (winner == opponentRole) {
+        label = '相手獲得';
+        cardColor = Colors.red.shade50;
+        textColor = Colors.red;
+      }
+
+      return RoundDisplayItem(
+        catName: result.catNames[i],
+        catCost: result.catCosts[i],
+        winnerLabel: label,
+        cardColor: cardColor,
+        winnerTextColor: textColor,
+        catIconColor: _getCatColor(result.catNames[i]),
+        myBet: result.getBet(i, isHost ? 'host' : 'guest'),
+        opponentBet: result.getBet(i, isHost ? 'guest' : 'host'),
+      );
+    });
+  }
+
+  /// 自分の獲得した猫のサマリーテキスト
+  String get myCatsWonSummary {
+    final data = playerData;
+    if (data == null) return '';
+    return _formatCatsSummary(data.myCatsWon);
+  }
+
+  /// 相手の獲得した猫のサマリーテキスト
+  String get opponentCatsWonSummary {
+    final data = playerData;
+    if (data == null) return '';
+    return _formatCatsSummary(data.opponentCatsWon);
+  }
+
+  /// 猫の名前に応じて色を返す（内部用ヘルパー）
+  Color _getCatColor(String catName) {
+    switch (catName) {
+      case '茶トラねこ':
+        return Colors.orange;
+      case '白ねこ':
+        return Colors.grey.shade300;
+      case '黒ねこ':
+        return Colors.black;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
+  String _formatCatsSummary(List<String> catsWon) {
+    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
+    for (final cat in catsWon) {
+      if (counts.containsKey(cat)) {
+        counts[cat] = counts[cat]! + 1;
+      }
+    }
+    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+  }
+
+  /// 最終勝者のラベル
+  String get finalWinnerLabel {
+    final room = _currentRoom;
+    if (room == null || room.status != GameStatus.finished) return '';
+
+    final myRole = isHost ? Winner.host : Winner.guest;
+    if (room.finalWinner == Winner.draw) return '引き分け';
+    return room.finalWinner == myRole ? 'あなたの勝利！' : '敗北...';
+  }
+
+  /// 最終勝者の色
+  Color get finalWinnerColor {
+    final room = _currentRoom;
+    if (room == null || room.status != GameStatus.finished) return Colors.black;
+
+    final myRole = isHost ? Winner.host : Winner.guest;
+    if (room.finalWinner == Winner.draw) return Colors.grey;
+    return room.finalWinner == myRole ? Colors.green : Colors.red;
+  }
+
+  /// 現在表示すべきターン数
+  int get displayTurn {
+    final room = _currentRoom;
+    if (room == null) return 0;
+    return room.status == GameStatus.roundResult
+        ? room.currentTurn
+        : room.currentTurn - 1;
+  }
+
+  /// 自分がラウンド結果を確認済みかどうか
+  bool get isRoundResultConfirmed {
+    final room = _currentRoom;
+    if (room == null) return false;
+    return isHost
+        ? room.host.confirmedRoundResult
+        : (room.guest?.confirmedRoundResult ?? false);
+  }
+
+  /// このラウンドでの自分の勝利数
+  int get myRoundWinCount {
+    final room = _currentRoom;
+    final result = room?.lastRoundResult;
+    if (result == null) return 0;
+
+    final myRole = isHost ? Winner.host : Winner.guest;
+    int count = 0;
+    for (int i = 0; i < result.catNames.length; i++) {
+      if (result.getWinner(i) == myRole) count++;
+    }
+    return count;
+  }
+
+  /// このラウンドでの相手の勝利数
+  int get opponentRoundWinCount {
+    final room = _currentRoom;
+    final result = room?.lastRoundResult;
+    if (result == null) return 0;
+
+    final opponentRole = isHost ? Winner.guest : Winner.host;
+    int count = 0;
+    for (int i = 0; i < result.catNames.length; i++) {
+      if (result.getWinner(i) == opponentRole) count++;
+    }
+    return count;
   }
 
   GameScreenViewModel({
