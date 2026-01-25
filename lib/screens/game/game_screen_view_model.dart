@@ -209,6 +209,88 @@ class GameScreenViewModel extends ChangeNotifier {
     return count;
   }
 
+  /// 相手の準備状態のラベル
+  String get opponentReadyStatusLabel {
+    final data = playerData;
+    if (data == null) return '';
+    return data.opponentReady ? '準備完了！' : '選択中...';
+  }
+
+  /// 相手の準備状態の色
+  Color get opponentReadyStatusColor {
+    final data = playerData;
+    if (data == null) return Colors.grey;
+    return data.opponentReady ? Colors.green : Colors.orange;
+  }
+
+  /// 残りの魚の表示ラベル
+  String get myRemainingFishLabel {
+    final data = playerData;
+    if (data == null) return '';
+    final remaining = data.myFishCount - totalBet;
+    return '残りの魚: $remaining / ${data.myFishCount} 🐟';
+  }
+
+  /// 確定ボタンのラベル
+  String get confirmBetsButtonLabel {
+    return _hasPlacedBet ? '確定済み' : '確定';
+  }
+
+  /// サイコロボタンのラベル
+  String get rollButtonLabel {
+    return _hasRolled ? '振りました' : 'サイコロを振る';
+  }
+
+  /// サイコロボタンの色
+  Color get rollButtonColor {
+    return _hasRolled ? Colors.grey : Colors.orange;
+  }
+
+  /// 相手のサイコロ結果ステータスラベル
+  String get opponentRollStatusLabel {
+    final data = playerData;
+    if (data == null) return '';
+    if (data.opponentRolled && data.opponentDiceRoll != null) {
+      return '魚を ${data.opponentDiceRoll} 匹獲得しました！';
+    }
+    return 'サイコロを振っています...';
+  }
+
+  /// 相手のサイコロ結果ステータスラベルの色
+  Color get opponentRollStatusColor {
+    final data = playerData;
+    if (data == null) return Colors.grey;
+    return data.opponentRolled ? Colors.green : Colors.orange;
+  }
+
+  /// 猫のアイコン色を取得（外部View用）
+  Color getCatIconColor(String catName) => _getCatColor(catName);
+
+  // --- ローカルの描画分岐ロジック ---
+
+  /// 自分のサイコロ結果を表示すべきか
+  bool get shouldShowMyRollResult {
+    final data = playerData;
+    return data != null && data.myRolled && data.myDiceRoll != null;
+  }
+
+  /// 相手のサイコロ結果を表示すべきか
+  bool get shouldShowOpponentRollResult {
+    final data = playerData;
+    return data != null && data.opponentRolled && data.opponentDiceRoll != null;
+  }
+
+  /// ロールフェーズから次へ進める状態か
+  bool get canProceedFromRoll {
+    final data = playerData;
+    return data != null && data.myRolled && data.opponentRolled;
+  }
+
+  /// 自分の準備（確定）が終わっているか
+  bool get isMyReady {
+    return playerData?.myReady ?? false;
+  }
+
   GameScreenViewModel({
     required GameService gameService,
     required this.roomCode,

@@ -9,17 +9,6 @@ class RollingPhaseView extends StatelessWidget {
 
   const RollingPhaseView({super.key, required this.room});
 
-  /// 獲得した猫を種類別にフォーマット
-  String _formatCatsWon(List<String> catsWon) {
-    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
-    for (final cat in catsWon) {
-      if (counts.containsKey(cat)) {
-        counts[cat] = counts[cat]! + 1;
-      }
-    }
-    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
-  }
-
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
@@ -47,11 +36,11 @@ class RollingPhaseView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'あなた: ${_formatCatsWon(playerData.myCatsWon)}',
+                      'あなた: ${viewModel.myCatsWonSummary}',
                       style: const TextStyle(fontSize: 14),
                     ),
                     Text(
-                      '相手: ${_formatCatsWon(playerData.opponentCatsWon)}',
+                      '相手: ${viewModel.opponentCatsWonSummary}',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -82,8 +71,7 @@ class RollingPhaseView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    if (playerData.opponentRolled &&
-                        playerData.opponentDiceRoll != null) ...[
+                    if (viewModel.shouldShowOpponentRollResult) ...[
                       Text(
                         '🎲 ${playerData.opponentDiceRoll}',
                         style: const TextStyle(
@@ -91,19 +79,15 @@ class RollingPhaseView extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '魚を ${playerData.opponentDiceRoll} 匹獲得しました！',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ] else ...[
-                      const Text(
-                        'サイコロを振っています...',
-                        style: TextStyle(fontSize: 16, color: Colors.orange),
-                      ),
                     ],
+                    Text(
+                      viewModel.opponentRollStatusLabel,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: viewModel.opponentRollStatusColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -125,8 +109,7 @@ class RollingPhaseView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    if (playerData.myRolled &&
-                        playerData.myDiceRoll != null) ...[
+                    if (viewModel.shouldShowMyRollResult) ...[
                       Text(
                         '🎲 ${playerData.myDiceRoll}',
                         style: const TextStyle(
@@ -144,7 +127,7 @@ class RollingPhaseView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      if (playerData.opponentRolled)
+                      if (viewModel.canProceedFromRoll)
                         ElevatedButton(
                           onPressed: viewModel.confirmRoll,
                           style: ElevatedButton.styleFrom(
@@ -175,7 +158,7 @@ class RollingPhaseView extends StatelessWidget {
                             : viewModel.rollDice,
                         icon: const Icon(Icons.casino, size: 32),
                         label: Text(
-                          viewModel.hasRolled ? '振りました' : 'サイコロを振る',
+                          viewModel.rollButtonLabel,
                           style: const TextStyle(fontSize: 20),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -183,9 +166,7 @@ class RollingPhaseView extends StatelessWidget {
                             horizontal: 32,
                             vertical: 20,
                           ),
-                          backgroundColor: viewModel.hasRolled
-                              ? Colors.grey
-                              : Colors.orange,
+                          backgroundColor: viewModel.rollButtonColor,
                         ),
                       ),
                     ],

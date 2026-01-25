@@ -9,86 +9,6 @@ class BettingPhaseView extends StatelessWidget {
 
   const BettingPhaseView({super.key, required this.room});
 
-  /// 猫の名前に応じて色を返す
-  Color _getCatColor(String catName) {
-    switch (catName) {
-      case '茶トラねこ':
-        return Colors.orange;
-      case '白ねこ':
-        return Colors.grey.shade300;
-      case '黒ねこ':
-        return Colors.black;
-      default:
-        return Colors.orange;
-    }
-  }
-
-  /// 獲得した猫リストを表示するウィジェット
-  Widget _buildWonCatsList(List<String> cats, List<int> costs) {
-    if (cats.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Text('まだ獲得していません', style: TextStyle(color: Colors.grey)),
-      );
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: List.generate(cats.length, (index) {
-        final cat = cats[index];
-        final cost = costs.length > index ? costs[index] : 1;
-
-        return Container(
-          width: 70,
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Icon(Icons.pets, size: 20, color: _getCatColor(cat)),
-              Text(
-                cat,
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Text(
-                  '★$cost',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red.shade700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
@@ -126,6 +46,7 @@ class BettingPhaseView extends StatelessWidget {
                     _buildWonCatsList(
                       playerData.myCatsWon,
                       playerData.myWonCatCosts,
+                      viewModel,
                     ),
                     const SizedBox(height: 12),
                     const Text(
@@ -136,6 +57,7 @@ class BettingPhaseView extends StatelessWidget {
                     _buildWonCatsList(
                       playerData.opponentCatsWon,
                       playerData.opponentWonCatCosts,
+                      viewModel,
                     ),
                   ],
                 ),
@@ -168,12 +90,10 @@ class BettingPhaseView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      playerData.opponentReady ? '準備完了！' : '選択中...',
+                      viewModel.opponentReadyStatusLabel,
                       style: TextStyle(
                         fontSize: 16,
-                        color: playerData.opponentReady
-                            ? Colors.green
-                            : Colors.orange,
+                        color: viewModel.opponentReadyStatusColor,
                       ),
                     ),
                   ],
@@ -189,8 +109,9 @@ class BettingPhaseView extends StatelessWidget {
                 children: List.generate(3, (index) {
                   final catIndex = index.toString();
                   final cards = room.currentRound?.toList() ?? [];
-                  if (cards.isEmpty || index >= cards.length) return const SizedBox();
-                  
+                  if (cards.isEmpty || index >= cards.length)
+                    return const SizedBox();
+
                   final catName = cards[index].displayName;
                   final currentBet = viewModel.bets[catIndex] ?? 0;
 
@@ -207,7 +128,7 @@ class BettingPhaseView extends StatelessWidget {
                               Icon(
                                 Icons.pets,
                                 size: 24,
-                                color: _getCatColor(catName),
+                                color: viewModel.getCatIconColor(catName),
                               ),
                               const SizedBox(height: 2),
                               Flexible(
@@ -245,7 +166,7 @@ class BettingPhaseView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (!playerData.myReady) ...[
+                              if (!viewModel.isMyReady) ...[
                                 const SizedBox(height: 6),
                                 Text(
                                   '$currentBet 🐟',
@@ -322,13 +243,13 @@ class BettingPhaseView extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      '残りの魚: ${playerData.myFishCount - viewModel.totalBet} / ${playerData.myFishCount} 🐟',
+                      viewModel.myRemainingFishLabel,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (!playerData.myReady) ...[
+                    if (!viewModel.isMyReady) ...[
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: viewModel.hasPlacedBet
@@ -338,7 +259,7 @@ class BettingPhaseView extends StatelessWidget {
                           padding: const EdgeInsets.all(16),
                         ),
                         child: Text(
-                          viewModel.hasPlacedBet ? '確定済み' : '確定',
+                          viewModel.confirmBetsButtonLabel,
                           style: const TextStyle(fontSize: 18),
                         ),
                       ),
@@ -362,6 +283,76 @@ class BettingPhaseView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// 獲得した猫リストを表示するウィジェット
+  Widget _buildWonCatsList(
+    List<String> cats,
+    List<int> costs,
+    GameScreenViewModel viewModel,
+  ) {
+    if (cats.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Text('まだ獲得していません', style: TextStyle(color: Colors.grey)),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(cats.length, (index) {
+        final cat = cats[index];
+        final cost = costs.length > index ? costs[index] : 1;
+
+        return Container(
+          width: 70,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.pets, size: 20, color: viewModel.getCatIconColor(cat)),
+              Text(
+                cat,
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(
+                  '★$cost',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
