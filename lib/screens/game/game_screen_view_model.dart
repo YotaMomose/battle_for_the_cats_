@@ -164,50 +164,17 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   /// 現在表示すべきターン数
-  int get displayTurn {
-    final room = _currentRoom;
-    if (room == null) return 0;
-    return room.status == GameStatus.roundResult
-        ? room.currentTurn
-        : room.currentTurn - 1;
-  }
+  int get displayTurn => playerData?.displayTurn ?? 0;
 
   /// 自分がラウンド結果を確認済みかどうか
-  bool get isRoundResultConfirmed {
-    final room = _currentRoom;
-    if (room == null) return false;
-    return isHost
-        ? room.host.confirmedRoundResult
-        : (room.guest?.confirmedRoundResult ?? false);
-  }
+  bool get isRoundResultConfirmed =>
+      playerData?.isMyRoundResultConfirmed ?? false;
 
   /// このラウンドでの自分の勝利数
-  int get myRoundWinCount {
-    final room = _currentRoom;
-    final result = room?.lastRoundResult;
-    if (result == null) return 0;
-
-    final myRole = isHost ? Winner.host : Winner.guest;
-    int count = 0;
-    for (int i = 0; i < result.catNames.length; i++) {
-      if (result.getWinner(i) == myRole) count++;
-    }
-    return count;
-  }
+  int get myRoundWinCount => playerData?.myRoundWinCount ?? 0;
 
   /// このラウンドでの相手の勝利数
-  int get opponentRoundWinCount {
-    final room = _currentRoom;
-    final result = room?.lastRoundResult;
-    if (result == null) return 0;
-
-    final opponentRole = isHost ? Winner.guest : Winner.host;
-    int count = 0;
-    for (int i = 0; i < result.catNames.length; i++) {
-      if (result.getWinner(i) == opponentRole) count++;
-    }
-    return count;
-  }
+  int get opponentRoundWinCount => playerData?.opponentRoundWinCount ?? 0;
 
   /// 相手の準備状態のラベル
   String get opponentReadyStatusLabel {
@@ -269,27 +236,18 @@ class GameScreenViewModel extends ChangeNotifier {
   // --- ローカルの描画分岐ロジック ---
 
   /// 自分のサイコロ結果を表示すべきか
-  bool get shouldShowMyRollResult {
-    final data = playerData;
-    return data != null && data.myRolled && data.myDiceRoll != null;
-  }
+  bool get shouldShowMyRollResult =>
+      playerData?.shouldShowMyRollResult ?? false;
 
   /// 相手のサイコロ結果を表示すべきか
-  bool get shouldShowOpponentRollResult {
-    final data = playerData;
-    return data != null && data.opponentRolled && data.opponentDiceRoll != null;
-  }
+  bool get shouldShowOpponentRollResult =>
+      playerData?.shouldShowOpponentRollResult ?? false;
 
   /// ロールフェーズから次へ進める状態か
-  bool get canProceedFromRoll {
-    final data = playerData;
-    return data != null && data.myRolled && data.opponentRolled;
-  }
+  bool get canProceedFromRoll => playerData?.canProceedFromRoll ?? false;
 
   /// 自分の準備（確定）が終わっているか
-  bool get isMyReady {
-    return playerData?.myReady ?? false;
-  }
+  bool get isMyReady => playerData?.myReady ?? false;
 
   GameScreenViewModel({
     required GameService gameService,

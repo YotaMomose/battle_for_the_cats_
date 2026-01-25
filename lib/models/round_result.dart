@@ -48,4 +48,9 @@ class RoundResult {
     final bets = role == 'host' ? hostBets : guestBets;
     return bets[index.toString()] ?? 0;
   }
+
+  /// 指定した役割のこのラウンドでの勝利数を返す
+  int getWinCountFor(Winner role) {
+    return winners.values.where((v) => v == role).length;
+  }
 }

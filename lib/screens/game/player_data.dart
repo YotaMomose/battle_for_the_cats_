@@ -1,8 +1,11 @@
 import '../../models/game_room.dart';
+import '../../constants/game_constants.dart';
 
 /// プレイヤー別にGameRoomのデータを取得するヘルパークラス
 /// ※ドメインモデルのデータを「自分から見た視点」で整理するだけの純粋なデータクラス
 class PlayerData {
+  final GameRoom room;
+  final bool isHost;
   final int myFishCount;
   final int opponentFishCount;
   final List<String> myCatsWon;
@@ -19,6 +22,8 @@ class PlayerData {
   final Map<String, int> opponentBets;
 
   const PlayerData({
+    required this.room,
+    required this.isHost,
     required this.myFishCount,
     required this.opponentFishCount,
     required this.myCatsWon,
@@ -35,6 +40,39 @@ class PlayerData {
     required this.opponentBets,
   });
 
+  /// 自分の役割
+  Winner get myRole => isHost ? Winner.host : Winner.guest;
+
+  /// 相手の役割
+  Winner get opponentRole => isHost ? Winner.guest : Winner.host;
+
+  /// 自分のサイコロ結果を表示すべきか
+  bool get shouldShowMyRollResult => myRolled && myDiceRoll != null;
+
+  /// 相手のサイコロ結果を表示すべきか
+  bool get shouldShowOpponentRollResult =>
+      opponentRolled && opponentDiceRoll != null;
+
+  /// ロールフェーズから次へ進める状態か
+  bool get canProceedFromRoll => myRolled && opponentRolled;
+
+  /// 表示すべきターン数
+  int get displayTurn => room.status == GameStatus.roundResult
+      ? room.currentTurn
+      : room.currentTurn - 1;
+
+  /// 自分がラウンド結果を確認済みか
+  bool get isMyRoundResultConfirmed => isHost
+      ? room.host.confirmedRoundResult
+      : (room.guest?.confirmedRoundResult ?? false);
+
+  /// このラウンドでの自分の勝利数
+  int get myRoundWinCount => room.lastRoundResult?.getWinCountFor(myRole) ?? 0;
+
+  /// このラウンドでの相手の勝利数
+  int get opponentRoundWinCount =>
+      room.lastRoundResult?.getWinCountFor(opponentRole) ?? 0;
+
   /// GameRoomとisHostから自分と相手のデータを抽出
   factory PlayerData.fromRoom(GameRoom room, bool isHost) {
     final host = room.host;
@@ -44,6 +82,8 @@ class PlayerData {
     final opponent = isHost ? guest : host;
 
     return PlayerData(
+      room: room,
+      isHost: isHost,
       myFishCount: my?.fishCount ?? 0,
       opponentFishCount: opponent?.fishCount ?? 0,
       myCatsWon: my?.catsWon ?? [],
