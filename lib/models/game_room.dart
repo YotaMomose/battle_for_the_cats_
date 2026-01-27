@@ -5,6 +5,7 @@ import 'cards/round_cards.dart';
 import 'player.dart';
 import 'round_result.dart';
 import 'round_winners.dart';
+import '../domain/battle_evaluator.dart';
 
 class GameRoom {
   final String roomId;
@@ -102,87 +103,55 @@ class GameRoom {
     if (g == null) return;
 
     final condition = winCondition ?? StandardWinCondition();
-    final cards = currentRound?.toList() ?? [];
+    final evaluator = BattleEvaluator();
 
-    // 1. 各猫について勝敗を判定
-    final winnersMap = <String, Winner>{};
-    final List<String> hostWonNames = [];
-    final List<String> guestWonNames = [];
-    final List<int> hostWonCosts = [];
-    final List<int> guestWonCosts = [];
+    // 1. 各猫について勝敗を判定 (Domain Service)
+    final winnersMap = evaluator.evaluate(currentRound!, host, g);
 
-    for (int i = 0; i < cards.length; i++) {
-      final catIndex = i.toString();
-      final card = cards[i];
-      final cost = card.baseCost;
+    // 2. 履歴の記録
+    _recordRoundResult(winnersMap);
 
-      final hostBet = host.currentBets[catIndex] ?? 0;
-      final guestBet = g.currentBets[catIndex] ?? 0;
+    // 3. プレイヤーへの猫の付与
+    _applyRoundWinners(winnersMap);
 
-      final hostQualified = hostBet >= cost;
-      final guestQualified = guestBet >= cost;
-
-      if (hostQualified && (!guestQualified || hostBet > guestBet)) {
-        winnersMap[catIndex] = Winner.host;
-        hostWonNames.add(card.displayName);
-        hostWonCosts.add(cost);
-      } else if (guestQualified && (!hostQualified || guestBet > hostBet)) {
-        winnersMap[catIndex] = Winner.guest;
-        guestWonNames.add(card.displayName);
-        guestWonCosts.add(cost);
-      } else {
-        winnersMap[catIndex] = Winner.draw;
-      }
-    }
-
-    // 獲得情報を画面表示用に保存
-    lastRoundResult = RoundResult(
-      catNames: cards.map((c) => c.displayName).toList(),
-      catCosts: currentRound?.getCosts() ?? [],
-      winners: RoundWinners(winnersMap),
-      hostBets: Map<String, int>.from(host.currentBets),
-      guestBets: Map<String, int>.from(g.currentBets),
-    );
-
-    // プレイヤーの獲得リストを更新
-    for (var i = 0; i < hostWonNames.length; i++) {
-      host.addWonCat(hostWonNames[i], hostWonCosts[i]);
-    }
-    for (var i = 0; i < guestWonNames.length; i++) {
-      g.addWonCat(guestWonNames[i], guestWonCosts[i]);
-    }
-
-    // 最終勝利判定
-    final hostWins = condition.checkWin(host.catsWon);
-    final guestWins = condition.checkWin(g.catsWon);
-
-    if (hostWins && guestWins) {
-      // 両者勝利時は合計コストで判定
-      final hostTotalCost = host.wonCatCosts.fold(0, (a, b) => a + b);
-      final guestTotalCost = g.wonCatCosts.fold(0, (a, b) => a + b);
-      if (hostTotalCost > guestTotalCost) {
-        finalWinner = Winner.host;
-      } else if (guestTotalCost > hostTotalCost) {
-        finalWinner = Winner.guest;
-      } else {
-        finalWinner = Winner.draw;
-      }
-      status = GameStatus.finished;
-    } else if (hostWins) {
-      finalWinner = Winner.host;
-      status = GameStatus.finished;
-    } else if (guestWins) {
-      finalWinner = Winner.guest;
+    // 4. 最終勝利判定 (Domain Object)
+    finalWinner = condition.determineFinalWinner(host, g);
+    if (finalWinner != null) {
       status = GameStatus.finished;
     } else {
       status = GameStatus.roundResult;
     }
 
-    winners = RoundWinners(winnersMap);
+    winners = winnersMap;
 
     // 確認フラグをリセット
     host.confirmedRoundResult = false;
     g.confirmedRoundResult = false;
+  }
+
+  /// 獲得情報（履歴）を保存する
+  void _recordRoundResult(RoundWinners winnersMap) {
+    lastRoundResult = RoundResult(
+      catNames: currentRound?.toList().map((c) => c.displayName).toList() ?? [],
+      catCosts: currentRound?.getCosts() ?? [],
+      winners: winnersMap,
+      hostBets: Map<String, int>.from(host.currentBets),
+      guestBets: Map<String, int>.from(guest?.currentBets ?? {}),
+    );
+  }
+
+  /// 勝者に基づいてプレイヤーに猫とコストを付与する
+  void _applyRoundWinners(RoundWinners winnersMap) {
+    final cards = currentRound?.toList() ?? [];
+    for (int i = 0; i < cards.length; i++) {
+      final winner = winnersMap.at(i);
+      final card = cards[i];
+      if (winner == Winner.host) {
+        host.addWonCat(card.displayName, card.baseCost);
+      } else if (winner == Winner.guest) {
+        guest?.addWonCat(card.displayName, card.baseCost);
+      }
+    }
   }
 
   /// 次のターンの準備をする
