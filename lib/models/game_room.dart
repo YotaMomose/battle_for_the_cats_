@@ -4,6 +4,7 @@ import '../domain/win_condition.dart';
 import 'cards/round_cards.dart';
 import 'player.dart';
 import 'round_result.dart';
+import 'round_winners.dart';
 
 class GameRoom {
   final String roomId;
@@ -20,8 +21,8 @@ class GameRoom {
   // 現在のラウンドの3匹の猫
   RoundCards? currentRound;
 
-  // 各猫の勝者（猫のインデックス -> Winner.host/guest/draw）
-  Map<String, Winner>? winners;
+  // 各猫の勝者
+  RoundWinners? winners;
 
   // 最終勝者
   Winner? finalWinner;
@@ -49,7 +50,7 @@ class GameRoom {
       'host': host.toMap(),
       'guest': guest?.toMap(),
       'currentRound': currentRound?.toMap(),
-      'winners': winners?.map((k, v) => MapEntry(k, v.value)),
+      'winners': winners?.toMap(),
       'finalWinner': finalWinner?.value,
       'lastRoundResult': lastRoundResult?.toMap(),
     };
@@ -68,9 +69,7 @@ class GameRoom {
           ? RoundCards.fromMap(map['currentRound'])
           : null,
       winners: map['winners'] != null
-          ? (map['winners'] as Map<dynamic, dynamic>).map(
-              (k, v) => MapEntry(k.toString(), Winner.fromString(v.toString())),
-            )
+          ? RoundWinners.fromMap(map['winners'])
           : null,
       finalWinner: map['finalWinner'] != null
           ? Winner.fromString(map['finalWinner'])
@@ -140,7 +139,7 @@ class GameRoom {
     lastRoundResult = RoundResult(
       catNames: cards.map((c) => c.displayName).toList(),
       catCosts: currentRound?.getCosts() ?? [],
-      winners: Map<String, Winner>.from(winnersMap),
+      winners: RoundWinners(winnersMap),
       hostBets: Map<String, int>.from(host.currentBets),
       guestBets: Map<String, int>.from(g.currentBets),
     );
@@ -179,7 +178,7 @@ class GameRoom {
       status = GameStatus.roundResult;
     }
 
-    winners = winnersMap;
+    winners = RoundWinners(winnersMap);
 
     // 確認フラグをリセット
     host.confirmedRoundResult = false;

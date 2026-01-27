@@ -4,6 +4,7 @@ import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/round_result.dart';
+import 'package:battle_for_the_cats/models/round_winners.dart';
 
 void main() {
   group('GameRoom - 初期化', () {
@@ -296,7 +297,11 @@ void main() {
         room.lastRoundResult = RoundResult(
           catNames: ['茶トラねこ', '白ねこ', '黒ねこ'],
           catCosts: [2, 3, 1],
-          winners: {'0': Winner.host, '1': Winner.guest, '2': Winner.draw},
+          winners: RoundWinners({
+            '0': Winner.host,
+            '1': Winner.guest,
+            '2': Winner.draw,
+          }),
           hostBets: {'0': 3, '1': 2, '2': 1},
           guestBets: {'0': 2, '1': 3, '2': 2},
         );
@@ -305,7 +310,13 @@ void main() {
         expect(room.lastRoundResult?.catCosts, equals([2, 3, 1]));
         expect(
           room.lastRoundResult?.winners,
-          equals({'0': Winner.host, '1': Winner.guest, '2': Winner.draw}),
+          equals(
+            RoundWinners({
+              '0': Winner.host,
+              '1': Winner.guest,
+              '2': Winner.draw,
+            }),
+          ),
         );
       });
 
