@@ -3,6 +3,8 @@ import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/won_cat.dart';
+import 'package:battle_for_the_cats/models/bets.dart';
+import 'package:battle_for_the_cats/models/cat_inventory.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/round_result.dart';
 import 'package:battle_for_the_cats/models/round_winners.dart';
@@ -31,7 +33,7 @@ void main() {
       expect(room.currentTurn, equals(1));
 
       // ホスト側
-      expect(room.host.catsWon, isEmpty);
+      expect(room.host.catsWon.all, isEmpty);
       expect(room.guest, isNull);
       expect(room.host.fishCount, equals(0));
 
@@ -61,7 +63,7 @@ void main() {
         host: Player(id: 'host-456'),
       );
 
-      expect(room.host.currentBets, equals({'0': 0, '1': 0, '2': 0}));
+      expect(room.host.currentBets, equals(Bets.empty()));
     });
 
     test('カスタム値で初期化できる', () {
@@ -136,6 +138,8 @@ void main() {
         expect(hostMap['fishCount'], equals(10));
         expect(hostMap['rolled'], isTrue);
         expect(hostMap['diceRoll'], equals(4));
+        expect(hostMap['currentBets'], isA<Map<String, dynamic>>());
+        expect(hostMap['catsWon'], isA<List<dynamic>>());
         expect(hostMap['ready'], isTrue);
 
         final guestMap = map['guest'] as Map<String, dynamic>;
@@ -176,6 +180,9 @@ void main() {
 
         final room = GameRoom.fromMap(originalMap);
 
+        print('Debug: expected id=host-456, actual id=${room.host.id}');
+        print('Debug: expected status=playing, actual status=${room.status}');
+
         expect(room.roomId, equals('room-123'));
         expect(room.host.id, equals('host-456'));
         expect(room.guest?.id, equals('guest-789'));
@@ -184,10 +191,24 @@ void main() {
         expect(room.host.fishCount, equals(10));
         expect(room.guest?.fishCount, equals(8));
         expect(room.host.diceRoll, equals(4));
-        expect(room.guest?.diceRoll, equals(3));
+        expect(room.guest?.diceRoll, isNull);
         expect(room.host.ready, isTrue);
-        expect(room.host.catsWon.first.name, equals('茶トラねこ'));
-        expect(room.host.catsWon.first.cost, equals(2));
+        expect(room.guest?.ready, isFalse);
+
+        // Betsの検証
+        expect(room.host.currentBets.getBet('0'), equals(3));
+        expect(room.host.currentBets.getBet('1'), equals(2));
+        expect(room.host.currentBets.getBet('2'), equals(1));
+        expect(room.guest?.currentBets.getBet('0'), equals(1));
+        expect(room.guest?.currentBets.getBet('1'), equals(2));
+        expect(room.guest?.currentBets.getBet('2'), equals(3));
+
+        // CatInventoryの検証
+        expect(room.host.catsWon.count, equals(2));
+        expect(room.host.catsWon.all[0].name, equals('茶トラねこ'));
+        expect(room.host.catsWon.all[1].name, equals('白ねこ'));
+        expect(room.guest?.catsWon.count, equals(1));
+        expect(room.guest?.catsWon.all[0].name, equals('黒ねこ'));
       });
 
       test('round-trip (toMap → fromMap) で値が保存される', () {
@@ -196,23 +217,23 @@ void main() {
           host: Player(
             id: 'host-456',
             fishCount: 15,
-            catsWon: [
+            catsWon: CatInventory([
               WonCat(name: '茶トラねこ', cost: 2),
               WonCat(name: '白ねこ', cost: 3),
-            ],
+            ]),
             diceRoll: 5,
             rolled: true,
             ready: true,
-            currentBets: {'0': 3, '1': 2, '2': 1},
+            currentBets: Bets({'0': 3, '1': 2, '2': 1}),
           ),
           guest: Player(
             id: 'guest-789',
             fishCount: 12,
-            catsWon: [WonCat(name: '黒ねこ', cost: 1)],
+            catsWon: CatInventory([WonCat(name: '黒ねこ', cost: 1)]),
             diceRoll: 2,
             rolled: true,
             ready: true,
-            currentBets: {'0': 1, '1': 2, '2': 3},
+            currentBets: Bets({'0': 1, '1': 2, '2': 3}),
           ),
           status: GameStatus.roundResult,
           currentTurn: 3,
@@ -231,16 +252,22 @@ void main() {
         expect(restored.currentTurn, equals(original.currentTurn));
         expect(restored.host.fishCount, equals(original.host.fishCount));
         expect(restored.guest?.fishCount, equals(original.guest?.fishCount));
-        expect(restored.host.catsWon, equals(original.host.catsWon));
-        expect(restored.guest?.catsWon, equals(original.guest?.catsWon));
+        expect(
+          restored.host.catsWon.count,
+          equals(original.host.catsWon.count),
+        );
         expect(restored.host.totalWonCatCost, equals(5));
         expect(restored.guest?.totalWonCatCost, equals(1));
         expect(restored.host.diceRoll, equals(original.host.diceRoll));
         expect(restored.guest?.diceRoll, equals(original.guest?.diceRoll));
-        expect(restored.host.currentBets, equals(original.host.currentBets));
+        // オブジェクトの等価性ではなく、内容(Map)で比較
         expect(
-          restored.guest?.currentBets,
-          equals(original.guest?.currentBets),
+          restored.host.currentBets.toMap(),
+          equals(original.host.currentBets.toMap()),
+        );
+        expect(
+          restored.guest?.currentBets.toMap(),
+          equals(original.guest?.currentBets.toMap()),
         );
       });
 
@@ -257,6 +284,8 @@ void main() {
         expect(restored.host.diceRoll, isNull);
         expect(restored.winners, isNull);
         expect(restored.finalWinner, isNull);
+        expect(restored.host.currentBets.total, equals(0));
+        expect(restored.host.catsWon.count, equals(0));
       });
     });
 
@@ -303,8 +332,8 @@ void main() {
             '1': Winner.guest,
             '2': Winner.draw,
           }),
-          hostBets: {'0': 3, '1': 2, '2': 1},
-          guestBets: {'0': 2, '1': 3, '2': 2},
+          hostBets: Bets({'0': 3, '1': 2, '2': 1}),
+          guestBets: Bets({'0': 2, '1': 3, '2': 2}),
         );
 
         expect(

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/domain/win_condition.dart';
 import 'package:battle_for_the_cats/models/won_cat.dart';
+import 'package:battle_for_the_cats/models/cat_inventory.dart';
 
 void main() {
   group('StandardWinCondition Tests', () {
@@ -10,8 +11,10 @@ void main() {
       winCondition = StandardWinCondition();
     });
 
-    List<WonCat> createCats(List<String> names) {
-      return names.map((name) => WonCat(name: name, cost: 1)).toList();
+    CatInventory createCats(List<String> names) {
+      return CatInventory(
+        names.map((name) => WonCat(name: name, cost: 1)).toList(),
+      );
     }
 
     test('should NOT win with less than 3 cats', () {

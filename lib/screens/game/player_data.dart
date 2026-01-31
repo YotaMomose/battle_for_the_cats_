@@ -1,5 +1,6 @@
 import '../../models/game_room.dart';
-import '../../models/won_cat.dart';
+import '../../models/bets.dart';
+import '../../models/cat_inventory.dart';
 import '../../constants/game_constants.dart';
 
 /// プレイヤー別にGameRoomのデータを取得するヘルパークラス
@@ -9,16 +10,16 @@ class PlayerData {
   final bool isHost;
   final int myFishCount;
   final int opponentFishCount;
-  final List<WonCat> myCatsWon;
-  final List<WonCat> opponentCatsWon;
+  final CatInventory myCatsWon;
+  final CatInventory opponentCatsWon;
   final int? myDiceRoll;
   final int? opponentDiceRoll;
   final bool myRolled;
   final bool opponentRolled;
   final bool myReady;
   final bool opponentReady;
-  final Map<String, int> myBets;
-  final Map<String, int> opponentBets;
+  final Bets myBets;
+  final Bets opponentBets;
 
   const PlayerData({
     required this.room,
@@ -83,16 +84,16 @@ class PlayerData {
       isHost: isHost,
       myFishCount: my?.fishCount ?? 0,
       opponentFishCount: opponent?.fishCount ?? 0,
-      myCatsWon: my?.catsWon ?? [],
-      opponentCatsWon: opponent?.catsWon ?? [],
+      myCatsWon: my?.catsWon ?? CatInventory(),
+      opponentCatsWon: opponent?.catsWon ?? CatInventory(),
       myDiceRoll: my?.diceRoll,
       opponentDiceRoll: opponent?.diceRoll,
       myRolled: my?.rolled ?? false,
       opponentRolled: opponent?.rolled ?? false,
       myReady: my?.ready ?? false,
       opponentReady: opponent?.ready ?? false,
-      myBets: my?.currentBets ?? {},
-      opponentBets: opponent?.currentBets ?? {},
+      myBets: my?.currentBets ?? Bets(),
+      opponentBets: opponent?.currentBets ?? Bets(),
     );
   }
 }

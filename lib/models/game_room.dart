@@ -3,6 +3,7 @@ import '../constants/game_constants.dart';
 import '../domain/win_condition.dart';
 import 'cards/round_cards.dart';
 import 'player.dart';
+import 'bets.dart';
 import 'round_result.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
@@ -138,8 +139,8 @@ class GameRoom {
           .map((c) => WonCat(name: c.displayName, cost: c.baseCost))
           .toList(),
       winners: winnersMap,
-      hostBets: Map<String, int>.from(host.currentBets),
-      guestBets: Map<String, int>.from(guest?.currentBets ?? {}),
+      hostBets: host.currentBets,
+      guestBets: guest?.currentBets ?? Bets.empty(),
     );
   }
 

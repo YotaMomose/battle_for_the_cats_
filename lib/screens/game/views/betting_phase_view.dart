@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/game_room.dart';
 import '../../../models/won_cat.dart';
+import '../../../models/cat_inventory.dart';
 import '../game_screen_view_model.dart';
 
 /// 賭けフェーズ画面
@@ -280,7 +281,11 @@ class BettingPhaseView extends StatelessWidget {
   }
 
   /// 獲得した猫リストを表示するウィジェット
-  Widget _buildWonCatsList(List<WonCat> cats, GameScreenViewModel viewModel) {
+  Widget _buildWonCatsList(
+    CatInventory inventory,
+    GameScreenViewModel viewModel,
+  ) {
+    final cats = inventory.all;
     if (cats.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(8.0),

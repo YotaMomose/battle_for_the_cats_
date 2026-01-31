@@ -1,6 +1,7 @@
 import '../models/cards/round_cards.dart';
 import '../models/player.dart';
 import '../models/round_winners.dart';
+import '../models/bets.dart';
 import '../constants/game_constants.dart';
 
 /// 各猫の勝敗判定を行うクラス
@@ -15,8 +16,8 @@ class BattleEvaluator {
       final card = cards[i];
       final cost = card.baseCost;
 
-      final hostBet = host.currentBets[catIndex] ?? 0;
-      final guestBet = guest.currentBets[catIndex] ?? 0;
+      final hostBet = host.currentBets.getBet(catIndex);
+      final guestBet = guest.currentBets.getBet(catIndex);
 
       final hostQualified = hostBet >= cost;
       final guestQualified = guestBet >= cost;

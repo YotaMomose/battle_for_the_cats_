@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/models/player.dart';
+import 'package:battle_for_the_cats/models/bets.dart';
 
 void main() {
   group('Player Rich Domain Model Tests', () {
@@ -19,18 +20,18 @@ void main() {
 
     test('placeBets should set currentBets and ready flag', () {
       final player = Player(id: 'p1');
-      final bets = {'0': 2, '1': 3, '2': 0};
-      player.placeBets(bets);
-      expect(player.currentBets, bets);
+      final betsMap = {'0': 2, '1': 3, '2': 0};
+      player.placeBets(betsMap);
+      expect(player.currentBets, Bets(betsMap));
       expect(player.ready, isTrue);
     });
 
     test('addWonCat should add to catsWon list', () {
       final player = Player(id: 'p1');
       player.addWonCat('Mike', 3);
-      expect(player.catsWon.length, 1);
-      expect(player.catsWon[0].name, 'Mike');
-      expect(player.catsWon[0].cost, 3);
+      expect(player.catsWon.count, 1);
+      expect(player.catsWon.all.first.name, 'Mike');
+      expect(player.catsWon.all.first.cost, 3);
       expect(player.totalWonCatCost, 3);
     });
 
@@ -44,7 +45,7 @@ void main() {
       player.prepareForNextTurn();
 
       expect(player.fishCount, 5); // 12 - 7
-      expect(player.currentBets, {'0': 0, '1': 0, '2': 0});
+      expect(player.currentBets, Bets.empty());
       expect(player.ready, isFalse);
       expect(player.diceRoll, isNull);
       expect(player.rolled, isFalse);

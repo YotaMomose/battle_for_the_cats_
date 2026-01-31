@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/services/room_service.dart';
-import 'package:battle_for_the_cats/models/game_room.dart';
 import '../mocks/mock_room_repository.dart';
-import '../helpers/test_fixtures.dart';
 
 void main() {
   group('RoomService - 詳細なMockテスト', () {
@@ -74,8 +72,11 @@ void main() {
 
         // Assert: 各位置で3種類以上の異なる文字が出現
         for (int pos = 0; pos < 6; pos++) {
-          expect(charsByPosition[pos]!.length, greaterThanOrEqualTo(3),
-              reason: '位置 $pos での多様性が不足');
+          expect(
+            charsByPosition[pos]!.length,
+            greaterThanOrEqualTo(3),
+            reason: '位置 $pos での多様性が不足',
+          );
         }
       });
     });
@@ -132,10 +133,10 @@ void main() {
         // Assert
         expect(roomCode.length, equals(6));
         expect(roomCode, matches(RegExp(r'^[A-Z0-9]{6}$')));
-        
+
         // 小文字がない
         expect(roomCode, isNot(matches(RegExp(r'[a-z]'))));
-        
+
         // スペースなし
         expect(roomCode, isNot(matches(RegExp(r'\s'))));
       });
@@ -194,15 +195,18 @@ void main() {
         // Act & Assert
         for (int i = 0; i < 200; i++) {
           final roomCode = roomService.generateRoomCode();
-          
+
           // 6文字確認
           expect(roomCode.length, equals(6));
-          
+
           // 大文字英数字のみ確認
           for (final char in roomCode.split('')) {
             final isUppercase = RegExp(r'[A-Z0-9]').hasMatch(char);
-            expect(isUppercase, isTrue,
-                reason: 'ルームコード "$roomCode" に不正な文字 "$char" が含まれています');
+            expect(
+              isUppercase,
+              isTrue,
+              reason: 'ルームコード "$roomCode" に不正な文字 "$char" が含まれています',
+            );
           }
         }
       });
@@ -211,10 +215,13 @@ void main() {
         // Act & Assert
         for (int i = 0; i < 100; i++) {
           final roomCode = roomService.generateRoomCode();
-          
+
           // 小文字がないことを確認
-          expect(roomCode, isNot(matches(RegExp(r'[a-z]'))),
-              reason: 'ルームコード "$roomCode" に小文字が含まれています');
+          expect(
+            roomCode,
+            isNot(matches(RegExp(r'[a-z]'))),
+            reason: 'ルームコード "$roomCode" に小文字が含まれています',
+          );
         }
       });
 
@@ -222,10 +229,13 @@ void main() {
         // Act & Assert
         for (int i = 0; i < 100; i++) {
           final roomCode = roomService.generateRoomCode();
-          
+
           // 正規表現が正しく英数字のみ
-          expect(roomCode, matches(RegExp(r'^[A-Z0-9]{6}$')),
-              reason: 'ルームコード "$roomCode" が正しい形式ではありません');
+          expect(
+            roomCode,
+            matches(RegExp(r'^[A-Z0-9]{6}$')),
+            reason: 'ルームコード "$roomCode" が正しい形式ではありません',
+          );
         }
       });
 
@@ -240,13 +250,13 @@ void main() {
         for (final code in generatedCodes) {
           // 長さ
           expect(code.length, equals(6));
-          
+
           // 大文字英数字のみ
           expect(code, matches(RegExp(r'^[A-Z0-9]{6}$')));
-          
+
           // 小文字なし
           expect(code, isNot(matches(RegExp(r'[a-z]'))));
-          
+
           // スペースなし
           expect(code, isNot(matches(RegExp(r'\s'))));
         }

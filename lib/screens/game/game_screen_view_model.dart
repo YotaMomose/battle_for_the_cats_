@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/game_room.dart';
 import '../../models/won_cat.dart';
+import '../../models/bets.dart';
+import '../../models/cat_inventory.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
 import 'game_screen_state.dart';
@@ -44,7 +46,7 @@ class GameScreenViewModel extends ChangeNotifier {
   // ローカル状態
   bool _hasRolled = false;
   bool _hasPlacedBet = false;
-  Map<String, int> _bets = {'0': 0, '1': 0, '2': 0};
+  Bets _bets = Bets.empty();
   int _lastTurn = 0;
 
   // Stream購読
@@ -57,8 +59,8 @@ class GameScreenViewModel extends ChangeNotifier {
   GameScreenState get uiState => _uiState;
   bool get hasRolled => _hasRolled;
   bool get hasPlacedBet => _hasPlacedBet;
-  Map<String, int> get bets => Map.unmodifiable(_bets);
-  int get totalBet => _bets.values.reduce((a, b) => a + b);
+  Map<String, int> get bets => _bets.toMap();
+  int get totalBet => _bets.total;
 
   /// プレイヤーデータ（計算プロパティ）
   PlayerData? get playerData {
@@ -135,14 +137,12 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
-  String _formatCatsSummary(List<WonCat> catsWon) {
-    final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
-    for (final cat in catsWon) {
-      if (counts.containsKey(cat.name)) {
-        counts[cat.name] = counts[cat.name]! + 1;
-      }
-    }
-    return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';
+  String _formatCatsSummary(CatInventory inventory) {
+    final counts = inventory.countByName();
+    final brown = counts['茶トラねこ'] ?? 0;
+    final white = counts['白ねこ'] ?? 0;
+    final black = counts['黒ねこ'] ?? 0;
+    return '茶トラ$brown匹 白$white匹 黒$black匹';
   }
 
   /// 最終勝者のラベル
@@ -359,7 +359,7 @@ class GameScreenViewModel extends ChangeNotifier {
   void resetLocalState() {
     _hasRolled = false;
     _hasPlacedBet = false;
-    _bets = {'0': 0, '1': 0, '2': 0};
+    _bets = Bets.empty();
   }
 
   Future<void> confirmRoll() async {
@@ -387,7 +387,7 @@ class GameScreenViewModel extends ChangeNotifier {
   /// 賭けを置く
   Future<void> placeBets() async {
     try {
-      await _gameService.placeBets(roomCode, playerId, _bets);
+      await _gameService.placeBets(roomCode, playerId, _bets.toMap());
       _hasPlacedBet = true;
       notifyListeners();
     } catch (e) {
@@ -409,7 +409,9 @@ class GameScreenViewModel extends ChangeNotifier {
     if (_hasPlacedBet) return;
     if (amount < 0) return;
 
-    _bets[catIndex] = amount;
+    final newMap = Map<String, int>.from(_bets.toMap());
+    newMap[catIndex] = amount;
+    _bets = Bets(newMap);
     notifyListeners();
   }
 

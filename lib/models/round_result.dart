@@ -1,13 +1,14 @@
 import '../constants/game_constants.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
+import 'bets.dart';
 
 /// ラウンドの結果を保持するデータモデル
 class RoundResult {
   final List<WonCat> cats;
   final RoundWinners winners;
-  final Map<String, int> hostBets;
-  final Map<String, int> guestBets;
+  final Bets hostBets;
+  final Bets guestBets;
 
   RoundResult({
     required this.cats,
@@ -20,8 +21,8 @@ class RoundResult {
     return {
       'cats': cats.map((c) => c.toMap()).toList(),
       'winners': winners.toMap(),
-      'hostBets': hostBets,
-      'guestBets': guestBets,
+      'hostBets': hostBets.toMap(),
+      'guestBets': guestBets.toMap(),
     };
   }
 
@@ -33,8 +34,10 @@ class RoundResult {
               .toList() ??
           [],
       winners: RoundWinners.fromMap(map['winners'] ?? {}),
-      hostBets: Map<String, int>.from(map['hostBets'] ?? {}),
-      guestBets: Map<String, int>.from(map['guestBets'] ?? {}),
+      hostBets: Bets.fromMap(Map<String, dynamic>.from(map['hostBets'] ?? {})),
+      guestBets: Bets.fromMap(
+        Map<String, dynamic>.from(map['guestBets'] ?? {}),
+      ),
     );
   }
 
@@ -46,7 +49,7 @@ class RoundResult {
   /// 指定したインデックスの賭け金を取得
   int getBet(int index, String role) {
     final bets = role == 'host' ? hostBets : guestBets;
-    return bets[index.toString()] ?? 0;
+    return bets.getBet(index.toString());
   }
 
   /// 指定した役割のこのラウンドでの勝利数を返す
