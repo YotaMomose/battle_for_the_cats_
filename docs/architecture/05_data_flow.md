@@ -272,7 +272,7 @@ sequenceDiagram
     
     GFS->>FS: getRoom() → GameRoom
     GFS->>GFS: 相手もベット済み？ → No
-    GFS->>FS: updateRoom({hostBets: {0: 3}})
+    GFS->>FS: updateRoom({hostBets: Bets({0: 3})})
     
     FS-->>VMH: snapshots() 通知
     FS-->>VMG: snapshots() 通知
@@ -283,8 +283,8 @@ sequenceDiagram
     
     G->>VMG: placeBets()
     VMG->>VMG: _hasPlacedBet = true
-    VMG->>GS: placeBets(roomCode, {0: 2})
-    GS->>GFS: placeBets(roomCode, {0: 2})
+    VMG->>GS: placeBets(roomCode, Bets({0: 2}))
+    GS->>GFS: placeBets(roomCode, Bets({0: 2}))
     
     GFS->>FS: getRoom() → GameRoom
     GFS->>GFS: 相手もベット済み？ → Yes

@@ -56,8 +56,12 @@ lib/
 │       └── ClipResult (class)
 │
 ├── models/                                      【データモデル】
-│   └── game_room.dart                          (約150行)
-│       └── GameRoom (class)
+│   ├── game_room.dart                          (約150行)
+│   │   └── GameRoom (class)
+│   ├── bets.dart                               (約40行)
+│   │   └── Bets (class)
+│   └── cat_inventory.dart                      (約60行)
+│       └── CatInventory (class)
 │
 ├── repositories/                                【リポジトリ層】
 │   ├── firestore_repository.dart               (104行)

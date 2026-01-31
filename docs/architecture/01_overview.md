@@ -22,6 +22,8 @@ graph TB
     subgraph "Domain Layer"
         GameLogic[GameLogic<br/>Pure Functions]
         RoundResult[RoundResult]
+        Bets[Bets]
+        CatInventory[CatInventory]
     end
     
     subgraph "Repository Layer"
@@ -61,6 +63,8 @@ graph TB
     style GameFlowService fill:#fff4e1
     style GameLogic fill:#f0fff0
     style RoundResult fill:#f0fff0
+    style Bets fill:#f0fff0
+    style CatInventory fill:#f0fff0
     style RoomRepository fill:#ffe1f5
     style FirestoreRepository fill:#ffe1f5
     style Firestore fill:#f5f5f5
@@ -121,6 +125,8 @@ graph TB
   - `resolveRound()`: ラウンド決着処理
   - `checkWinCondition()`: 勝利条件判定
 - **RoundResult**: ラウンド結果を表すデータクラス
+- **Bets**: 賭け金情報のカプセル化（Firestoreへの保存形式を管理）
+- **CatInventory**: 獲得した猫のコレクション管理（合計コスト計算など）
 
 **特徴**:
 - Pure Functions（副作用なし）

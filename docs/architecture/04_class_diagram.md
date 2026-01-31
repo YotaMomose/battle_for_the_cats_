@@ -45,7 +45,7 @@ classDiagram
         -GameRoom _currentRoom
         -GameScreenState _uiState
         -StreamSubscription _roomSubscription
-        -Map~int, int~ _bets
+        -Bets _bets
         -bool _hasRolled
         -bool _hasPlacedBet
         +rollDice() Future~void~
@@ -119,11 +119,10 @@ classDiagram
     }
     
     class RoundResult {
-        +Map~int, Winner~ winners
-        +List~String~ hostWonCats
-        +List~String~ guestWonCats
-        +GameStatus? finalStatus
-        +Winner? finalWinner
+        +List~WonCat~ cats
+        +RoundWinners winners
+        +Bets hostBets
+        +Bets guestBets
     }
     
     class GameRoom {
@@ -139,10 +138,10 @@ classDiagram
         +int? guestFish
         +int? hostDiceResult
         +int? guestDiceResult
-        +Map~int, int~ hostBets
-        +Map~int, int~? guestBets
-        +List~String~ hostCollectedCats
-        +List~String~? guestCollectedCats
+        +Bets hostBets
+        +Bets? guestBets
+        +CatInventory hostCollectedCats
+        +CatInventory? guestCollectedCats
         +Winner? winner
         +DateTime createdAt
         +toMap() Map~String, dynamic~
@@ -315,17 +314,16 @@ classDiagram
         +rollDice() int
         +generateRoomCode() String
         +resolveRound(GameRoom room) RoundResult
-        +checkWinCondition(List~String~ cats) Winner?
+        +checkWinCondition(CatInventory inventory) Winner?
         -_determineWinners(...) Map~int, Winner~
         -_clipFeet(int hostBet, int guestBet, int cost) ClipResult
     }
     
     class RoundResult {
-        +Map~int, Winner~ winners
-        +List~String~ hostWonCats
-        +List~String~ guestWonCats
-        +GameStatus? finalStatus
-        +Winner? finalWinner
+        +List~WonCat~ cats
+        +RoundWinners winners
+        +Bets hostBets
+        +Bets guestBets
     }
     
     class GameRoom {
@@ -335,10 +333,28 @@ classDiagram
         +int currentTurn
         +List~String~ currentCats
         +int hostFish
-        +Map~int, int~ hostBets
-        +List~String~ hostCollectedCats
+        +Bets hostBets
+        +CatInventory hostCollectedCats
         +toMap() Map
         +fromMap(Map) GameRoom
+    }
+
+    class Bets {
+        +Map~String, int~ _bets
+        +int total
+        +getBet(String id) int
+        +toMap() Map
+        +fromMap(Map) Bets
+    }
+
+    class CatInventory {
+        +List~WonCat~ _cats
+        +int count
+        +int totalCost
+        +List~String~ names
+        +addCat(String name, int cost) void
+        +toMapList() List
+        +fromMapList(List) CatInventory
     }
     
     class GameConstants {
