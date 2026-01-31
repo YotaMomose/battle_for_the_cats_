@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/game_room.dart';
+import '../../../models/won_cat.dart';
 import '../game_screen_view_model.dart';
 
 /// 賭けフェーズ画面
@@ -43,22 +44,14 @@ class BettingPhaseView extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
-                    _buildWonCatsList(
-                      playerData.myCatsWon,
-                      playerData.myWonCatCosts,
-                      viewModel,
-                    ),
+                    _buildWonCatsList(playerData.myCatsWon, viewModel),
                     const SizedBox(height: 12),
                     const Text(
                       '相手の獲得カード:',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
-                    _buildWonCatsList(
-                      playerData.opponentCatsWon,
-                      playerData.opponentWonCatCosts,
-                      viewModel,
-                    ),
+                    _buildWonCatsList(playerData.opponentCatsWon, viewModel),
                   ],
                 ),
               ),
@@ -287,11 +280,7 @@ class BettingPhaseView extends StatelessWidget {
   }
 
   /// 獲得した猫リストを表示するウィジェット
-  Widget _buildWonCatsList(
-    List<String> cats,
-    List<int> costs,
-    GameScreenViewModel viewModel,
-  ) {
+  Widget _buildWonCatsList(List<WonCat> cats, GameScreenViewModel viewModel) {
     if (cats.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(8.0),
@@ -302,10 +291,7 @@ class BettingPhaseView extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: List.generate(cats.length, (index) {
-        final cat = cats[index];
-        final cost = costs.length > index ? costs[index] : 1;
-
+      children: cats.map((cat) {
         return Container(
           width: 70,
           padding: const EdgeInsets.all(4),
@@ -323,9 +309,13 @@ class BettingPhaseView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(Icons.pets, size: 20, color: viewModel.getCatIconColor(cat)),
+              Icon(
+                Icons.pets,
+                size: 20,
+                color: viewModel.getCatIconColor(cat.name),
+              ),
               Text(
-                cat,
+                cat.name,
                 style: const TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -341,7 +331,7 @@ class BettingPhaseView extends StatelessWidget {
                   border: Border.all(color: Colors.red.shade200),
                 ),
                 child: Text(
-                  '★$cost',
+                  '★${cat.cost}',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -352,7 +342,7 @@ class BettingPhaseView extends StatelessWidget {
             ],
           ),
         );
-      }),
+      }).toList(),
     );
   }
 }

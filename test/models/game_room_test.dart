@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
+import 'package:battle_for_the_cats/models/won_cat.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/round_result.dart';
 import 'package:battle_for_the_cats/models/round_winners.dart';
@@ -153,8 +154,10 @@ void main() {
             'rolled': true,
             'ready': true,
             'currentBets': {'0': 3, '1': 2, '2': 1},
-            'catsWon': ['茶トラねこ', '白ねこ'],
-            'wonCatCosts': [2, 3],
+            'catsWon': [
+              {'name': '茶トラねこ', 'cost': 2},
+              {'name': '白ねこ', 'cost': 3},
+            ],
           },
           'guest': {
             'id': 'guest-789',
@@ -163,13 +166,12 @@ void main() {
             'rolled': true,
             'ready': false,
             'currentBets': {'0': 1, '1': 2, '2': 3},
-            'catsWon': ['黒ねこ'],
-            'wonCatCosts': [1],
+            'catsWon': [
+              {'name': '黒ねこ', 'cost': 1},
+            ],
           },
           'status': 'playing',
           'currentTurn': 2,
-          'cats': ['茶トラねこ', '白ねこ', '黒ねこ'],
-          'catCosts': [2, 3, 1],
         };
 
         final room = GameRoom.fromMap(originalMap);
@@ -184,6 +186,8 @@ void main() {
         expect(room.host.diceRoll, equals(4));
         expect(room.guest?.diceRoll, equals(3));
         expect(room.host.ready, isTrue);
+        expect(room.host.catsWon.first.name, equals('茶トラねこ'));
+        expect(room.host.catsWon.first.cost, equals(2));
       });
 
       test('round-trip (toMap → fromMap) で値が保存される', () {
@@ -192,8 +196,10 @@ void main() {
           host: Player(
             id: 'host-456',
             fishCount: 15,
-            catsWon: ['茶トラねこ', '白ねこ'],
-            wonCatCosts: [2, 3],
+            catsWon: [
+              WonCat(name: '茶トラねこ', cost: 2),
+              WonCat(name: '白ねこ', cost: 3),
+            ],
             diceRoll: 5,
             rolled: true,
             ready: true,
@@ -202,8 +208,7 @@ void main() {
           guest: Player(
             id: 'guest-789',
             fishCount: 12,
-            catsWon: ['黒ねこ'],
-            wonCatCosts: [1],
+            catsWon: [WonCat(name: '黒ねこ', cost: 1)],
             diceRoll: 2,
             rolled: true,
             ready: true,
@@ -228,11 +233,8 @@ void main() {
         expect(restored.guest?.fishCount, equals(original.guest?.fishCount));
         expect(restored.host.catsWon, equals(original.host.catsWon));
         expect(restored.guest?.catsWon, equals(original.guest?.catsWon));
-        expect(restored.host.wonCatCosts, equals(original.host.wonCatCosts));
-        expect(
-          restored.guest?.wonCatCosts,
-          equals(original.guest?.wonCatCosts),
-        );
+        expect(restored.host.totalWonCatCost, equals(5));
+        expect(restored.guest?.totalWonCatCost, equals(1));
         expect(restored.host.diceRoll, equals(original.host.diceRoll));
         expect(restored.guest?.diceRoll, equals(original.guest?.diceRoll));
         expect(restored.host.currentBets, equals(original.host.currentBets));
@@ -268,24 +270,20 @@ void main() {
 
         // ラウンド1
         room.currentTurn = 1;
-        room.host.catsWon.add('茶トラねこ');
-        room.guest?.catsWon.add('白ねこ');
-        room.host.wonCatCosts.add(2);
-        room.guest?.wonCatCosts.add(1);
+        room.host.addWonCat('茶トラねこ', 2);
+        room.guest?.addWonCat('白ねこ', 1);
 
         // ラウンド2に進む
         room.currentTurn = 2;
-        room.host.catsWon.add('黒ねこ');
-        room.guest?.catsWon.add('茶トラねこ');
-        room.host.wonCatCosts.add(3);
-        room.guest?.wonCatCosts.add(2);
+        room.host.addWonCat('黒ねこ', 3);
+        room.guest?.addWonCat('茶トラねこ', 2);
 
         // 累積を確認
         expect(room.currentTurn, equals(2));
-        expect(room.host.catsWon, equals(['茶トラねこ', '黒ねこ']));
-        expect(room.guest?.catsWon, equals(['白ねこ', '茶トラねこ']));
-        expect(room.host.wonCatCosts, equals([2, 3]));
-        expect(room.guest?.wonCatCosts, equals([1, 2]));
+        expect(room.host.wonCatNames, equals(['茶トラねこ', '黒ねこ']));
+        expect(room.guest?.wonCatNames, equals(['白ねこ', '茶トラねこ']));
+        expect(room.host.totalWonCatCost, equals(5));
+        expect(room.guest?.totalWonCatCost, equals(3));
       });
 
       test('前回のラウンド情報が記録される', () {
@@ -295,8 +293,11 @@ void main() {
         );
 
         room.lastRoundResult = RoundResult(
-          catNames: ['茶トラねこ', '白ねこ', '黒ねこ'],
-          catCosts: [2, 3, 1],
+          cats: [
+            WonCat(name: '茶トラねこ', cost: 2),
+            WonCat(name: '白ねこ', cost: 3),
+            WonCat(name: '黒ねこ', cost: 1),
+          ],
           winners: RoundWinners({
             '0': Winner.host,
             '1': Winner.guest,
@@ -306,8 +307,14 @@ void main() {
           guestBets: {'0': 2, '1': 3, '2': 2},
         );
 
-        expect(room.lastRoundResult?.catNames, equals(['茶トラねこ', '白ねこ', '黒ねこ']));
-        expect(room.lastRoundResult?.catCosts, equals([2, 3, 1]));
+        expect(
+          room.lastRoundResult?.cats.map((c) => c.name),
+          equals(['茶トラねこ', '白ねこ', '黒ねこ']),
+        );
+        expect(
+          room.lastRoundResult?.cats.map((c) => c.cost),
+          equals([2, 3, 1]),
+        );
         expect(
           room.lastRoundResult?.winners,
           equals(

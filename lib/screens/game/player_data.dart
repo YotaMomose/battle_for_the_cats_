@@ -1,4 +1,5 @@
 import '../../models/game_room.dart';
+import '../../models/won_cat.dart';
 import '../../constants/game_constants.dart';
 
 /// プレイヤー別にGameRoomのデータを取得するヘルパークラス
@@ -8,10 +9,8 @@ class PlayerData {
   final bool isHost;
   final int myFishCount;
   final int opponentFishCount;
-  final List<String> myCatsWon;
-  final List<String> opponentCatsWon;
-  final List<int> myWonCatCosts;
-  final List<int> opponentWonCatCosts;
+  final List<WonCat> myCatsWon;
+  final List<WonCat> opponentCatsWon;
   final int? myDiceRoll;
   final int? opponentDiceRoll;
   final bool myRolled;
@@ -28,8 +27,6 @@ class PlayerData {
     required this.opponentFishCount,
     required this.myCatsWon,
     required this.opponentCatsWon,
-    required this.myWonCatCosts,
-    required this.opponentWonCatCosts,
     required this.myDiceRoll,
     required this.opponentDiceRoll,
     required this.myRolled,
@@ -88,8 +85,6 @@ class PlayerData {
       opponentFishCount: opponent?.fishCount ?? 0,
       myCatsWon: my?.catsWon ?? [],
       opponentCatsWon: opponent?.catsWon ?? [],
-      myWonCatCosts: my?.wonCatCosts ?? [],
-      opponentWonCatCosts: opponent?.wonCatCosts ?? [],
       myDiceRoll: my?.diceRoll,
       opponentDiceRoll: opponent?.diceRoll,
       myRolled: my?.rolled ?? false,

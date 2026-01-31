@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/game_room.dart';
+import '../../models/won_cat.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
 import 'game_screen_state.dart';
@@ -74,8 +75,9 @@ class GameScreenViewModel extends ChangeNotifier {
     final myRole = isHost ? Winner.host : Winner.guest;
     final opponentRole = isHost ? Winner.guest : Winner.host;
 
-    return List.generate(result.catNames.length, (i) {
+    return List.generate(result.cats.length, (i) {
       final winner = result.getWinner(i);
+      final cat = result.cats[i];
 
       String label = '引き分け';
       Color cardColor = Colors.grey.shade50;
@@ -92,12 +94,12 @@ class GameScreenViewModel extends ChangeNotifier {
       }
 
       return RoundDisplayItem(
-        catName: result.catNames[i],
-        catCost: result.catCosts[i],
+        catName: cat.name,
+        catCost: cat.cost,
         winnerLabel: label,
         cardColor: cardColor,
         winnerTextColor: textColor,
-        catIconColor: _getCatColor(result.catNames[i]),
+        catIconColor: _getCatColor(cat.name),
         myBet: result.getBet(i, isHost ? 'host' : 'guest'),
         opponentBet: result.getBet(i, isHost ? 'guest' : 'host'),
       );
@@ -133,11 +135,11 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
-  String _formatCatsSummary(List<String> catsWon) {
+  String _formatCatsSummary(List<WonCat> catsWon) {
     final counts = <String, int>{'茶トラねこ': 0, '白ねこ': 0, '黒ねこ': 0};
     for (final cat in catsWon) {
-      if (counts.containsKey(cat)) {
-        counts[cat] = counts[cat]! + 1;
+      if (counts.containsKey(cat.name)) {
+        counts[cat.name] = counts[cat.name]! + 1;
       }
     }
     return '茶トラ${counts['茶トラねこ']}匹 白${counts['白ねこ']}匹 黒${counts['黒ねこ']}匹';

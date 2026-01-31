@@ -25,11 +25,13 @@ void main() {
       expect(player.ready, isTrue);
     });
 
-    test('addWonCat should add to lists', () {
+    test('addWonCat should add to catsWon list', () {
       final player = Player(id: 'p1');
       player.addWonCat('Mike', 3);
-      expect(player.catsWon, ['Mike']);
-      expect(player.wonCatCosts, [3]);
+      expect(player.catsWon.length, 1);
+      expect(player.catsWon[0].name, 'Mike');
+      expect(player.catsWon[0].cost, 3);
+      expect(player.totalWonCatCost, 3);
     });
 
     test('prepareForNextTurn should reset flags and subtract bets', () {

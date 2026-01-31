@@ -1,17 +1,16 @@
 import '../constants/game_constants.dart';
 import 'round_winners.dart';
+import 'won_cat.dart';
 
 /// ラウンドの結果を保持するデータモデル
 class RoundResult {
-  final List<String> catNames;
-  final List<int> catCosts;
+  final List<WonCat> cats;
   final RoundWinners winners;
   final Map<String, int> hostBets;
   final Map<String, int> guestBets;
 
   RoundResult({
-    required this.catNames,
-    required this.catCosts,
+    required this.cats,
     required this.winners,
     required this.hostBets,
     required this.guestBets,
@@ -19,8 +18,7 @@ class RoundResult {
 
   Map<String, dynamic> toMap() {
     return {
-      'catNames': catNames,
-      'catCosts': catCosts,
+      'cats': cats.map((c) => c.toMap()).toList(),
       'winners': winners.toMap(),
       'hostBets': hostBets,
       'guestBets': guestBets,
@@ -29,8 +27,11 @@ class RoundResult {
 
   factory RoundResult.fromMap(Map<String, dynamic> map) {
     return RoundResult(
-      catNames: List<String>.from(map['catNames'] ?? []),
-      catCosts: List<int>.from(map['catCosts'] ?? []),
+      cats:
+          (map['cats'] as List?)
+              ?.map((c) => WonCat.fromMap(Map<String, dynamic>.from(c)))
+              .toList() ??
+          [],
       winners: RoundWinners.fromMap(map['winners'] ?? {}),
       hostBets: Map<String, int>.from(map['hostBets'] ?? {}),
       guestBets: Map<String, int>.from(map['guestBets'] ?? {}),

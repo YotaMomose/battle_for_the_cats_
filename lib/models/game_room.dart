@@ -5,6 +5,7 @@ import 'cards/round_cards.dart';
 import 'player.dart';
 import 'round_result.dart';
 import 'round_winners.dart';
+import 'won_cat.dart';
 import '../domain/battle_evaluator.dart';
 
 class GameRoom {
@@ -131,9 +132,11 @@ class GameRoom {
 
   /// 獲得情報（履歴）を保存する
   void _recordRoundResult(RoundWinners winnersMap) {
+    final cards = currentRound?.toList() ?? [];
     lastRoundResult = RoundResult(
-      catNames: currentRound?.toList().map((c) => c.displayName).toList() ?? [],
-      catCosts: currentRound?.getCosts() ?? [],
+      cats: cards
+          .map((c) => WonCat(name: c.displayName, cost: c.baseCost))
+          .toList(),
       winners: winnersMap,
       hostBets: Map<String, int>.from(host.currentBets),
       guestBets: Map<String, int>.from(guest?.currentBets ?? {}),

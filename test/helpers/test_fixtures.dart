@@ -1,6 +1,7 @@
 import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
+import 'package:battle_for_the_cats/models/won_cat.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
 
@@ -38,10 +39,8 @@ GameRoom createTestGameRoom({
   RoundCards? currentRound,
   Map<String, int>? hostBets,
   Map<String, int>? guestBets,
-  List<String>? hostCatsWon,
-  List<String>? guestCatsWon,
-  List<int>? hostWonCatCosts,
-  List<int>? guestWonCatCosts,
+  List<WonCat>? hostCatsWon,
+  List<WonCat>? guestCatsWon,
 }) {
   return GameRoom(
     roomId: roomId,
@@ -50,7 +49,6 @@ GameRoom createTestGameRoom({
       fishCount: hostFishCount,
       currentBets: hostBets ?? {'0': 0, '1': 0, '2': 0},
       catsWon: hostCatsWon ?? [],
-      wonCatCosts: hostWonCatCosts ?? [],
     ),
     guest: guestId != null
         ? Player(
@@ -58,7 +56,6 @@ GameRoom createTestGameRoom({
             fishCount: guestFishCount,
             currentBets: guestBets ?? {'0': 0, '1': 0, '2': 0},
             catsWon: guestCatsWon ?? [],
-            wonCatCosts: guestWonCatCosts ?? [],
           )
         : null,
     status: status,
