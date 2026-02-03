@@ -55,6 +55,9 @@ class GameScreenViewModel extends ChangeNotifier {
   // コールバック
   final VoidCallback? onOpponentLeft;
 
+  // 退出処理中かどうか
+  bool _isExiting = false;
+
   // ===== Getters (Viewから参照) =====
   GameScreenState get uiState => _uiState;
   bool get hasRolled => _hasRolled;
@@ -269,7 +272,10 @@ class GameScreenViewModel extends ChangeNotifier {
           (room) {
             if (room == null) {
               // ルームが削除された場合
-              _handleOpponentLeft();
+              // 自己退出の場合は何もしない
+              if (!_isExiting) {
+                _handleOpponentLeft();
+              }
               return;
             }
             _currentRoom = room;
@@ -311,7 +317,10 @@ class GameScreenViewModel extends ChangeNotifier {
         ? (guest?.abandoned ?? false)
         : host.abandoned;
     if (opponentAbandoned) {
-      _handleOpponentLeft();
+      // 自己退出中なら処理をスキップ
+      if (!_isExiting) {
+        _handleOpponentLeft();
+      }
       return;
     }
 
@@ -417,9 +426,11 @@ class GameScreenViewModel extends ChangeNotifier {
 
   Future<void> leaveRoom() async {
     try {
+      _isExiting = true; // 退出フラグを立てる
       await _gameService.leaveRoom(roomCode, playerId);
       onOpponentLeft?.call();
     } catch (e) {
+      _isExiting = false; // 失敗した場合はフラグを戻す
       _uiState = _uiState.copyWithError('退出に失敗しました: $e');
       notifyListeners();
     }

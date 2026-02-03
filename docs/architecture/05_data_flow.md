@@ -114,6 +114,29 @@ sequenceDiagram
     FS->>FS: 魚の消費・猫の付与・statusを roundResult に更新
 ```
 
+### 3.3 退出処理 (Transaction)
+レースコンディションを防ぎ、最新の状態に基づいて削除を判定するため、トランザクションを使用します。
+
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant RS as RoomService
+    participant RR as RoomRepository
+    participant FS as Firestore
+    
+    P->>RS: leaveRoom(code, playerId)
+    RS->>RR: runTransaction()
+    RR->>FS: get doc (LOCK)
+    Note over FS: 最新の状態を読み取り
+    
+    alt 削除条件合致 (ホスト単独 または 両者退出)
+        RS->>FS: delete("rooms/CODE")
+    else 片方のみ退出
+        RS->>FS: update("rooms/CODE", {abandoned: true})
+    end
+    Note over FS: Transaction Commit
+```
+
 ---
 
 ## 4. リアルタイム同期

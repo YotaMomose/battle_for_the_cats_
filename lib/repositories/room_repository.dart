@@ -45,6 +45,37 @@ class RoomRepository {
     await _repository.deleteDocument(_collection, roomCode);
   }
 
+  /// トランザクション内でルームを取得
+  Future<GameRoom?> getRoomInTransaction(
+    Transaction transaction,
+    String roomCode,
+  ) async {
+    final ref = _repository.getDocumentReference(_collection, roomCode);
+    final doc = await transaction.get(ref);
+
+    if (!doc.exists || doc.data() == null) {
+      return null;
+    }
+
+    return GameRoom.fromMap(doc.data()!);
+  }
+
+  /// トランザクション内でルームを更新
+  void updateRoomInTransaction(
+    Transaction transaction,
+    String roomCode,
+    Map<String, dynamic> data,
+  ) {
+    final ref = _repository.getDocumentReference(_collection, roomCode);
+    transaction.update(ref, data);
+  }
+
+  /// トランザクション内でルームを削除
+  void deleteRoomInTransaction(Transaction transaction, String roomCode) {
+    final ref = _repository.getDocumentReference(_collection, roomCode);
+    transaction.delete(ref);
+  }
+
   /// ルームを監視
   Stream<GameRoom?> watchRoom(String roomCode) {
     return _repository.watchDocument(_collection, roomCode).map((snapshot) {

@@ -58,15 +58,38 @@ class RoomService {
     return _repository.watchRoom(roomCode);
   }
 
-  /// ルームを退出する（削除ではなく、フラグを立てる）
+  /// ルームを退出する
+  /// 両プレイヤーが退出した場合、または待機中にホストが退出した場合にはルームを削除する
+  /// トランザクションを使用して整合性を担保する
   Future<void> leaveRoom(String roomCode, String playerId) async {
-    final room = await _repository.getRoom(roomCode);
-    if (room == null) return;
+    await _repository.runTransaction((transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) return;
 
-    final isHost = _repository.isHost(room, playerId);
-    await _repository.updateRoom(roomCode, {
-      '${isHost ? 'host' : 'guest'}.abandoned': true,
+      final isHost = _repository.isHost(room, playerId);
+
+      if (_shouldDeleteRoom(room, isHost)) {
+        _repository.deleteRoomInTransaction(transaction, roomCode);
+      } else {
+        _repository.updateRoomInTransaction(transaction, roomCode, {
+          '${isHost ? 'host' : 'guest'}.abandoned': true,
+        });
+      }
     });
+  }
+
+  /// ルームを削除すべきかどうかを判定
+  bool _shouldDeleteRoom(GameRoom room, bool isHost) {
+    if (isHost) {
+      // ホストが退出し、ゲストがいないか既に退出済みの場合
+      return room.guest == null || (room.guest?.abandoned ?? false);
+    } else {
+      // ゲストが退出し、既にホストが退出済みの場合
+      return room.host.abandoned;
+    }
   }
 
   /// ルームを削除
