@@ -20,10 +20,18 @@ graph TB
     end
     
     subgraph "Domain Layer"
-        GameLogic[GameLogic<br/>Pure Functions]
+        BattleEvaluator[BattleEvaluator]
+        Dice[Dice / StandardDice]
+        WinCondition[WinCondition]
+    end
+
+    subgraph "Models Layer"
+        GameRoom[GameRoom]
+        Player[Player]
         RoundResult[RoundResult]
         Bets[Bets]
         CatInventory[CatInventory]
+        Cards[Cards / RoundCards]
     end
     
     subgraph "Repository Layer"
@@ -44,12 +52,13 @@ graph TB
     GameService -->|delegate| GameFlowService
     
     RoomService -->|use| RoomRepository
-    RoomService -->|use| GameLogic
     MatchmakingService -->|use| FirestoreRepository
     MatchmakingService -->|use| RoomService
-    MatchmakingService -->|use| GameLogic
     GameFlowService -->|use| RoomRepository
-    GameFlowService -->|use| GameLogic
+    
+    GameRoom -->|use| BattleEvaluator
+    GameRoom -->|use| WinCondition
+    Player -->|use| Dice
     
     RoomRepository -->|extends| FirestoreRepository
     FirestoreRepository -->|CRUD + Stream| Firestore
@@ -61,10 +70,11 @@ graph TB
     style RoomService fill:#fff4e1
     style MatchmakingService fill:#fff4e1
     style GameFlowService fill:#fff4e1
-    style GameLogic fill:#f0fff0
-    style RoundResult fill:#f0fff0
-    style Bets fill:#f0fff0
-    style CatInventory fill:#f0fff0
+    style BattleEvaluator fill:#f0fff0
+    style Dice fill:#f0fff0
+    style WinCondition fill:#f0fff0
+    style GameRoom fill:#e1f5ff
+    style Player fill:#e1f5ff
     style RoomRepository fill:#ffe1f5
     style FirestoreRepository fill:#ffe1f5
     style Firestore fill:#f5f5f5
@@ -82,13 +92,13 @@ graph TB
   - `MainMenuView`, `MatchmakingView`
   - `WaitingView`, `RollingPhaseView`, `BettingPhaseView`, `RoundResultView`, `FinalResultView`
 - **ViewModel**: ビジネスロジックと状態管理
-  - `HomeScreenViewModel` (161行)
-  - `GameScreenViewModel` (155行)
+  - `HomeScreenViewModel`
+  - `GameScreenViewModel`
   - `ChangeNotifier`を継承
   - Serviceレイヤーへの依存性注入
 - **State**: 型安全な状態表現
-  - `HomeScreenState` (3状態: Idle, Loading, Matchmaking)
-  - `GameScreenState` (6状態: Loading, Waiting, Rolling, Playing, RoundResult, Finished)
+  - `HomeScreenState` (Idle, Loading, Matchmaking)
+  - `GameScreenState` (Loading, Waiting, Rolling, Playing, RoundResult, Finished)
 
 **パターン**:
 - MVVM (Model-View-ViewModel)
@@ -99,63 +109,56 @@ graph TB
 
 ### 2. Service Layer（サービス層）
 
-**責務**: ビジネスロジックの調整とワークフローの制御
+**責務**: ユースケースの実現とワークフローの制御
 
 **構成要素**:
-- **GameService** (58行): Facadeパターンで統一インターフェース提供
-- **RoomService** (71行): 部屋のライフサイクル管理
-- **MatchmakingService** (160行): ランダムマッチング処理
-- **GameFlowService** (131行): ゲーム進行制御（サイコロ、ベット、ターン管理）
+- **GameService**: 画面から利用される唯一の窓口（Facade）
+- **RoomService**: 部屋の作成、参加などのライフサイクル管理
+- **MatchmakingService**: 待機リストへの登録とマッチングロジック
+- **GameFlowService**: サイコロ、ベット、ターン進行などのゲーム進行制御
 
 **パターン**:
 - Facade Pattern (GameService)
-- Transaction Control (マッチング処理)
+- Transaction Control (マッチング処理、次ターン遷移)
 - Dependency Injection (全サービス)
 
 ---
 
 ### 3. Domain Layer（ドメイン層）
 
-**責務**: 純粋なビジネスロジック（Firestoreに依存しない）
+**責務**: 純粋なビジネスロジック（永続化や外部に依存しない）
 
 **構成要素**:
-- **GameLogic** (184行): ゲームルールの実装
-  - `rollDice()`: サイコロを振る
-  - `generateRoomCode()`: 部屋コード生成
-  - `resolveRound()`: ラウンド決着処理
-  - `checkWinCondition()`: 勝利条件判定
-- **RoundResult**: ラウンド結果を表すデータクラス
-- **Bets**: 賭け金情報のカプセル化（Firestoreへの保存形式を管理）
-- **CatInventory**: 獲得した猫のコレクション管理（合計コスト計算など）
+- **BattleEvaluator**: 各猫について、賭け金とコストを比較して勝敗を判定
+- **Dice**: サイコロを振るインターフェースと標準的な実装（StandardDice）
+- **WinCondition**: 勝利条件の判定ロジック（StandardWinCondition）
 
 **特徴**:
-- Pure Functions（副作用なし）
+- インターフェースによる抽象化
 - テスタビリティが高い
-- 再利用性が高い
+- 純粋な計算ロジック
 
 ---
 
-### 4. Repository Layer（リポジトリ層）
+### 4. Models Layer（モデル層）
 
-**責務**: データアクセスの抽象化
+**責務**: データの構造定義と自己完結したロジック
 
 **構成要素**:
-- **FirestoreRepository** (104行): Firestore操作の抽象化
-  - CRUD操作: `getDocument()`, `setDocument()`, `updateDocument()`, `deleteDocument()`
-  - Stream: `watchDocument()`
-  - クエリ: `query()` with filters
-  - トランザクション: `runTransaction()`
-- **RoomRepository** (82行): 部屋データ専用のアクセス層
-  - `getRoom()`, `createRoom()`, `updateRoom()`, `deleteRoom()`, `watchRoom()`
-  - ヘルパーメソッド: `isHost()`, `getPlayerField()`, `updatePlayerData()`
+- **GameRoom**: 部屋の状態、ホスト/ゲストの保持、ラウンド判定の統括
+- **Player**: 魚の数、獲得した猫、サイコロ、確認フラグなどを保持
+- **RoundResult**: 特定のラウンドの結果（猫、勝者、賭け金）を保持
+- **Bets**: 猫への賭け金情報をカプセル化
+- **CatInventory**: 獲得した猫のコレクション管理
+- **Cards**: 猫カードの種類やコスト、エフェクトなどの静的データ
 
-**パターン**:
-- Repository Pattern
-- Dependency Inversion (抽象に依存)
+**特徴**:
+- Firestoreドキュメントとの相互変換 (`toMap`, `fromMap`)
+- 自身の状態を変更するメソッド（カプセル化）
 
 ---
 
-### 5. Data Layer（データ層）
+### 5. Repository Layer（リポジトリ層）
 
 **責務**: 永続化されたデータの管理
 

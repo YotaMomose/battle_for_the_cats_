@@ -40,71 +40,64 @@ battle_for_the_cats/
 
 ```
 lib/
-├── main.dart                                    (約100行) - エントリーポイント
+├── main.dart                                    (約50行) - エントリーポイント
+├── firebase_options.dart                        (自動生成) - Firebase設定
 │
 ├── constants/                                   【定数・Enum】
-│   └── game_constants.dart                     (74行)
+│   └── game_constants.dart                     (72行)
 │       ├── GameConstants (static class)
 │       ├── GameStatus (enum)
 │       ├── MatchmakingStatus (enum)
 │       └── Winner (enum)
 │
-├── domain/                                      【ドメイン層】
-│   └── game_logic.dart                         (184行)
-│       ├── GameLogic (class)
-│       ├── RoundResult (class)
-│       └── ClipResult (class)
+├── domain/                                      【ドメイン層：純粋ロジック】
+│   ├── battle_evaluator.dart                   (37行) - 勝敗捕捉判定
+│   ├── dice.dart                               (21行) - サイコロインターフェース
+│   └── win_condition.dart                      (52行) - 勝利条件判定
 │
-├── models/                                      【データモデル】
-│   ├── game_room.dart                          (約150行)
-│   │   └── GameRoom (class)
-│   ├── bets.dart                               (約40行)
-│   │   └── Bets (class)
-│   └── cat_inventory.dart                      (約60行)
-│       └── CatInventory (class)
+├── models/                                      【モデル層：データ構造と自己完結ロジック】
+│   ├── game_room.dart                          (188行) - 部屋の状態管理
+│   ├── player.dart                             (118行) - プレイヤーの状態管理
+│   ├── bets.dart                               (約40行) - 賭け金管理
+│   ├── round_result.dart                       (60行) - ラウンド結果
+│   ├── round_winners.dart                      (約30行) - 勝者マップ
+│   ├── won_cat.dart                            (約20行) - 獲得した猫のデータ
+│   ├── cat_inventory.dart                      (約50行) - 猫のコレクション
+│   └── cards/                                   【カード定義（静的データ）】
+│       ├── round_cards.dart                    (約50行) - ラウンドの3枚
+│       ├── game_card.dart                      (約40行) - 基本カード
+│       └── regular_cat.dart                    (約60行) - 通常の猫
 │
-├── repositories/                                【リポジトリ層】
+├── repositories/                                【リポジトリ層：データアクセス】
 │   ├── firestore_repository.dart               (104行)
-│   │   ├── FirestoreRepository (base class)
-│   │   └── QueryFilter (helper class)
-│   │
 │   └── room_repository.dart                    (82行)
-│       └── RoomRepository (extends FirestoreRepository)
 │
-├── services/                                    【サービス層】
-│   ├── game_service.dart                       (58行)
-│   │   └── GameService (Facade)
-│   │
-│   ├── room_service.dart                       (71行)
-│   │   └── RoomService
-│   │
-│   ├── matchmaking_service.dart                (160行)
-│   │   └── MatchmakingService
-│   │
-│   └── game_flow_service.dart                  (131行)
-│       └── GameFlowService
+├── services/                                    【サービス層：ユースケース】
+│   ├── game_service.dart                       (約100行) - Facade
+│   ├── room_service.dart                       (82行) - 部屋管理
+│   ├── matchmaking_service.dart                (204行) - マッチング
+│   └── game_flow_service.dart                  (110行) - ゲーム進行制御
 │
-└── screens/                                     【Presentation層】
-    │
+└── screens/                                     【プレゼンテーション層：UI】
     ├── home/                                    【ホーム画面】
-    │   ├── home_screen.dart                    (62行) - Entry Point
-    │   ├── home_screen_view_model.dart         (161行)
-    │   ├── home_screen_state.dart              (46行)
+    │   ├── home_screen.dart                    (約60行)
+    │   ├── home_screen_view_model.dart         (195行)
+    │   ├── home_screen_state.dart              (約50行)
     │   └── views/
-    │       ├── main_menu_view.dart             (106行)
-    │       └── matchmaking_view.dart           (51行)
+    │       ├── main_menu_view.dart             (約120行)
+    │       └── matchmaking_view.dart           (約60行)
     │
     └── game/                                    【ゲーム画面】
-        ├── game_screen.dart                    (100行) - Entry Point
-        ├── game_screen_view_model.dart         (155行)
-        ├── game_screen_state.dart              (95行)
-        ├── player_data.dart                    (18行) - Helper
+        ├── game_screen.dart                    (約120行)
+        ├── game_screen_view_model.dart         (434行)
+        ├── game_screen_state.dart              (約120行)
+        ├── player_data.dart                    (約150行)
         └── views/
-            ├── waiting_view.dart               (40行)
-            ├── rolling_phase_view.dart         (160行)
-            ├── betting_phase_view.dart         (220行)
-            ├── round_result_view.dart          (165行)
-            └── final_result_view.dart          (105行)
+            ├── waiting_view.dart               (約50行)
+            ├── rolling_phase_view.dart         (約200行)
+            ├── betting_phase_view.dart         (約250行)
+            ├── round_result_view.dart          (約200行)
+            └── final_result_view.dart          (約120行)
 ```
 
 ---
@@ -119,27 +112,19 @@ lib/screens/
 │   ├── home_screen.dart              - Provider設定 + Navigator
 │   ├── home_screen_view_model.dart   - 状態管理 + ビジネスロジック
 │   ├── home_screen_state.dart        - 型安全な状態クラス
-│   └── views/
-│       ├── main_menu_view.dart       - メインメニューUI
-│       └── matchmaking_view.dart     - マッチング中UI
+│   └── views/                        - サブビュー
 │
 └── game/
     ├── game_screen.dart              - Provider設定 + Navigator
     ├── game_screen_view_model.dart   - 状態管理 + Stream監視
     ├── game_screen_state.dart        - 型安全な状態クラス
-    ├── player_data.dart              - Host/Guest切替ヘルパー
-    └── views/
-        ├── waiting_view.dart         - 相手待機中UI
-        ├── rolling_phase_view.dart   - サイコロフェーズUI
-        ├── betting_phase_view.dart   - ベットフェーズUI
-        ├── round_result_view.dart    - ラウンド結果UI
-        └── final_result_view.dart    - 最終結果UI
+    ├── player_data.dart              - 表示用データの集約・加工
+    └── views/                        - フェーズごとのUI部品
 ```
 
 **特徴**:
-- 1画面 = 1ディレクトリ
-- MVVM構成: Screen (View) + ViewModel + State + Views
-- Viewsサブディレクトリで詳細UIを分離
+- **player_data.dart**: ホスト/ゲストの差異を吸収し、ViewModelがUIに向けた情報を整理するために使用。
+- **GameScreenViewModel**: 最も複雑な状態管理（Stream監視、フェーズ遷移、ローカル入力）を担当。
 
 ---
 
@@ -147,17 +132,11 @@ lib/screens/
 
 ```
 lib/services/
-├── game_service.dart            - Facade: 統一インターフェース
-├── room_service.dart            - 部屋のライフサイクル管理
-├── matchmaking_service.dart     - ランダムマッチング処理
-└── game_flow_service.dart       - ゲーム進行制御
+├── game_service.dart            - Facade: プレゼンテーション層への単一窓口
+├── room_service.dart            - 部屋の基本的なライフサイクル
+├── matchmaking_service.dart     - トランザクションを用いた高度なマッチング
+└── game_flow_service.dart       - サイコロ・ベット・確定操作のワークフロー
 ```
-
-**責務**:
-- `GameService`: 他3サービスへのFacade
-- `RoomService`: 部屋作成・参加・削除
-- `MatchmakingService`: キュー管理・マッチング
-- `GameFlowService`: サイコロ・ベット・ターン管理
 
 ---
 
@@ -165,16 +144,24 @@ lib/services/
 
 ```
 lib/domain/
-└── game_logic.dart              - ゲームルール実装
-    ├── GameLogic               - Pure Functions
-    ├── RoundResult             - ラウンド結果データ
-    └── ClipResult              - 足切り結果データ
+├── battle_evaluator.dart        - 猫の足切り・勝敗判定ロジック
+├── dice.dart                    - サイコロの抽選アルゴリズム
+└── win_condition.dart           - 最終的な勝利判定（タイブレーク含む）
 ```
 
 **特徴**:
-- Firestoreに依存しない
-- 全てPure Functions
-- テストが容易
+- **インターフェース化**: `Dice` や `WinCondition` を abstract class とすることで、テスト時のモック化やルール変更を容易にしている。
+
+---
+
+### Models Layer (データ構造と自己完結ロジック)
+
+```
+lib/models/
+├── game_room.dart               - ルーム全体のドキュメント構造と、ラウンド解決ロジック 
+├── player.dart                  - 個々のプレイヤーの状態と、サイコロ・ベット等の行為
+└── cards/                       - 猫の種類、コスト、エフェクト等の静的データ
+```
 
 ---
 
@@ -182,65 +169,25 @@ lib/domain/
 
 ```
 lib/repositories/
-├── firestore_repository.dart    - Firestore操作の抽象化
-│   ├── FirestoreRepository     - Base class (CRUD + Stream)
-│   └── QueryFilter             - クエリヘルパー
-│
-└── room_repository.dart         - Room専用データアクセス
-    └── RoomRepository          - Extends FirestoreRepository
-```
-
-**継承関係**:
-```
-FirestoreRepository (汎用)
-    ↑
-    | extends
-    |
-RoomRepository (Room専用)
-```
-
----
-
-### Data Models (データ構造)
-
-```
-lib/models/
-└── game_room.dart               - GameRoomモデル
-    └── GameRoom                - Firestoreドキュメント構造
-```
-
-**責務**:
-- Firestoreドキュメントとの変換 (`toMap()`, `fromMap()`)
-- データ構造の定義
-
----
-
-### Constants (定数・Enum)
-
-```
-lib/constants/
-└── game_constants.dart          - 定数とEnum定義
-    ├── GameConstants           - static定数
-    ├── GameStatus              - ゲーム状態Enum
-    ├── MatchmakingStatus       - マッチング状態Enum
-    └── Winner                  - 勝者Enum
+├── firestore_repository.dart    - 汎用的なFirestoreアクセスの抽象化
+└── room_repository.dart         - `rooms` コレクションに特化した操作
 ```
 
 ---
 
 ## ファイルサイズ統計
 
-### 層別の合計行数
+### 層別の合計行数（概算）
 
-| 層 | ファイル数 | 合計行数 | 平均行数 |
+| 層 | ファイル数 | 合計行数 | 特徴 |
 |---|---|---|---|
-| **Presentation** | 12 | 約1,100行 | 約92行 |
-| **Service** | 4 | 420行 | 105行 |
-| **Domain** | 1 | 184行 | 184行 |
-| **Repository** | 2 | 186行 | 93行 |
-| **Models** | 1 | 150行 | 150行 |
-| **Constants** | 1 | 74行 | 74行 |
-| **合計** | 21 | 約2,114行 | 約101行 |
+| **Presentation** | 15 | 約2,400行 | ViewModelや詳細UIの分割が進んでいる |
+| **Service** | 4 | 約500行 | マッチングとゲームフローに重み |
+| **Domain** | 3 | 約110行 | 密度の高い純粋ロジック |
+| **Models** | 10 | 約700行 | データ構造とカプセル化されたロジック |
+| **Repository** | 2 | 約200行 | 抽象化により簡潔 |
+| **Constants** | 1 | 72行 | 定数・Enumの集約 |
+| **合計** | 35 | 約4,000行 | 大規模なリファクタリングにより整合性が向上 |
 
 **考察**:
 - 1ファイルあたり平均100行程度で適切に分割
