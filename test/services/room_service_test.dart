@@ -255,11 +255,110 @@ void main() {
           expect(code, matches(RegExp(r'^[A-Z0-9]{6}$')));
 
           // 小文字なし
-          expect(code, isNot(matches(RegExp(r'[a-z]'))));
-
-          // スペースなし
-          expect(code, isNot(matches(RegExp(r'\s'))));
         }
+      });
+    });
+
+    group('leaveRoom', () {
+      test('待機中にホストが退出した場合、ルームが削除される', () async {
+        // Arrange
+        const hostId = 'host123';
+        final roomCode = await roomService.createRoom(hostId);
+        mockRepository.resetCallHistories();
+
+        // Act
+        await roomService.leaveRoom(roomCode, hostId);
+
+        // Assert
+        expect(mockRepository.deleteRoomCallCount, equals(1));
+        expect(mockRepository.deleteCallHistory, contains(roomCode));
+      });
+
+      test('ゲストが先に退出した場合、abandonedフラグがセットされる', () async {
+        // Arrange
+        const hostId = 'host123';
+        const guestId = 'guest456';
+        final roomCode = await roomService.createRoom(hostId);
+        await roomService.joinRoom(roomCode, guestId);
+        mockRepository.resetCallHistories();
+
+        // Act
+        await roomService.leaveRoom(roomCode, guestId);
+
+        // Assert - ルームは削除されない
+        expect(mockRepository.deleteRoomCallCount, equals(0));
+
+        // ゲストのabandonedフラグが立っていることを確認
+        final room = await mockRepository.getRoom(roomCode);
+        expect(room, isNotNull);
+        expect(room!.guest?.abandoned, isTrue);
+      });
+
+      test('ゲストが先に退出し、その後ホストが退出した場合、ルームが削除される', () async {
+        // Arrange
+        const hostId = 'host123';
+        const guestId = 'guest456';
+        final roomCode = await roomService.createRoom(hostId);
+        await roomService.joinRoom(roomCode, guestId);
+
+        // ゲストが先に退出
+        await roomService.leaveRoom(roomCode, guestId);
+        mockRepository.resetCallHistories();
+
+        // Act - ホストが退出
+        await roomService.leaveRoom(roomCode, hostId);
+
+        // Assert - ルームが削除される
+        expect(mockRepository.deleteRoomCallCount, equals(1));
+        expect(mockRepository.deleteCallHistory, contains(roomCode));
+      });
+
+      test('ホストが先に退出した場合、abandonedフラグがセットされる', () async {
+        // Arrange
+        const hostId = 'host123';
+        const guestId = 'guest456';
+        final roomCode = await roomService.createRoom(hostId);
+        await roomService.joinRoom(roomCode, guestId);
+        mockRepository.resetCallHistories();
+
+        // Act
+        await roomService.leaveRoom(roomCode, hostId);
+
+        // Assert - ルームは削除されない
+        expect(mockRepository.deleteRoomCallCount, equals(0));
+
+        // ホストのabandonedフラグが立っていることを確認
+        final room = await mockRepository.getRoom(roomCode);
+        expect(room, isNotNull);
+        expect(room!.host.abandoned, isTrue);
+      });
+
+      test('ホストが先に退出し、その後ゲストが退出した場合、ルームが削除される', () async {
+        // Arrange
+        const hostId = 'host123';
+        const guestId = 'guest456';
+        final roomCode = await roomService.createRoom(hostId);
+        await roomService.joinRoom(roomCode, guestId);
+
+        // ホストが先に退出
+        await roomService.leaveRoom(roomCode, hostId);
+        mockRepository.resetCallHistories();
+
+        // Act - ゲストが退出
+        await roomService.leaveRoom(roomCode, guestId);
+
+        // Assert - ルームが削除される
+        expect(mockRepository.deleteRoomCallCount, equals(1));
+        expect(mockRepository.deleteCallHistory, contains(roomCode));
+      });
+
+      test('存在しないルームから退出しようとしても例外が発生しない', () async {
+        // Arrange
+        const roomCode = 'NOTEXIST';
+        const playerId = 'player123';
+
+        // Act & Assert - 例外が発生しないことを確認
+        await expectLater(roomService.leaveRoom(roomCode, playerId), completes);
       });
     });
   });

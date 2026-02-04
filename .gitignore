@@ -45,3 +45,7 @@ app.*.map.json
 /android/app/release
 .cursorrules
 .agent/workflows/test.md
+
+# Firebase settings
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

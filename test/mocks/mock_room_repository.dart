@@ -1,6 +1,7 @@
 import 'package:mockito/mockito.dart';
 import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/repositories/room_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// MockRoomRepository: RoomRepositoryをモック化して、メソッド呼び出しやパラメータを検証
 class MockRoomRepository extends Mock implements RoomRepository {
@@ -66,5 +67,57 @@ class MockRoomRepository extends Mock implements RoomRepository {
     deleteCallHistory.add(roomId);
     _rooms.remove(roomId);
   }
-}
 
+  /// モックのrunTransaction実装
+  /// トランザクションをシミュレートするため、同期的に処理を実行
+  @override
+  Future<T> runTransaction<T>(
+    Future<T> Function(Transaction transaction) transactionHandler,
+  ) async {
+    // テスト環境では、トランザクションオブジェクトは実際には使用されない
+    // RoomServiceのleaveRoomメソッドは、トランザクション内でRepositoryのメソッドを呼び出すだけ
+    // そのため、nullを渡しても問題ない（ただし、型チェックを回避するためにdynamicを使用）
+    return await transactionHandler(null as dynamic);
+  }
+
+  /// モックのgetRoomInTransaction実装
+  @override
+  Future<GameRoom?> getRoomInTransaction(
+    Transaction transaction,
+    String roomCode,
+  ) async {
+    return _rooms[roomCode];
+  }
+
+  /// モックのupdateRoomInTransaction実装
+  @override
+  void updateRoomInTransaction(
+    Transaction transaction,
+    String roomCode,
+    Map<String, dynamic> data,
+  ) {
+    final room = _rooms[roomCode];
+    if (room == null) return;
+
+    // abandonedフラグの更新をシミュレート
+    if (data.containsKey('host.abandoned')) {
+      room.host.abandoned = data['host.abandoned'] as bool;
+    }
+    if (data.containsKey('guest.abandoned') && room.guest != null) {
+      room.guest!.abandoned = data['guest.abandoned'] as bool;
+    }
+  }
+
+  /// モックのdeleteRoomInTransaction実装
+  @override
+  void deleteRoomInTransaction(Transaction transaction, String roomCode) {
+    deleteCallHistory.add(roomCode);
+    _rooms.remove(roomCode);
+  }
+
+  /// モックのisHost実装
+  @override
+  bool isHost(GameRoom room, String playerId) {
+    return room.hostId == playerId;
+  }
+}

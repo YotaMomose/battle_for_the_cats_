@@ -153,8 +153,12 @@ class _GameScreenContent extends StatelessWidget {
         content: const Text('対戦相手が退出したため、ゲームを終了します。'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
+            onPressed: () async {
+              // ルームから退出してからホームに戻る
+              await vm.leaveRoom();
+              if (context.mounted) {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }
             },
             child: const Text('ホームに戻る'),
           ),

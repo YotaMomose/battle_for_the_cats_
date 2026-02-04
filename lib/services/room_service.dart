@@ -83,12 +83,26 @@ class RoomService {
 
   /// ルームを削除すべきかどうかを判定
   bool _shouldDeleteRoom(GameRoom room, bool isHost) {
+    // 両方のプレイヤーが退出済みの場合は必ず削除
+    final hostAbandoned = room.host.abandoned;
+    final guestAbandoned = room.guest?.abandoned ?? false;
+
+    if (hostAbandoned && guestAbandoned) {
+      print('[RoomService] 両プレイヤーが退出済み - ルームを削除します');
+      return true;
+    }
+
     if (isHost) {
-      // ホストが退出し、ゲストがいないか既に退出済みの場合
-      return room.guest == null || (room.guest?.abandoned ?? false);
+      // ホストが退出する場合
+      // - ゲストがいない（待機中）
+      // - ゲストが既に退出済み
+      final shouldDelete = room.guest == null || guestAbandoned;
+      return shouldDelete;
     } else {
-      // ゲストが退出し、既にホストが退出済みの場合
-      return room.host.abandoned;
+      // ゲストが退出する場合
+      // - ホストが既に退出済み
+      final shouldDelete = hostAbandoned;
+      return shouldDelete;
     }
   }
 
