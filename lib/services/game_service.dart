@@ -68,7 +68,8 @@ class GameService {
     String roomCode,
     String playerId,
     Map<String, int> bets,
-  ) => _gameFlowService.placeBets(roomCode, playerId, bets);
+    Map<String, String?> itemPlacements,
+  ) => _gameFlowService.placeBets(roomCode, playerId, bets, itemPlacements);
   Future<void> confirmRoll(String roomCode, String playerId) =>
       _gameFlowService.confirmRoll(roomCode, playerId);
   Future<void> nextTurn(String roomCode, String playerId) =>

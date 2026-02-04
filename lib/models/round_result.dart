@@ -2,6 +2,7 @@ import '../constants/game_constants.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
 import 'bets.dart';
+import '../models/item.dart';
 
 /// ラウンドの結果を保持するデータモデル
 class RoundResult {
@@ -22,7 +23,9 @@ class RoundResult {
       'cats': cats.map((c) => c.toMap()).toList(),
       'winners': winners.toMap(),
       'hostBets': hostBets.toMap(),
+      'hostItems': hostBets.itemsToMap(),
       'guestBets': guestBets.toMap(),
+      'guestItems': guestBets.itemsToMap(),
     };
   }
 
@@ -34,9 +37,13 @@ class RoundResult {
               .toList() ??
           [],
       winners: RoundWinners.fromMap(map['winners'] ?? {}),
-      hostBets: Bets.fromMap(Map<String, dynamic>.from(map['hostBets'] ?? {})),
+      hostBets: Bets.fromMap(
+        Map<String, dynamic>.from(map['hostBets'] ?? {}),
+        Map<String, dynamic>.from(map['hostItems'] ?? {}),
+      ),
       guestBets: Bets.fromMap(
         Map<String, dynamic>.from(map['guestBets'] ?? {}),
+        Map<String, dynamic>.from(map['guestItems'] ?? {}),
       ),
     );
   }
@@ -55,5 +62,11 @@ class RoundResult {
   /// 指定した役割のこのラウンドでの勝利数を返す
   int getWinCountFor(Winner role) {
     return winners.countWinsFor(role);
+  }
+
+  /// 指定したインデックスのアイテムを取得
+  ItemType? getItem(int index, String role) {
+    final bets = role == 'host' ? hostBets : guestBets;
+    return bets.getItem(index.toString());
   }
 }

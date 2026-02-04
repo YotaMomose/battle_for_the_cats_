@@ -1,6 +1,7 @@
 import '../../models/game_room.dart';
 import '../../models/bets.dart';
 import '../../models/cat_inventory.dart';
+import '../../models/item_inventory.dart';
 import '../../constants/game_constants.dart';
 
 /// プレイヤー別にGameRoomのデータを取得するヘルパークラス
@@ -20,6 +21,8 @@ class PlayerData {
   final bool opponentReady;
   final Bets myBets;
   final Bets opponentBets;
+  final ItemInventory myInventory;
+  final ItemInventory opponentInventory;
 
   const PlayerData({
     required this.room,
@@ -36,6 +39,8 @@ class PlayerData {
     required this.opponentReady,
     required this.myBets,
     required this.opponentBets,
+    required this.myInventory,
+    required this.opponentInventory,
   });
 
   /// 自分の役割
@@ -94,6 +99,8 @@ class PlayerData {
       opponentReady: opponent?.ready ?? false,
       myBets: my?.currentBets ?? Bets(),
       opponentBets: opponent?.currentBets ?? Bets(),
+      myInventory: my?.items ?? ItemInventory.initial(),
+      opponentInventory: opponent?.items ?? ItemInventory.initial(),
     );
   }
 }

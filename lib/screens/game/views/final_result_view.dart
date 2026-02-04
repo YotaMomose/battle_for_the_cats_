@@ -88,7 +88,7 @@ class FinalResultView extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '自: ${item.myBet} 敵: ${item.opponentBet}',
+                                    '自: ${item.myBet}${item.myItem != null ? '*' : ''} 敵: ${item.opponentBet}${item.opponentItem != null ? '*' : ''}',
                                     style: const TextStyle(fontSize: 9),
                                   ),
                                 ],

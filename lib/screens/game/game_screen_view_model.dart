@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/game_room.dart';
 import '../../models/won_cat.dart';
 import '../../models/bets.dart';
+import '../../models/item.dart';
 import '../../models/cat_inventory.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
@@ -19,6 +20,8 @@ class RoundDisplayItem {
   final Color catIconColor;
   final int myBet;
   final int opponentBet;
+  final ItemType? myItem;
+  final ItemType? opponentItem;
 
   const RoundDisplayItem({
     required this.catName,
@@ -29,6 +32,8 @@ class RoundDisplayItem {
     required this.catIconColor,
     required this.myBet,
     required this.opponentBet,
+    this.myItem,
+    this.opponentItem,
   });
 }
 
@@ -64,6 +69,7 @@ class GameScreenViewModel extends ChangeNotifier {
   bool get hasPlacedBet => _hasPlacedBet;
   Map<String, int> get bets => _bets.toMap();
   int get totalBet => _bets.total;
+  ItemType? getPlacedItem(String catIndex) => _bets.getItem(catIndex);
 
   /// プレイヤーデータ（計算プロパティ）
   PlayerData? get playerData {
@@ -107,6 +113,8 @@ class GameScreenViewModel extends ChangeNotifier {
         catIconColor: _getCatColor(cat.name),
         myBet: result.getBet(i, isHost ? 'host' : 'guest'),
         opponentBet: result.getBet(i, isHost ? 'guest' : 'host'),
+        myItem: result.getItem(i, isHost ? 'host' : 'guest'),
+        opponentItem: result.getItem(i, isHost ? 'guest' : 'host'),
       );
     });
   }
@@ -396,7 +404,12 @@ class GameScreenViewModel extends ChangeNotifier {
   /// 賭けを置く
   Future<void> placeBets() async {
     try {
-      await _gameService.placeBets(roomCode, playerId, _bets.toMap());
+      await _gameService.placeBets(
+        roomCode,
+        playerId,
+        _bets.toMap(),
+        _bets.itemsToMap(),
+      );
       _hasPlacedBet = true;
       notifyListeners();
     } catch (e) {
@@ -420,7 +433,33 @@ class GameScreenViewModel extends ChangeNotifier {
 
     final newMap = Map<String, int>.from(_bets.toMap());
     newMap[catIndex] = amount;
-    _bets = Bets(newMap);
+    _bets = Bets(
+      newMap,
+      _bets.itemsToMap().map(
+        (k, v) => MapEntry(k, v != null ? ItemType.fromString(v) : null),
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// アイテムを配置する
+  void updateItemPlacement(String catIndex, ItemType? item) {
+    if (_hasPlacedBet) return;
+
+    final currentBetsMap = _bets.toMap();
+    final currentItemsMap = _bets.itemsToMap().map(
+      (k, v) => MapEntry(k, v != null ? ItemType.fromString(v) : null),
+    );
+
+    // 他の場所に同じアイテムがあれば削除（1ターンに1回制限）
+    if (item != null) {
+      currentItemsMap.forEach((key, value) {
+        if (value == item) currentItemsMap[key] = null;
+      });
+    }
+
+    currentItemsMap[catIndex] = item;
+    _bets = Bets(currentBetsMap, currentItemsMap);
     notifyListeners();
   }
 

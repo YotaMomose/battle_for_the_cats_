@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../constants/game_constants.dart';
 import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
+import '../models/item.dart';
 import '../domain/dice.dart';
 import '../repositories/room_repository.dart';
 
@@ -52,15 +53,20 @@ class GameFlowService {
     String roomCode,
     String playerId,
     Map<String, int> bets,
+    Map<String, String?> itemPlacements,
   ) async {
     final room = await _repository.getRoom(roomCode);
     if (room == null) return;
 
-    final isHost = room.isHost(playerId);
-    final player = isHost ? room.host : room.guest;
+    final player = room.isHost(playerId) ? room.host : room.guest;
     if (player == null) return;
 
-    player.placeBets(bets);
+    final convertedItems = itemPlacements.map((key, value) {
+      if (value == null) return MapEntry(key, null);
+      return MapEntry(key, ItemType.fromString(value));
+    });
+
+    player.placeBetsWithItems(bets, convertedItems);
 
     // 両者が準備完了したか確認
     if (room.canStartRound) {

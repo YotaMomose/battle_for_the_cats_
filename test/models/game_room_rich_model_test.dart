@@ -40,8 +40,14 @@ void main() {
         card3: RegularCat(id: 'c3', displayName: 'Cat3', baseCost: 3),
       );
       room.currentRound = roundCards;
-      room.host.placeBets({'0': 2, '1': 0, '2': 0});
-      room.guest?.placeBets({'0': 0, '1': 3, '2': 0});
+      room.host.placeBetsWithItems(
+        {'0': 2, '1': 0, '2': 0},
+        {'0': null, '1': null, '2': null},
+      );
+      room.guest?.placeBetsWithItems(
+        {'0': 0, '1': 3, '2': 0},
+        {'0': null, '1': null, '2': null},
+      );
 
       room.resolveRound();
 

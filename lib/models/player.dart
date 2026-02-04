@@ -1,6 +1,8 @@
-import 'bets.dart';
+import '../models/bets.dart';
 import 'cat_inventory.dart';
+import 'item_inventory.dart';
 import '../domain/dice.dart';
+import '../models/item.dart';
 
 /// Playerモデル
 /// プレイヤー（ホストまたはゲスト）の状態を保持するデータモデル
@@ -13,6 +15,7 @@ class Player {
   bool confirmedRoll;
   bool confirmedRoundResult;
   Bets currentBets;
+  ItemInventory items;
   bool ready;
   bool abandoned;
 
@@ -25,10 +28,12 @@ class Player {
     this.confirmedRoll = false,
     this.confirmedRoundResult = false,
     Bets? currentBets,
+    ItemInventory? items,
     this.ready = false,
     this.abandoned = false,
   }) : catsWon = catsWon ?? CatInventory(),
-       currentBets = currentBets ?? Bets();
+       currentBets = currentBets ?? Bets(),
+       items = items ?? ItemInventory.initial();
 
   Map<String, dynamic> toMap() {
     return {
@@ -40,6 +45,8 @@ class Player {
       'confirmedRoll': confirmedRoll,
       'confirmedRoundResult': confirmedRoundResult,
       'currentBets': currentBets.toMap(),
+      'itemPlacements': currentBets.itemsToMap(),
+      'items': items.toMap(),
       'ready': ready,
       'abandoned': abandoned,
     };
@@ -58,7 +65,11 @@ class Player {
         Map<String, dynamic>.from(
           map['currentBets'] ?? {'0': 0, '1': 0, '2': 0},
         ),
+        Map<String, dynamic>.from(
+          map['itemPlacements'] ?? {'0': null, '1': null, '2': null},
+        ),
       ),
+      items: ItemInventory.fromMap(map['items'] as Map<String, dynamic>?),
       ready: map['ready'] ?? false,
       abandoned: map['abandoned'] ?? false,
     );
@@ -89,9 +100,12 @@ class Player {
     addFish(value);
   }
 
-  /// 賭けを設定する
-  void placeBets(Map<String, int> bets) {
-    currentBets = Bets(bets);
+  /// 賭けとアイテムを設定する
+  void placeBetsWithItems(
+    Map<String, int> bets,
+    Map<String, ItemType?> itemPlacements,
+  ) {
+    currentBets = Bets(bets, itemPlacements);
     ready = true;
   }
 
@@ -103,6 +117,14 @@ class Player {
   /// 現在の賭け金を支払い、リソースを消費する
   void payBets() {
     fishCount -= currentBets.total;
+
+    // アイテムを消費する
+    for (int i = 0; i < 3; i++) {
+      final item = currentBets.getItem(i.toString());
+      if (item != null) {
+        items.consume(item);
+      }
+    }
   }
 
   /// 次のターンのために状態をリセットし、残りの魚を算出する
