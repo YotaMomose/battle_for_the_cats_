@@ -4,6 +4,7 @@ import '../repositories/room_repository.dart';
 import 'game_flow_service.dart';
 import 'matchmaking_service.dart';
 import 'room_service.dart';
+import '../models/match_result.dart';
 
 /// ゲームサービスのファサード　複数のクラスやオブジェクトから構成される複雑な処理を、一つのシンプルなクラス（ファサード）に集約する
 /// 各専門サービスへのアクセスを提供
@@ -54,7 +55,7 @@ class GameService {
   // マッチング
   Future<String> joinMatchmaking(String playerId) =>
       _matchmakingService.joinMatchmaking(playerId);
-  Stream<String?> watchMatchmaking(String playerId) =>
+  Stream<MatchResult?> watchMatchmaking(String playerId) =>
       _matchmakingService.watchMatchmaking(playerId);
   Future<void> cancelMatchmaking(String playerId) =>
       _matchmakingService.cancelMatchmaking(playerId);

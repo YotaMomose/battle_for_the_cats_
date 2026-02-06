@@ -23,7 +23,7 @@ class _MainMenuViewState extends State<MainMenuView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeScreenViewModel>();
-    final isLoading = viewModel.state is LoadingState;
+    final isNotIdle = viewModel.state is! IdleState;
 
     return Scaffold(
       appBar: AppBar(
@@ -46,11 +46,11 @@ class _MainMenuViewState extends State<MainMenuView> {
               ),
               const SizedBox(height: 48),
               ElevatedButton(
-                onPressed: isLoading ? null : () => viewModel.createRoom(),
+                onPressed: isNotIdle ? null : () => viewModel.createRoom(),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                 ),
-                child: isLoading
+                child: (viewModel.state is LoadingState)
                     ? const SizedBox(
                         height: 20,
                         width: 20,
@@ -60,7 +60,7 @@ class _MainMenuViewState extends State<MainMenuView> {
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: isLoading
+                onPressed: isNotIdle
                     ? null
                     : () => viewModel.startRandomMatch(),
                 icon: const Icon(Icons.shuffle),
@@ -82,11 +82,12 @@ class _MainMenuViewState extends State<MainMenuView> {
                   hintText: '6桁のコードを入力',
                 ),
                 textCapitalization: TextCapitalization.characters,
+                enabled: !isNotIdle,
                 maxLength: 6,
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: isLoading
+                onPressed: isNotIdle
                     ? null
                     : () => viewModel.joinRoom(_roomCodeController.text),
                 style: ElevatedButton.styleFrom(

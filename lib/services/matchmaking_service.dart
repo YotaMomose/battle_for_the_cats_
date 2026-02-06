@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../constants/game_constants.dart';
 import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
 import '../models/player.dart';
+import '../models/match_result.dart';
 import '../repositories/firestore_repository.dart';
 import 'room_service.dart';
 
@@ -32,7 +34,7 @@ class MatchmakingService {
   }
 
   /// マッチングを監視
-  Stream<String?> watchMatchmaking(String playerId) async* {
+  Stream<MatchResult?> watchMatchmaking(String playerId) async* {
     await for (final snapshot in _repository.watchDocument(
       _collection,
       playerId,
@@ -48,7 +50,12 @@ class MatchmakingService {
       // マッチング成立した場合
       if (status == MatchmakingStatus.matched) {
         final roomCode = data['roomCode'] as String?;
-        yield roomCode;
+        final isHost = data['isHost'] as bool? ?? false;
+        if (roomCode != null) {
+          yield MatchResult(roomCode: roomCode, isHost: isHost);
+        } else {
+          yield null;
+        }
         return;
       }
 
@@ -79,6 +86,10 @@ class MatchmakingService {
 
   /// 対戦相手候補を検索
   Future<String?> _findOpponent(String playerId) async {
+    // 現在時刻から5分以上前のドキュメントは無視する（ゴースト対策）
+    final fiveMinutesAgo =
+        DateTime.now().millisecondsSinceEpoch - (5 * 60 * 1000);
+
     final querySnapshot = await _repository.query(
       _collection,
       filters: [QueryFilter('status', MatchmakingStatus.waiting.value)],
@@ -87,7 +98,11 @@ class MatchmakingService {
     );
 
     for (final doc in querySnapshot.docs) {
-      if (doc.id != playerId) {
+      final data = doc.data();
+      final timestamp = data['timestamp'] as int? ?? 0;
+
+      // 自分のIDではなく、かつ一定時間内のもののみ対象とする
+      if (doc.id != playerId && timestamp > fiveMinutesAgo) {
         return doc.id;
       }
     }
@@ -109,8 +124,8 @@ class MatchmakingService {
       final myDoc = await transaction.get(myRef);
       final opponentDoc = await transaction.get(opponentRef);
 
-      // マッチング可能な状態か検証
-      if (!_canMatch(myDoc, opponentDoc)) {
+      // マッチング可能な状態か検証 (自分自身とのマッチングも防止)
+      if (playerId == opponentId || !_canMatch(myDoc, opponentDoc)) {
         return;
       }
 
@@ -192,7 +207,14 @@ class MatchmakingService {
 
   /// マッチングをキャンセル
   Future<void> cancelMatchmaking(String playerId) async {
-    await _repository.deleteDocument(_collection, playerId);
+    try {
+      await _repository
+          .getDocumentReference(_collection, playerId)
+          .delete()
+          .timeout(const Duration(seconds: 10));
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// マッチング情報からホストかどうかを取得

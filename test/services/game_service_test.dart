@@ -5,12 +5,10 @@ import 'package:battle_for_the_cats/services/game_service.dart';
 import 'package:battle_for_the_cats/services/matchmaking_service.dart';
 import 'package:battle_for_the_cats/services/room_service.dart';
 
-class MockRoomService extends Mock implements RoomService {}
+import 'package:mockito/annotations.dart';
+import 'game_service_test.mocks.dart';
 
-class MockMatchmakingService extends Mock implements MatchmakingService {}
-
-class MockGameFlowService extends Mock implements GameFlowService {}
-
+@GenerateMocks([RoomService, MatchmakingService, GameFlowService])
 void main() {
   group('GameService', () {
     late MockRoomService mockRoomService;
@@ -59,9 +57,6 @@ void main() {
 
     group('ゲーム進行メソッド', () {
       test('rollDice をリクエストすると GameFlowService に委譲される', () async {
-        when(
-          mockGameFlowService.rollDice('ROOM_CODE', 'player_001'),
-        ).thenAnswer((_) async => null);
         await gameService.rollDice('ROOM_CODE', 'player_001');
         verify(
           mockGameFlowService.rollDice('ROOM_CODE', 'player_001'),
@@ -70,10 +65,7 @@ void main() {
 
       test('placeBets をリクエストすると GameFlowService に委譲される', () async {
         final bets = {'cat_001': 5};
-        final items = {'cat_001': null};
-        when(
-          mockGameFlowService.placeBets('ROOM_CODE', 'player_001', bets, items),
-        ).thenAnswer((_) async => null);
+        final items = {'cat_001': 'catTeaser'};
 
         await gameService.placeBets('ROOM_CODE', 'player_001', bets, items);
 
@@ -88,12 +80,6 @@ void main() {
         final bets1 = {'cat_001': 5};
         final bets2 = {'cat_001': 3};
         final items = {'cat_001': null};
-        when(
-          mockGameFlowService.placeBets('ROOM_CODE', 'player_1', bets1, items),
-        ).thenAnswer((_) async => null);
-        when(
-          mockGameFlowService.placeBets('ROOM_CODE', 'player_2', bets2, items),
-        ).thenAnswer((_) async => null);
 
         await gameService.placeBets('ROOM_CODE', 'player_1', bets1, items);
         await gameService.placeBets('ROOM_CODE', 'player_2', bets2, items);

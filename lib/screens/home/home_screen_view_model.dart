@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../services/game_service.dart';
+import '../../models/match_result.dart';
 import 'home_screen_state.dart';
 
 /// ホーム画面のViewModel
@@ -12,6 +14,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   HomeScreenState _state = HomeScreenState.idle();
   StreamSubscription? _matchmakingSubscription;
+  String? _sessionPlayerId;
 
   HomeScreenState get state => _state;
 
@@ -20,11 +23,10 @@ class HomeScreenViewModel extends ChangeNotifier {
     required this.onNavigateToGame,
   }) : _gameService = gameService;
 
-  /// Player ID を生成
-  /// TODO: Player ID の生成方法を変更する
-  /// Firebase Authentication の「匿名認証 (Anonymous Auth)」 を利用するのが最もスタンダードで安全な方法
+  /// Player ID を一意に生成 (セッション内で固定)
   String _generatePlayerId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
+    _sessionPlayerId ??= const Uuid().v4();
+    return _sessionPlayerId!;
   }
 
   /// 状態を更新して通知
@@ -41,6 +43,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   /// ルームを作成
   Future<void> createRoom() async {
+    if (_state is! IdleState) return;
     _updateState(HomeScreenState.loading());
 
     try {
@@ -60,6 +63,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   /// ランダムマッチングを開始
   Future<void> startRandomMatch() async {
+    if (_state is! IdleState) return;
     final playerId = _generatePlayerId();
     _updateState(HomeScreenState.matchmaking(playerId));
 
@@ -67,11 +71,22 @@ class HomeScreenViewModel extends ChangeNotifier {
       // 待機リストに登録
       await _gameService.joinMatchmaking(playerId);
 
+      // join処理（書き込み）完了後のガード：
+      // 書き込みの非同期処理中にキャンセルボタンが押されていないか、
+      // あるいは別のマッチングが開始されていないかチェックする
+      final currentState = _state;
+      if (currentState is! MatchmakingState ||
+          currentState.playerId != playerId) {
+        // キャンセルされていた場合は、直ちにFirestoreの情報を消去してゴースト化を防ぐ
+        await _gameService.cancelMatchmaking(playerId);
+        return;
+      }
+
       // マッチング監視を開始
       _matchmakingSubscription = _gameService
           .watchMatchmaking(playerId)
           .listen(
-            (roomCode) => _handleMatchFound(roomCode, playerId),
+            (result) => _handleMatchFound(result, playerId),
             onError: _handleMatchmakingError,
           );
     } catch (e) {
@@ -80,31 +95,33 @@ class HomeScreenViewModel extends ChangeNotifier {
   }
 
   /// マッチング成立時の処理
-  Future<void> _handleMatchFound(String? roomCode, String playerId) async {
+  Future<void> _handleMatchFound(MatchResult? result, String playerId) async {
     // まだマッチングしていない場合は継続
-    if (roomCode == null) return;
+    if (result == null) return;
 
     // マッチング成立！
     await _matchmakingSubscription?.cancel();
     _matchmakingSubscription = null;
     // マッチング完了処理
-    await _finalizeMatch(roomCode, playerId);
+    await _finalizeMatch(result, playerId);
   }
 
   /// マッチング完了処理
   /// マッチングが完了したら、ゲーム画面へ遷移する
-  Future<void> _finalizeMatch(String roomCode, String playerId) async {
+  Future<void> _finalizeMatch(MatchResult result, String playerId) async {
     try {
-      // マッチング情報を取得してホストかゲストか判定
-      final isHost = await _gameService.isHostInMatch(playerId);
+      // マッチング情報を取得
+      final roomCode = result.roomCode;
+      final isHost = result.isHost;
 
       // ゲーム画面へ遷移
       onNavigateToGame(roomCode, playerId, isHost);
 
-      // マッチング情報をクリーンアップ
-      await _gameService.cancelMatchmaking(playerId);
+      // マッチング情報をクリーンアップ (非同期で実行)
+      _gameService.cancelMatchmaking(playerId);
 
       // 状態を元に戻す
+      _sessionPlayerId = null; // 次回のためにIDをリセット
       _updateState(HomeScreenState.idle());
     } catch (e) {
       _handleMatchmakingError(e);
@@ -121,15 +138,30 @@ class HomeScreenViewModel extends ChangeNotifier {
   Future<void> cancelMatchmaking() async {
     final currentState = _state;
     if (currentState is MatchmakingState) {
-      await _matchmakingSubscription?.cancel();
+      final pId = currentState.playerId;
+
+      // 1. UIをロック
+      _updateState(HomeScreenState.loading());
+
+      // 2. 監視の停止 (ハング防止のため待機しない)
+      _matchmakingSubscription?.cancel();
       _matchmakingSubscription = null;
-      await _gameService.cancelMatchmaking(currentState.playerId);
-      _updateState(HomeScreenState.idle());
+
+      try {
+        // 3. Firestore削除を実行し、完了を待機する
+        await _gameService.cancelMatchmaking(pId);
+      } catch (e) {
+        _setError('キャンセル処理（削除）に失敗しました。');
+      } finally {
+        // 4. メインメニューに戻す
+        _updateState(HomeScreenState.idle());
+      }
     }
   }
 
   /// ルームに参加
   Future<void> joinRoom(String roomCode) async {
+    if (_state is! IdleState) return;
     final validCode = _validateRoomCode(roomCode);
     if (validCode == null) return;
 
