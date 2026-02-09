@@ -310,6 +310,11 @@ class BettingPhaseView extends StatelessWidget {
                           shrinkWrap: true,
                           children: [
                             _buildDraggableItem(ItemType.catTeaser, viewModel),
+                            _buildDraggableItem(
+                              ItemType.surpriseHorn,
+                              viewModel,
+                            ),
+                            _buildDraggableItem(ItemType.luckyCat, viewModel),
                             // 他のアイテムも同様に追加可能
                           ],
                         ),

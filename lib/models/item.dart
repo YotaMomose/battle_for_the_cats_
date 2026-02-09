@@ -1,9 +1,8 @@
 /// アイテムの種類
 enum ItemType {
   catTeaser('catTeaser', 'ねこじゃらし', '相手が魚を置いていなければ自動で猫をゲット！'),
-  // 将来的に追加される可能性のあるアイテム
-  // surpriseHorn('surpriseHorn', 'びっくりホーン', '全員の魚を無効化する'),
-  // luckyCat('luckyCat', 'まねきねこ', '猫の必要魚数が2倍になる');
+  surpriseHorn('surpriseHorn', 'びっくりホーン', '全員の魚を無効化する'),
+  luckyCat('luckyCat', 'まねきねこ', '猫の必要魚数が2倍になる'),
   unknown('unknown', '不明', '');
 
   final String value;

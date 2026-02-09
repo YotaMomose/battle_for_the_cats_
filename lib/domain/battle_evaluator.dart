@@ -17,16 +17,35 @@ class BattleEvaluator {
       final card = cards[i];
       final cost = card.baseCost;
 
-      final hostBet = host.currentBets.getBet(catIndex);
-      final guestBet = guest.currentBets.getBet(catIndex);
-
       final hostItem = host.currentBets.getItem(catIndex);
       final guestItem = guest.currentBets.getItem(catIndex);
 
+      // --- まねきねこの効果 ---
+      // 猫の必要魚数を2倍にする（いずれかが置いていれば適用）
+      final isLuckyCatActive =
+          hostItem == ItemType.luckyCat || guestItem == ItemType.luckyCat;
+      final effectiveCost = isLuckyCatActive ? cost * 2 : cost;
+
+      // --- びっくりホーンの効果 ---
+      // 全員の魚を無効化する
+      final isSurpriseHornActive =
+          hostItem == ItemType.surpriseHorn ||
+          guestItem == ItemType.surpriseHorn;
+
+      int effectiveHostBet = host.currentBets.getBet(catIndex);
+      int effectiveGuestBet = guest.currentBets.getBet(catIndex);
+
+      if (isSurpriseHornActive) {
+        effectiveHostBet = 0;
+        effectiveGuestBet = 0;
+      }
+
       // --- ねこじゃらしの効果 ---
       // 相手が魚を置いていなければ、ねこじゃらし使用者が無条件勝利
-      final hostTeaserWins = hostItem == ItemType.catTeaser && guestBet == 0;
-      final guestTeaserWins = guestItem == ItemType.catTeaser && hostBet == 0;
+      final hostTeaserWins =
+          hostItem == ItemType.catTeaser && effectiveGuestBet == 0;
+      final guestTeaserWins =
+          guestItem == ItemType.catTeaser && effectiveHostBet == 0;
 
       if (hostTeaserWins && !guestTeaserWins) {
         winnersMap[catIndex] = Winner.host;
@@ -38,12 +57,14 @@ class BattleEvaluator {
       // 両者がねこじゃらしを使い、両者の魚が0の場合は引き分け（通常ロジックへ）
       // -----------------------
 
-      final hostQualified = hostBet >= cost;
-      final guestQualified = guestBet >= cost;
+      final hostQualified = effectiveHostBet >= effectiveCost;
+      final guestQualified = effectiveGuestBet >= effectiveCost;
 
-      if (hostQualified && (!guestQualified || hostBet > guestBet)) {
+      if (hostQualified &&
+          (!guestQualified || effectiveHostBet > effectiveGuestBet)) {
         winnersMap[catIndex] = Winner.host;
-      } else if (guestQualified && (!hostQualified || guestBet > hostBet)) {
+      } else if (guestQualified &&
+          (!hostQualified || effectiveGuestBet > effectiveHostBet)) {
         winnersMap[catIndex] = Winner.guest;
       } else {
         winnersMap[catIndex] = Winner.draw;

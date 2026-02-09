@@ -8,7 +8,11 @@ class ItemInventory {
 
   /// 初期状態（ねこじゃらしを1つ持っている）
   factory ItemInventory.initial() {
-    return ItemInventory({ItemType.catTeaser: 1});
+    return ItemInventory({
+      ItemType.catTeaser: 1,
+      ItemType.surpriseHorn: 1,
+      ItemType.luckyCat: 1,
+    });
   }
 
   /// 指定したアイテムの所持数を取得
