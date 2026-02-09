@@ -130,34 +130,11 @@ class BettingPhaseView extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (placedItem != null)
-                                    Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.pets,
-                                          size: 24,
-                                          color: viewModel.getCatIconColor(
-                                            catName,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: -4,
-                                          top: -4,
-                                          child: Icon(
-                                            Icons.stars,
-                                            size: 16,
-                                            color: Colors.amber,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  else
-                                    Icon(
-                                      Icons.pets,
-                                      size: 24,
-                                      color: viewModel.getCatIconColor(catName),
-                                    ),
+                                  Icon(
+                                    Icons.pets,
+                                    size: 24,
+                                    color: viewModel.getCatIconColor(catName),
+                                  ),
                                   const SizedBox(height: 2),
                                   Flexible(
                                     child: Text(
@@ -252,6 +229,12 @@ class BettingPhaseView extends StatelessWidget {
                                         ),
                                       ],
                                     ),
+                                    const SizedBox(height: 8),
+                                    _buildItemSlot(
+                                      catIndex,
+                                      placedItem,
+                                      viewModel,
+                                    ),
                                   ],
                                 ],
                               ),
@@ -303,21 +286,47 @@ class BettingPhaseView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      SizedBox(
-                        height: 50,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          children: [
-                            _buildDraggableItem(ItemType.catTeaser, viewModel),
-                            _buildDraggableItem(
-                              ItemType.surpriseHorn,
-                              viewModel,
+                      DragTarget<String>(
+                        onWillAccept: (data) => !viewModel.hasPlacedBet,
+                        onAccept: (catIndex) {
+                          viewModel.updateItemPlacement(catIndex, null);
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          return Container(
+                            height: 60,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: candidateData.isNotEmpty
+                                  ? Colors.red.withOpacity(0.1)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: candidateData.isNotEmpty
+                                    ? Colors.red
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
                             ),
-                            _buildDraggableItem(ItemType.luckyCat, viewModel),
-                            // 他のアイテムも同様に追加可能
-                          ],
-                        ),
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              children: [
+                                _buildDraggableItem(
+                                  ItemType.catTeaser,
+                                  viewModel,
+                                ),
+                                _buildDraggableItem(
+                                  ItemType.surpriseHorn,
+                                  viewModel,
+                                ),
+                                _buildDraggableItem(
+                                  ItemType.luckyCat,
+                                  viewModel,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ] else ...[
                       const SizedBox(height: 8),
@@ -345,32 +354,57 @@ class BettingPhaseView extends StatelessWidget {
 
   Widget _buildDraggableItem(ItemType type, GameScreenViewModel viewModel) {
     final count = viewModel.playerData?.myInventory.count(type) ?? 0;
-    if (count <= 0) return const SizedBox();
+
+    // このアイテムが現在いずれかの猫に配置されているかチェック
+    bool isPlaced = false;
+    for (int i = 0; i < 3; i++) {
+      if (viewModel.getPlacedItem(i.toString()) == type) {
+        isPlaced = true;
+        break;
+      }
+    }
+
+    final bool isUnavailable = count <= 0 || isPlaced;
 
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
-      child: Draggable<ItemType>(
-        data: type,
-        feedback: Material(
-          color: Colors.transparent,
-          child: _buildItemIcon(type, count, true),
-        ),
-        childWhenDragging: Opacity(
-          opacity: 0.5,
-          child: _buildItemIcon(type, count, false),
-        ),
-        child: _buildItemIcon(type, count, false),
-      ),
+      child: isUnavailable
+          ? Opacity(
+              opacity: 0.3,
+              child: _buildItemIcon(type, isPlaced: isPlaced || count <= 0),
+            )
+          : Draggable<ItemType>(
+              data: type,
+              feedback: Material(
+                color: Colors.transparent,
+                child: _buildItemIcon(type, isFeedback: true),
+              ),
+              childWhenDragging: Opacity(
+                opacity: 0.5,
+                child: _buildItemIcon(type, isFeedback: false),
+              ),
+              child: _buildItemIcon(type, isFeedback: false),
+            ),
     );
   }
 
-  Widget _buildItemIcon(ItemType type, int count, bool isFeedback) {
+  Widget _buildItemIcon(
+    ItemType type, {
+    bool isFeedback = false,
+    bool isPlaced = false,
+  }) {
+    final iconData = _getItemIcon(type);
+    final color = isPlaced ? Colors.grey : _getItemColor(type);
+
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.shade200),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isPlaced ? Colors.grey.shade300 : color.withOpacity(0.5),
+          width: 1.5,
+        ),
         boxShadow: isFeedback
             ? [
                 const BoxShadow(
@@ -379,33 +413,123 @@ class BettingPhaseView extends StatelessWidget {
                   offset: Offset(2, 2),
                 ),
               ]
-            : null,
+            : [
+                BoxShadow(
+                  color: color.withOpacity(0.1),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.auto_awesome, color: Colors.purple.shade400, size: 20),
-          const SizedBox(width: 4),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                type.displayName,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'あと$count個',
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
+        children: [Icon(iconData, color: color, size: 24)],
       ),
     );
+  }
+
+  Widget _buildItemSlot(
+    String catIndex,
+    ItemType? placedItem,
+    GameScreenViewModel viewModel,
+  ) {
+    return DragTarget<Object>(
+      onWillAccept: (data) => !viewModel.hasPlacedBet,
+      onAccept: (data) {
+        if (data is ItemType) {
+          // 下のインベントリから新しく配置
+          viewModel.updateItemPlacement(catIndex, data);
+        } else if (data is String) {
+          // 他のスロットから移動
+          final fromIndex = data;
+          if (fromIndex == catIndex) return; // 同じ場所なら何もしない
+
+          final item = viewModel.getPlacedItem(fromIndex);
+          if (item != null) {
+            // 移動元を空にし、移動先にセット
+            viewModel.updateItemPlacement(fromIndex, null);
+            viewModel.updateItemPlacement(catIndex, item);
+          }
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: candidateData.isNotEmpty
+                ? Colors.yellow.shade100
+                : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: placedItem != null
+                  ? _getItemColor(placedItem)
+                  : (candidateData.isNotEmpty
+                        ? Colors.orange
+                        : Colors.grey.shade300),
+              style: (placedItem != null || candidateData.isNotEmpty)
+                  ? BorderStyle.solid
+                  : BorderStyle.none,
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: placedItem != null
+                ? Draggable<String>(
+                    data: catIndex,
+                    feedback: Material(
+                      color: Colors.transparent,
+                      child: Icon(
+                        _getItemIcon(placedItem),
+                        color: _getItemColor(placedItem),
+                        size: 28,
+                      ),
+                    ),
+                    childWhenDragging: Opacity(
+                      opacity: 0.3,
+                      child: Icon(
+                        _getItemIcon(placedItem),
+                        color: _getItemColor(placedItem),
+                        size: 24,
+                      ),
+                    ),
+                    child: Icon(
+                      _getItemIcon(placedItem),
+                      color: _getItemColor(placedItem),
+                      size: 24,
+                    ),
+                  )
+                : Icon(Icons.add, color: Colors.grey.shade400, size: 16),
+          ),
+        );
+      },
+    );
+  }
+
+  IconData _getItemIcon(ItemType type) {
+    switch (type) {
+      case ItemType.catTeaser:
+        return Icons.auto_awesome;
+      case ItemType.surpriseHorn:
+        return Icons.campaign;
+      case ItemType.luckyCat:
+        return Icons.savings;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  Color _getItemColor(ItemType type) {
+    switch (type) {
+      case ItemType.catTeaser:
+        return Colors.purple.shade400;
+      case ItemType.surpriseHorn:
+        return Colors.orange.shade600;
+      case ItemType.luckyCat:
+        return Colors.amber.shade600;
+      default:
+        return Colors.grey;
+    }
   }
 
   /// 獲得した猫リストを表示するウィジェット
