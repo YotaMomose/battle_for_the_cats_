@@ -138,22 +138,26 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 猫の名前に応じて色を返す（内部用ヘルパー）
   Color _getCatColor(String catName) {
-    switch (catName) {
-      case '茶トラねこ':
-        return Colors.orange;
-      case '白ねこ':
-        return Colors.grey.shade300;
-      case '黒ねこ':
-        return Colors.black;
-      case 'アイテム屋':
-        return Colors.purple;
-      default:
-        return Colors.orange;
+    if (catName.contains('茶トラねこ')) {
+      return Colors.orange;
     }
+    if (catName.contains('白ねこ')) {
+      return Colors.grey[300]!;
+    }
+    if (catName.contains('黒ねこ')) {
+      return Colors.grey[800]!;
+    }
+    if (catName == 'アイテム屋') {
+      return Colors.blue;
+    }
+    return Colors.grey;
   }
 
   /// 猫の名前に応じてアイコンを返す（内部用ヘルパー）
   IconData _getCatIcon(String catName) {
+    if (catName.startsWith('ボス')) {
+      return Icons.stars;
+    }
     if (catName == 'アイテム屋') {
       return Icons.store;
     }

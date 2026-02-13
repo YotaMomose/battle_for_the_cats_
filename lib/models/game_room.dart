@@ -157,12 +157,14 @@ class GameRoom {
       final card = cards[i];
       if (winner == Winner.host) {
         host.addWonCat(card.displayName, card.baseCost);
-        if (card.cardType == CardType.itemShop) {
+        if (card.cardType == CardType.itemShop ||
+            card.cardType == CardType.bossKitty) {
           host.pendingItemRevivals++;
         }
       } else if (winner == Winner.guest) {
         guest?.addWonCat(card.displayName, card.baseCost);
-        if (card.cardType == CardType.itemShop) {
+        if (card.cardType == CardType.itemShop ||
+            card.cardType == CardType.bossKitty) {
           guest?.pendingItemRevivals++;
         }
       }

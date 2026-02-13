@@ -21,8 +21,15 @@ class StandardWinCondition implements WinCondition {
     // 通常の猫のみをカウント対象にする
     final counts = <String, int>{};
     for (final type in GameConstants.catTypes) {
+      // 通常の猫のカウントを追加
       if (allCounts.containsKey(type)) {
-        counts[type] = allCounts[type]!;
+        counts[type] = (counts[type] ?? 0) + allCounts[type]!;
+      }
+
+      // 対応するボスねこのカウントを合算する
+      final bossType = 'ボス$type';
+      if (allCounts.containsKey(bossType)) {
+        counts[type] = (counts[type] ?? 0) + allCounts[bossType]!;
       }
     }
 

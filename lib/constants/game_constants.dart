@@ -13,6 +13,7 @@ class GameConstants {
   static const int maxCatCost = 4; // 猫のコストの最大値（1～4）
   static const int winCondition = 3; // 勝利に必要な猫の数
   static const List<String> catTypes = ['茶トラねこ', '白ねこ', '黒ねこ'];
+  static const List<String> bossCatTypes = ['ボス茶トラねこ', 'ボス白ねこ', 'ボス黒ねこ'];
 
   // マッチング
   static const int matchmakingSearchLimit = 10; // マッチング検索数上限

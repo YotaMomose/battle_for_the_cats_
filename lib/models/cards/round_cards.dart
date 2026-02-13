@@ -3,6 +3,7 @@ import 'dart:math';
 import 'game_card.dart';
 import 'regular_cat.dart';
 import 'item_shop.dart';
+import 'boss_cat.dart';
 
 /// ラウンドで場に出る3枚のカードを表す
 /// 常に3枚のセットとして扱い、型安全性を確保
@@ -45,8 +46,13 @@ class RoundCards {
 
   /// ランダムなカードを生成するヘルパー
   static GameCard _randomCard(int index) {
+    final rand = Random().nextDouble();
+    // 50%の確率でボスねこが出現（テスト用）
+    if (rand < 0.5) {
+      return BossCat.random(index);
+    }
     // 10%の確率でアイテム屋が出現
-    if (Random().nextDouble() < 0.5) {
+    if (rand < 0.6) {
       return ItemShop.random(index);
     }
     return RegularCat.random(index);

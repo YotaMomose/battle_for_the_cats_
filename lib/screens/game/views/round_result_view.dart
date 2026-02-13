@@ -136,7 +136,7 @@ class RoundResultView extends StatelessWidget {
                   child: Column(
                     children: [
                       const Text(
-                        '✨ アイテム屋の効果発動！ ✨',
+                        '✨ アイテム復活効果発動！ ✨',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

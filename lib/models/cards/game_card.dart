@@ -1,7 +1,7 @@
 import 'card_type.dart';
 import 'card_effect.dart';
 import 'regular_cat.dart';
-
+import 'boss_cat.dart';
 import 'item_shop.dart';
 
 /// ゲーム内の全カード（猫、犬、漁師など）が実装すべきインターフェース
@@ -41,6 +41,9 @@ abstract class GameCard {
     }
     if (type == CardType.itemShop.value) {
       return ItemShop.fromMap(map);
+    }
+    if (type == CardType.bossKitty.value) {
+      return BossCat.fromMap(map);
     }
     // 将来的に他のカードタイプが追加されたらここに分岐を追加
     return RegularCat.fromMap(map);

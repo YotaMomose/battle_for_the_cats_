@@ -84,5 +84,23 @@ void main() {
         reason: '3 same type',
       );
     });
+
+    test('should win with Boss Cats and Regular Cats mixed', () {
+      expect(
+        winCondition.checkWin(createCats(['ボス黒ねこ', '黒ねこ', '黒ねこ'])),
+        isTrue,
+        reason: 'Boss Cat + 2 regular cats of same type',
+      );
+      expect(
+        winCondition.checkWin(createCats(['ボス茶トラねこ', 'ボス茶トラねこ', '茶トラねこ'])),
+        isTrue,
+        reason: '2 Boss Cats + 1 regular cat of same type',
+      );
+      expect(
+        winCondition.checkWin(createCats(['ボス茶トラねこ', '白ねこ', 'ボス黒ねこ'])),
+        isTrue,
+        reason: 'Boss Cats mixed in 3 different types',
+      );
+    });
   });
 }
