@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'game_card.dart';
 import 'regular_cat.dart';
+import 'item_shop.dart';
 
 /// ラウンドで場に出る3枚のカードを表す
 /// 常に3枚のセットとして扱い、型安全性を確保
@@ -40,12 +43,21 @@ class RoundCards {
     );
   }
 
+  /// ランダムなカードを生成するヘルパー
+  static GameCard _randomCard(int index) {
+    // 10%の確率でアイテム屋が出現
+    if (Random().nextDouble() < 0.5) {
+      return ItemShop.random(index);
+    }
+    return RegularCat.random(index);
+  }
+
   /// ランダムなカード3枚を生成する
   factory RoundCards.random() {
     return RoundCards(
-      card1: RegularCat.random(1),
-      card2: RegularCat.random(2),
-      card3: RegularCat.random(3),
+      card1: _randomCard(1),
+      card2: _randomCard(2),
+      card3: _randomCard(3),
     );
   }
 }

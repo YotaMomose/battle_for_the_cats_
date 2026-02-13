@@ -5,6 +5,7 @@ import 'game_flow_service.dart';
 import 'matchmaking_service.dart';
 import 'room_service.dart';
 import '../models/match_result.dart';
+import '../models/item.dart';
 
 /// ゲームサービスのファサード　複数のクラスやオブジェクトから構成される複雑な処理を、一つのシンプルなクラス（ファサード）に集約する
 /// 各専門サービスへのアクセスを提供
@@ -63,6 +64,12 @@ class GameService {
       _matchmakingService.isHostInMatch(playerId);
 
   // ゲーム進行
+  Future<void> reviveItem(
+    String roomCode,
+    String playerId,
+    ItemType itemType,
+  ) => _roomService.reviveItem(roomCode, playerId, itemType);
+
   Future<void> rollDice(String roomCode, String playerId) =>
       _gameFlowService.rollDice(roomCode, playerId);
   Future<void> placeBets(

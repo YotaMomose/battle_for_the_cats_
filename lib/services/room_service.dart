@@ -3,6 +3,7 @@ import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
 import '../models/player.dart';
 import '../repositories/room_repository.dart';
+import '../models/item.dart';
 
 /// ルーム管理を担当するサービス
 class RoomService {
@@ -109,6 +110,38 @@ class RoomService {
   /// ルームを削除
   Future<void> deleteRoom(String roomCode) async {
     await _repository.deleteRoom(roomCode);
+  }
+
+  /// アイテムを復活させる
+  Future<void> reviveItem(
+    String roomCode,
+    String playerId,
+    ItemType itemType,
+  ) async {
+    await _repository.runTransaction((transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) throw Exception('Room not found');
+
+      final isHost = _repository.isHost(room, playerId);
+      final player = isHost ? room.host : room.guest;
+
+      if (player == null) throw Exception('Player not found');
+
+      if (player.pendingItemRevivals <= 0) {
+        throw Exception('No pending item revivals');
+      }
+
+      // アイテムを追加
+      player.items.add(itemType);
+      player.pendingItemRevivals--;
+
+      _repository.updateRoomInTransaction(transaction, roomCode, {
+        isHost ? 'host' : 'guest': player.toMap(),
+      });
+    });
   }
 
   /// プレイヤーがホストかどうかを判定

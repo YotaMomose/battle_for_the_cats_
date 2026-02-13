@@ -18,6 +18,7 @@ class RoundDisplayItem {
   final Color cardColor;
   final Color winnerTextColor;
   final Color catIconColor;
+  final IconData catIcon;
   final int myBet;
   final int opponentBet;
   final ItemType? myItem;
@@ -30,6 +31,7 @@ class RoundDisplayItem {
     required this.cardColor,
     required this.winnerTextColor,
     required this.catIconColor,
+    required this.catIcon,
     required this.myBet,
     required this.opponentBet,
     this.myItem,
@@ -111,6 +113,7 @@ class GameScreenViewModel extends ChangeNotifier {
         cardColor: cardColor,
         winnerTextColor: textColor,
         catIconColor: _getCatColor(cat.name),
+        catIcon: _getCatIcon(cat.name),
         myBet: result.getBet(i, isHost ? 'host' : 'guest'),
         opponentBet: result.getBet(i, isHost ? 'guest' : 'host'),
         myItem: result.getItem(i, isHost ? 'host' : 'guest'),
@@ -142,9 +145,19 @@ class GameScreenViewModel extends ChangeNotifier {
         return Colors.grey.shade300;
       case '黒ねこ':
         return Colors.black;
+      case 'アイテム屋':
+        return Colors.purple;
       default:
         return Colors.orange;
     }
+  }
+
+  /// 猫の名前に応じてアイコンを返す（内部用ヘルパー）
+  IconData _getCatIcon(String catName) {
+    if (catName == 'アイテム屋') {
+      return Icons.store;
+    }
+    return Icons.pets;
   }
 
   /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
@@ -245,6 +258,9 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 猫のアイコン色を取得（外部View用）
   Color getCatIconColor(String catName) => _getCatColor(catName);
+
+  /// 猫のアイコン種類を取得（外部View用）
+  IconData getCatIconData(String catName) => _getCatIcon(catName);
 
   // --- ローカルの描画分岐ロジック ---
 
@@ -471,6 +487,31 @@ class GameScreenViewModel extends ChangeNotifier {
     } catch (e) {
       _isExiting = false; // 失敗した場合はフラグを戻す
       _uiState = _uiState.copyWithError('退出に失敗しました: $e');
+      notifyListeners();
+    }
+  }
+
+  /// 自分がアイテムを復活できる状態か
+  bool get canReviveItem => (playerData?.myPendingItemRevivals ?? 0) > 0;
+
+  /// 復活可能なアイテムリスト（所持していないアイテム）
+  List<ItemType> get revivableItems {
+    final data = playerData;
+    if (data == null) return [];
+
+    return ItemType.values.where((type) {
+      if (type == ItemType.unknown) return false;
+      return data.myInventory.count(type) == 0;
+    }).toList();
+  }
+
+  /// アイテム復活を実行
+  Future<void> reviveItem(ItemType item) async {
+    try {
+      await _gameService.reviveItem(roomCode, playerId, item);
+      notifyListeners();
+    } catch (e) {
+      _uiState = _uiState.copyWithError('アイテムの復活に失敗しました: $e');
       notifyListeners();
     }
   }

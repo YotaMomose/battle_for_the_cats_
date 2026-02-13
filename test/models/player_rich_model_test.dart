@@ -46,17 +46,19 @@ void main() {
       player.confirmedRoll = true;
       player.confirmedRoundResult = true;
 
-      player.prepareForNextTurn();
+      player.payCosts();
+      player.resetRoundState();
 
       expect(player.fishCount, 5); // 12 - 7
-      expect(player.currentBets, Bets.empty());
+      expect(player.currentBets.total, 0); // Bets.empty()
       expect(player.ready, isFalse);
       expect(player.diceRoll, isNull);
       expect(player.rolled, isFalse);
       expect(player.confirmedRoll, isFalse);
+      expect(player.pendingItemRevivals, 0);
     });
 
-    test('prepareForNextTurn should consume used items from inventory', () {
+    test('payCosts should consume used items from inventory', () {
       final player = Player(id: 'p1'); // Initial inventory has 1 catTeaser
       expect(player.items.count(ItemType.catTeaser), 1);
 
@@ -65,7 +67,7 @@ void main() {
         {'0': ItemType.catTeaser, '1': null, '2': null},
       );
 
-      player.prepareForNextTurn();
+      player.payCosts();
 
       expect(player.items.count(ItemType.catTeaser), 0);
     });

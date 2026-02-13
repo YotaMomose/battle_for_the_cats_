@@ -2,6 +2,8 @@ import 'card_type.dart';
 import 'card_effect.dart';
 import 'regular_cat.dart';
 
+import 'item_shop.dart';
+
 /// ゲーム内の全カード（猫、犬、漁師など）が実装すべきインターフェース
 abstract class GameCard {
   /// カードの一意なID
@@ -36,6 +38,9 @@ abstract class GameCard {
     final type = map['cardType'] as String?;
     if (type == CardType.regularCat.value) {
       return RegularCat.fromMap(map);
+    }
+    if (type == CardType.itemShop.value) {
+      return ItemShop.fromMap(map);
     }
     // 将来的に他のカードタイプが追加されたらここに分岐を追加
     return RegularCat.fromMap(map);

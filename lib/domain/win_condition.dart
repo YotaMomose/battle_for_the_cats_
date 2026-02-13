@@ -15,10 +15,21 @@ abstract class WinCondition {
 class StandardWinCondition implements WinCondition {
   @override
   bool checkWin(CatInventory inventory) {
-    if (inventory.count < 3) return false;
+    // 種類（名前）ごとのカウント
+    final allCounts = inventory.countByName();
 
-    // 各種類のカウント
-    final counts = inventory.countByName();
+    // 通常の猫のみをカウント対象にする
+    final counts = <String, int>{};
+    for (final type in GameConstants.catTypes) {
+      if (allCounts.containsKey(type)) {
+        counts[type] = allCounts[type]!;
+      }
+    }
+
+    // 合計数チェック
+    final totalCats = counts.values.fold(0, (sum, count) => sum + count);
+    if (totalCats < 3) return false;
+
     for (final count in counts.values) {
       // 同じ種類が3匹以上
       if (count >= 3) return true;

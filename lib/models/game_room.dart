@@ -8,6 +8,7 @@ import 'round_result.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
 import '../domain/battle_evaluator.dart';
+import 'cards/card_type.dart';
 
 class GameRoom {
   final String roomId;
@@ -113,10 +114,14 @@ class GameRoom {
     // 2. 履歴の記録
     _recordRoundResult(winnersMap);
 
-    // 3. プレイヤーへの猫の付与
+    // 3. コストの支払い（魚とアイテム消費）
+    host.payCosts();
+    g.payCosts();
+
+    // 4. プレイヤーへの猫の付与
     _applyRoundWinners(winnersMap);
 
-    // 4. 最終勝利判定 (Domain Object)
+    // 5. 最終勝利判定 (Domain Object)
     finalWinner = condition.determineFinalWinner(host, g);
     if (finalWinner != null) {
       status = GameStatus.finished;
@@ -152,8 +157,14 @@ class GameRoom {
       final card = cards[i];
       if (winner == Winner.host) {
         host.addWonCat(card.displayName, card.baseCost);
+        if (card.cardType == CardType.itemShop) {
+          host.pendingItemRevivals++;
+        }
       } else if (winner == Winner.guest) {
         guest?.addWonCat(card.displayName, card.baseCost);
+        if (card.cardType == CardType.itemShop) {
+          guest?.pendingItemRevivals++;
+        }
       }
     }
   }
@@ -163,8 +174,8 @@ class GameRoom {
     currentTurn++;
     status = GameStatus.rolling;
 
-    host.prepareForNextTurn();
-    guest?.prepareForNextTurn();
+    host.resetRoundState();
+    guest?.resetRoundState();
 
     currentRound = nextRoundCards;
     winners = null;

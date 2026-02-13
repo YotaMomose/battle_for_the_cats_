@@ -73,7 +73,7 @@ class RoundResultView extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.pets,
+                                  item.catIcon,
                                   size: 24,
                                   color: item.catIconColor,
                                 ),
@@ -123,6 +123,62 @@ class RoundResultView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+
+              // アイテム復活UI
+              if (viewModel.canReviveItem) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.purple.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        '✨ アイテム屋の効果発動！ ✨',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '使用済みのアイテムを復活できます（残り ${viewModel.playerData?.myPendingItemRevivals ?? 0}回）',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 16),
+                      if (viewModel.revivableItems.isEmpty)
+                        const Text(
+                          '復活できるアイテムがありません\n（またはすべてのアイテムを所持しています）',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      else
+                        Wrap(
+                          spacing: 8, // horizontal spacing
+                          runSpacing: 8, // vertical spacing
+                          alignment: WrapAlignment.center,
+                          children: viewModel.revivableItems.map((item) {
+                            return ElevatedButton.icon(
+                              onPressed: () => viewModel.reviveItem(item),
+                              icon: const Icon(Icons.refresh, size: 18),
+                              label: Text(item.displayName),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.purple,
+                                side: const BorderSide(color: Colors.purple),
+                                elevation: 0,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
 
               ElevatedButton(
                 onPressed: isConfirmed ? null : viewModel.nextTurn,

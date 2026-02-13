@@ -131,7 +131,7 @@ class BettingPhaseView extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    Icons.pets,
+                                    viewModel.getCatIconData(catName),
                                     size: 24,
                                     color: viewModel.getCatIconColor(catName),
                                   ),
@@ -187,7 +187,8 @@ class BettingPhaseView extends StatelessWidget {
                                           MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        IconButton(
+                                        _buildCompactIconButton(
+                                          icon: Icons.remove_circle,
                                           onPressed:
                                               viewModel.hasPlacedBet ||
                                                   currentBet == 0
@@ -198,16 +199,10 @@ class BettingPhaseView extends StatelessWidget {
                                                     currentBet - 1,
                                                   );
                                                 },
-                                          icon: const Icon(Icons.remove_circle),
-                                          iconSize: 20,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 32,
-                                            minHeight: 32,
-                                          ),
                                         ),
                                         const SizedBox(width: 4),
-                                        IconButton(
+                                        _buildCompactIconButton(
+                                          icon: Icons.add_circle,
                                           onPressed:
                                               viewModel.hasPlacedBet ||
                                                   viewModel.totalBet >=
@@ -219,13 +214,6 @@ class BettingPhaseView extends StatelessWidget {
                                                     currentBet + 1,
                                                   );
                                                 },
-                                          icon: const Icon(Icons.add_circle),
-                                          iconSize: 20,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 32,
-                                            minHeight: 32,
-                                          ),
                                         ),
                                       ],
                                     ),
@@ -567,7 +555,7 @@ class BettingPhaseView extends StatelessWidget {
           child: Column(
             children: [
               Icon(
-                Icons.pets,
+                viewModel.getCatIconData(cat.name),
                 size: 20,
                 color: viewModel.getCatIconColor(cat.name),
               ),
@@ -600,6 +588,28 @@ class BettingPhaseView extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// コンパクトなアイコンボタンを構築する
+  Widget _buildCompactIconButton({
+    required IconData icon,
+    required VoidCallback? onPressed,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Icon(
+            icon,
+            size: 22,
+            color: onPressed == null ? Colors.grey : Colors.blue,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -18,6 +18,7 @@ class Player {
   ItemInventory items;
   bool ready;
   bool abandoned;
+  int pendingItemRevivals;
 
   Player({
     required this.id,
@@ -31,6 +32,7 @@ class Player {
     ItemInventory? items,
     this.ready = false,
     this.abandoned = false,
+    this.pendingItemRevivals = 0,
   }) : catsWon = catsWon ?? CatInventory(),
        currentBets = currentBets ?? Bets(),
        items = items ?? ItemInventory.initial();
@@ -49,6 +51,7 @@ class Player {
       'items': items.toMap(),
       'ready': ready,
       'abandoned': abandoned,
+      'pendingItemRevivals': pendingItemRevivals,
     };
   }
 
@@ -72,6 +75,7 @@ class Player {
       items: ItemInventory.fromMap(map['items'] as Map<String, dynamic>?),
       ready: map['ready'] ?? false,
       abandoned: map['abandoned'] ?? false,
+      pendingItemRevivals: map['pendingItemRevivals'] ?? 0,
     );
   }
 
@@ -115,25 +119,26 @@ class Player {
   }
 
   /// 現在の賭け金を支払い、リソースを消費する
-  void payBets() {
+  void payCosts() {
     fishCount -= currentBets.total;
 
     // アイテムを消費する
     for (int i = 0; i < 3; i++) {
       final item = currentBets.getItem(i.toString());
       if (item != null) {
+        // アイテム使用時はスロットから削除
         items.consume(item);
       }
     }
   }
 
   /// 次のターンのために状態をリセットし、残りの魚を算出する
-  void prepareForNextTurn() {
-    payBets();
+  void resetRoundState() {
     currentBets = Bets.empty();
     ready = false;
     diceRoll = null;
     rolled = false;
     confirmedRoll = false;
+    pendingItemRevivals = 0;
   }
 }

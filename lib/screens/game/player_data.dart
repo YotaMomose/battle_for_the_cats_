@@ -23,6 +23,7 @@ class PlayerData {
   final Bets opponentBets;
   final ItemInventory myInventory;
   final ItemInventory opponentInventory;
+  final int myPendingItemRevivals;
 
   const PlayerData({
     required this.room,
@@ -41,6 +42,7 @@ class PlayerData {
     required this.opponentBets,
     required this.myInventory,
     required this.opponentInventory,
+    required this.myPendingItemRevivals,
   });
 
   /// 自分の役割
@@ -101,6 +103,7 @@ class PlayerData {
       opponentBets: opponent?.currentBets ?? Bets(),
       myInventory: my?.items ?? ItemInventory.initial(),
       opponentInventory: opponent?.items ?? ItemInventory.initial(),
+      myPendingItemRevivals: my?.pendingItemRevivals ?? 0,
     );
   }
 }

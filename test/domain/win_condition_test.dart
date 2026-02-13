@@ -18,37 +18,70 @@ void main() {
     }
 
     test('should NOT win with less than 3 cats', () {
-      expect(winCondition.checkWin([]), isFalse);
-      expect(winCondition.checkWin(createCats(['Mike'])), isFalse);
-      expect(winCondition.checkWin(createCats(['Mike', 'Mike'])), isFalse);
+      expect(winCondition.checkWin(CatInventory()), isFalse);
+      expect(winCondition.checkWin(createCats(['茶トラねこ'])), isFalse);
+      expect(winCondition.checkWin(createCats(['茶トラねこ', '茶トラねこ'])), isFalse);
     });
 
     test('should win with 3 cats of the SAME type', () {
       expect(
-        winCondition.checkWin(createCats(['Mike', 'Mike', 'Mike'])),
+        winCondition.checkWin(createCats(['茶トラねこ', '茶トラねこ', '茶トラねこ'])),
         isTrue,
       );
     });
 
     test('should win with 3 cats of DIFFERENT types', () {
       expect(
-        winCondition.checkWin(createCats(['Mike', 'Tama', 'Kuro'])),
+        winCondition.checkWin(createCats(['茶トラねこ', '白ねこ', '黒ねこ'])),
         isTrue,
       );
     });
 
     test('should NOT win with 3 cats but only 2 types (2+1)', () {
-      // Mikex2 + Tamax1 = 3 cats, but neither "3 of same" nor "3 types"
+      // 茶トラねこx2 + 白ねこx1 = 3 cats, but neither "3 of same" nor "3 types"
       expect(
-        winCondition.checkWin(createCats(['Mike', 'Mike', 'Tama'])),
+        winCondition.checkWin(createCats(['茶トラねこ', '茶トラねこ', '白ねこ'])),
         isFalse,
       );
     });
 
     test('should win with 4 cats containing 3 of same type', () {
       expect(
-        winCondition.checkWin(createCats(['Mike', 'Mike', 'Tama', 'Mike'])),
+        winCondition.checkWin(createCats(['茶トラねこ', '茶トラねこ', '白ねこ', '茶トラねこ'])),
         isTrue,
+      );
+    });
+
+    test('should NOT win with 3 cats if one is "アイテム屋"', () {
+      // 2 different cats + 1 Item Shop = 3 entries, but only 2 cats
+      expect(
+        winCondition.checkWin(createCats(['茶トラねこ', '白ねこ', 'アイテム屋'])),
+        isFalse,
+      );
+
+      // 2 same cats + 1 Item Shop = 3 entries
+      expect(
+        winCondition.checkWin(createCats(['茶トラねこ', '茶トラねこ', 'アイテム屋'])),
+        isFalse,
+      );
+
+      // 3 Item Shops = 3 entries, but not cats
+      expect(
+        winCondition.checkWin(createCats(['アイテム屋', 'アイテム屋', 'アイテム屋'])),
+        isFalse,
+      );
+    });
+
+    test('should win with valid cat names from GameConstants', () {
+      expect(
+        winCondition.checkWin(createCats(['茶トラねこ', '白ねこ', '黒ねこ'])),
+        isTrue,
+        reason: '3 different types',
+      );
+      expect(
+        winCondition.checkWin(createCats(['茶トラねこ', '茶トラねこ', '茶トラねこ'])),
+        isTrue,
+        reason: '3 same type',
       );
     });
   });
