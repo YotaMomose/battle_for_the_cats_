@@ -105,37 +105,49 @@ class FinalResultView extends StatelessWidget {
             ],
 
             Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    const Icon(
-                      Icons.emoji_events,
-                      size: 60,
-                      color: Colors.amber,
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.emoji_events, color: Colors.amber),
+                        SizedBox(width: 8),
+                        Text(
+                          '最終スコア',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.emoji_events, color: Colors.amber),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      '最終スコア',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 24),
+                    _buildPlayerCards(
+                      context,
+                      'あなた',
+                      viewModel.myWonCardDetails,
                     ),
-                    const SizedBox(height: 16),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Divider(),
+                    ),
+                    _buildPlayerCards(
+                      context,
+                      '相手',
+                      viewModel.opponentWonCardDetails,
+                    ),
+                    const SizedBox(height: 24),
                     Text(
-                      'あなた: ${viewModel.myCatsWonSummary}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '相手: ${viewModel.opponentCatsWonSummary}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '全${room.currentTurn}ターン',
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      '全${room.currentTurn}ターン終了',
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -147,15 +159,109 @@ class FinalResultView extends StatelessWidget {
                 viewModel.leaveRoom();
               },
               style: ElevatedButton.styleFrom(
+                backgroundColor: resultColor,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 48,
                   vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
               child: const Text('ホームに戻る', style: TextStyle(fontSize: 18)),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlayerCards(
+    BuildContext context,
+    String title,
+    List<FinalResultCardInfo> cards,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '${cards.length}枚',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (cards.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text('カードなし', style: TextStyle(color: Colors.grey)),
+            ),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: cards.map((card) => _buildCardChip(card)).toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCardChip(FinalResultCardInfo card) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: card.isWinningCard
+            ? card.color.withOpacity(0.15)
+            : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: card.isWinningCard ? card.color : Colors.grey.shade300,
+          width: card.isWinningCard ? 2 : 1,
+        ),
+        boxShadow: card.isWinningCard
+            ? [
+                BoxShadow(
+                  color: card.color.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            card.icon,
+            size: 16,
+            color: card.isWinningCard ? card.color : Colors.grey.shade600,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            card.name,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: card.isWinningCard
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+              color: card.isWinningCard ? Colors.black87 : Colors.grey.shade700,
+            ),
+          ),
+          if (card.isWinningCard) ...[
+            const SizedBox(width: 4),
+            const Icon(Icons.check_circle, size: 14, color: Colors.green),
+          ],
+        ],
       ),
     );
   }

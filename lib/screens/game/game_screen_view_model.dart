@@ -7,11 +7,13 @@ import '../../models/item.dart';
 import '../../models/cat_inventory.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
+import '../../domain/win_condition.dart';
 import 'game_screen_state.dart';
 import 'player_data.dart';
 
 /// ラウンド結果のUI表示用アイテム
 class RoundDisplayItem {
+  // ... existing fields
   final String catName;
   final int catCost;
   final String winnerLabel;
@@ -36,6 +38,21 @@ class RoundDisplayItem {
     required this.opponentBet,
     this.myItem,
     this.opponentItem,
+  });
+}
+
+/// 最終結果でのカード表示用データ
+class FinalResultCardInfo {
+  final String name;
+  final Color color;
+  final IconData icon;
+  final bool isWinningCard;
+
+  const FinalResultCardInfo({
+    required this.name,
+    required this.color,
+    required this.icon,
+    required this.isWinningCard,
   });
 }
 
@@ -134,6 +151,33 @@ class GameScreenViewModel extends ChangeNotifier {
     final data = playerData;
     if (data == null) return '';
     return _formatCatsSummary(data.opponentCatsWon);
+  }
+
+  /// 自分の獲得した全カードの詳細
+  List<FinalResultCardInfo> get myWonCardDetails {
+    final data = playerData;
+    if (data == null) return [];
+    return _getWonCardDetails(data.myCatsWon);
+  }
+
+  /// 相手の獲得した全カードの詳細
+  List<FinalResultCardInfo> get opponentWonCardDetails {
+    final data = playerData;
+    if (data == null) return [];
+    return _getWonCardDetails(data.opponentCatsWon);
+  }
+
+  List<FinalResultCardInfo> _getWonCardDetails(CatInventory inventory) {
+    final winningIndices = StandardWinCondition().getWinningIndices(inventory);
+    return List.generate(inventory.all.length, (i) {
+      final cat = inventory.all[i];
+      return FinalResultCardInfo(
+        name: cat.name,
+        color: _getCatColor(cat.name),
+        icon: _getCatIcon(cat.name),
+        isWinningCard: winningIndices.contains(i),
+      );
+    });
   }
 
   /// 猫の名前に応じて色を返す（内部用ヘルパー）
