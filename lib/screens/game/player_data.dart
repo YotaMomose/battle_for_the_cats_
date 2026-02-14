@@ -24,6 +24,8 @@ class PlayerData {
   final ItemInventory myInventory;
   final ItemInventory opponentInventory;
   final int myPendingItemRevivals;
+  final int myFishermanCount;
+  final int opponentFishermanCount;
 
   const PlayerData({
     required this.room,
@@ -43,6 +45,8 @@ class PlayerData {
     required this.myInventory,
     required this.opponentInventory,
     required this.myPendingItemRevivals,
+    required this.myFishermanCount,
+    required this.opponentFishermanCount,
   });
 
   /// 自分の役割
@@ -104,6 +108,8 @@ class PlayerData {
       myInventory: my?.items ?? ItemInventory.initial(),
       opponentInventory: opponent?.items ?? ItemInventory.initial(),
       myPendingItemRevivals: my?.pendingItemRevivals ?? 0,
+      myFishermanCount: my?.fishermanCount ?? 0,
+      opponentFishermanCount: opponent?.fishermanCount ?? 0,
     );
   }
 }

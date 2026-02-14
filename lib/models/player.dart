@@ -19,6 +19,7 @@ class Player {
   bool ready;
   bool abandoned;
   int pendingItemRevivals;
+  int fishermanCount;
 
   Player({
     required this.id,
@@ -33,6 +34,7 @@ class Player {
     this.ready = false,
     this.abandoned = false,
     this.pendingItemRevivals = 0,
+    this.fishermanCount = 0,
   }) : catsWon = catsWon ?? CatInventory(),
        currentBets = currentBets ?? Bets(),
        items = items ?? ItemInventory.initial();
@@ -52,6 +54,7 @@ class Player {
       'ready': ready,
       'abandoned': abandoned,
       'pendingItemRevivals': pendingItemRevivals,
+      'fishermanCount': fishermanCount,
     };
   }
 
@@ -76,6 +79,7 @@ class Player {
       ready: map['ready'] ?? false,
       abandoned: map['abandoned'] ?? false,
       pendingItemRevivals: map['pendingItemRevivals'] ?? 0,
+      fishermanCount: map['fishermanCount'] ?? 0,
     );
   }
 
@@ -86,6 +90,9 @@ class Player {
 
   /// 獲得した猫の名前リスト
   List<String> get wonCatNames => catsWon.names;
+
+  /// 獲得した漁師の数
+  int get currentFishermanCount => fishermanCount;
 
   /// 魚を増やす
   void addFish(int amount) {
@@ -101,7 +108,8 @@ class Player {
   void recordDiceRoll(int value) {
     diceRoll = value;
     rolled = true;
-    addFish(value);
+    // サイコロの目 + 漁師の数だけ魚を追加
+    addFish(value + fishermanCount);
   }
 
   /// 賭けとアイテムを設定する

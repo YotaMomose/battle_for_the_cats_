@@ -161,11 +161,17 @@ class GameRoom {
             card.cardType == CardType.bossKitty) {
           host.pendingItemRevivals++;
         }
+        if (card.cardType == CardType.fisherman) {
+          host.fishermanCount++;
+        }
       } else if (winner == Winner.guest) {
         guest?.addWonCat(card.displayName, card.baseCost);
         if (card.cardType == CardType.itemShop ||
             card.cardType == CardType.bossKitty) {
           guest?.pendingItemRevivals++;
+        }
+        if (card.cardType == CardType.fisherman) {
+          guest?.fishermanCount++;
         }
       }
     }

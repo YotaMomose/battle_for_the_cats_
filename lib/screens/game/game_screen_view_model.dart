@@ -194,6 +194,9 @@ class GameScreenViewModel extends ChangeNotifier {
     if (catName == 'アイテム屋') {
       return Colors.blue;
     }
+    if (catName == '漁師') {
+      return Colors.cyan;
+    }
     return Colors.grey;
   }
 
@@ -204,6 +207,9 @@ class GameScreenViewModel extends ChangeNotifier {
     }
     if (catName == 'アイテム屋') {
       return Icons.store;
+    }
+    if (catName == '漁師') {
+      return Icons.sailing;
     }
     return Icons.pets;
   }
@@ -292,7 +298,8 @@ class GameScreenViewModel extends ChangeNotifier {
     final data = playerData;
     if (data == null) return '';
     if (data.opponentRolled && data.opponentDiceRoll != null) {
-      return '魚を ${data.opponentDiceRoll} 匹獲得しました！';
+      final totalFish = data.opponentDiceRoll! + data.opponentFishermanCount;
+      return '魚を $totalFish 匹獲得しました！';
     }
     return 'サイコロを振っています...';
   }

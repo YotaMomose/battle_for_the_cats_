@@ -82,6 +82,15 @@ class BettingPhaseView extends StatelessWidget {
                         color: Colors.blue,
                       ),
                     ),
+                    if (playerData.opponentFishermanCount > 0)
+                      Text(
+                        '漁師: ${playerData.opponentFishermanCount}人 ⚓',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.cyan,
+                        ),
+                      ),
                     const SizedBox(height: 8),
                     Text(
                       viewModel.opponentReadyStatusLabel,
@@ -251,6 +260,15 @@ class BettingPhaseView extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    if (playerData.myFishermanCount > 0)
+                      Text(
+                        '漁師の数: ${playerData.myFishermanCount}人 ⚓',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.cyan,
+                        ),
+                      ),
                     if (!viewModel.isMyReady) ...[
                       const SizedBox(height: 16),
                       ElevatedButton(

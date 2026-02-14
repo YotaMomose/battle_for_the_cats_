@@ -73,7 +73,7 @@ class RollingPhaseView extends StatelessWidget {
                     const SizedBox(height: 8),
                     if (viewModel.shouldShowOpponentRollResult) ...[
                       Text(
-                        '🎲 ${playerData.opponentDiceRoll}',
+                        '🎲 ${playerData.opponentDiceRoll}${playerData.opponentFishermanCount > 0 ? ' + ${playerData.opponentFishermanCount}' : ''}',
                         style: const TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
@@ -88,6 +88,14 @@ class RollingPhaseView extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
+                    if (playerData.opponentFishermanCount > 0)
+                      Text(
+                        '(漁師ボーナス +${playerData.opponentFishermanCount} 🐟)',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -111,7 +119,7 @@ class RollingPhaseView extends StatelessWidget {
                     const SizedBox(height: 16),
                     if (viewModel.shouldShowMyRollResult) ...[
                       Text(
-                        '🎲 ${playerData.myDiceRoll}',
+                        '🎲 ${playerData.myDiceRoll}${playerData.myFishermanCount > 0 ? ' + ${playerData.myFishermanCount}' : ''}',
                         style: const TextStyle(
                           fontSize: 64,
                           fontWeight: FontWeight.bold,
@@ -119,13 +127,21 @@ class RollingPhaseView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '魚を ${playerData.myDiceRoll} 匹獲得！',
+                        '魚を ${playerData.myDiceRoll! + playerData.myFishermanCount} 匹獲得！',
                         style: const TextStyle(
                           fontSize: 20,
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (playerData.myFishermanCount > 0)
+                        Text(
+                          '(漁師ボーナス +${playerData.myFishermanCount} 🐟)',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
                       const SizedBox(height: 16),
                       if (viewModel.canProceedFromRoll)
                         ElevatedButton(
