@@ -310,6 +310,24 @@ class GameScreenViewModel extends ChangeNotifier {
   /// 猫のアイコン種類を取得（外部View用）
   IconData getCatIconData(String catName) => _getCatIcon(catName);
 
+  /// アイテムのアイコンを取得（内部用ヘルパー）
+  IconData _getItemIcon(ItemType? type) {
+    if (type == null) return Icons.help_outline;
+    switch (type) {
+      case ItemType.catTeaser:
+        return Icons.auto_awesome;
+      case ItemType.surpriseHorn:
+        return Icons.campaign;
+      case ItemType.luckyCat:
+        return Icons.monetization_on;
+      case ItemType.unknown:
+        return Icons.help_outline;
+    }
+  }
+
+  /// アイテムのアイコンを取得（外部View用）
+  IconData getItemIconData(ItemType? type) => _getItemIcon(type);
+
   // --- ローカルの描画分岐ロジック ---
 
   /// 自分のサイコロ結果を表示すべきか

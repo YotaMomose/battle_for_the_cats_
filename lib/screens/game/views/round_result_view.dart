@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/game_room.dart';
+import '../../../models/item.dart';
 import '../game_screen_view_model.dart';
 
 /// ラウンド結果画面
@@ -57,69 +58,72 @@ class RoundResultView extends StatelessWidget {
               SizedBox(
                 height: 160,
                 child: Row(
-                  children: List.generate(viewModel.lastRoundDisplayItems.length, (
-                    index,
-                  ) {
-                    final item = viewModel.lastRoundDisplayItems[index];
+                  children: List.generate(
+                    viewModel.lastRoundDisplayItems.length,
+                    (index) {
+                      final item = viewModel.lastRoundDisplayItems[index];
 
-                    return Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: Card(
-                          color: item.cardColor,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  item.catIcon,
-                                  size: 24,
-                                  color: item.catIconColor,
-                                ),
-                                const SizedBox(height: 4),
-                                Flexible(
-                                  child: Text(
-                                    item.catName,
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                      return Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Card(
+                            color: item.cardColor,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    item.catIcon,
+                                    size: 24,
+                                    color: item.catIconColor,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Flexible(
+                                    child: Text(
+                                      item.catName,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    item.winnerLabel,
+                                    style: TextStyle(
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
+                                      color: item.winnerTextColor,
                                     ),
                                     textAlign: TextAlign.center,
-                                    maxLines: 2,
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  item.winnerLabel,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: item.winnerTextColor,
+                                  const SizedBox(height: 4),
+                                  _buildPlayerResultRow(
+                                    'あなた',
+                                    item.myBet,
+                                    item.myItem,
+                                    viewModel,
                                   ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'あなた: ${item.myBet}${item.myItem != null ? ' (じゃらし使!)' : ''}',
-                                  style: const TextStyle(fontSize: 10),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  '相手: ${item.opponentBet}${item.opponentItem != null ? ' (じゃらし使!)' : ''}',
-                                  style: const TextStyle(fontSize: 10),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                                  _buildPlayerResultRow(
+                                    '相手',
+                                    item.opponentBet,
+                                    item.opponentItem,
+                                    viewModel,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -195,6 +199,35 @@ class RoundResultView extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPlayerResultRow(
+    String label,
+    int bet,
+    ItemType? item,
+    GameScreenViewModel viewModel,
+  ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Expanded(
+          child: Text(
+            '$label: $bet',
+            style: const TextStyle(fontSize: 10),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (item != null && item != ItemType.unknown)
+          Tooltip(
+            message: item.displayName,
+            child: Icon(
+              viewModel.getItemIconData(item),
+              size: 14,
+              color: Colors.blueAccent,
+            ),
+          ),
+      ],
     );
   }
 }
