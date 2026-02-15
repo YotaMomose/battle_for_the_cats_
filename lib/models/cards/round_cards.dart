@@ -5,6 +5,7 @@ import 'regular_cat.dart';
 import 'item_shop.dart';
 import 'boss_cat.dart';
 import 'fisherman.dart';
+import 'dog.dart';
 
 /// ラウンドで場に出る3枚のカードを表す
 /// 常に3枚のセットとして扱い、型安全性を確保
@@ -48,17 +49,21 @@ class RoundCards {
   /// ランダムなカードを生成するヘルパー
   static GameCard _randomCard(int index) {
     final rand = Random().nextDouble();
-    // 40%の確率でボスねこが出現（テスト用）
-    if (rand < 0.4) {
+    // 10%の確率でボスねこが出現（テスト用）
+    if (rand < 0.1) {
       return BossCat.random(index);
     }
     // 10%の確率でアイテム屋が出現
-    if (rand < 0.5) {
+    if (rand < 0.2) {
       return ItemShop.random(index);
     }
     // 10%の確率で漁師が出現
-    if (rand < 0.6) {
+    if (rand < 0.3) {
       return Fisherman.random(index);
+    }
+    // 10%の確率で犬が出現
+    if (rand < 0.7) {
+      return Dog.random(index);
     }
     return RegularCat.random(index);
   }

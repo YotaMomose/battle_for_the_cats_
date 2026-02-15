@@ -20,6 +20,7 @@ class Player {
   bool abandoned;
   int pendingItemRevivals;
   int fishermanCount;
+  int pendingDogChases;
 
   Player({
     required this.id,
@@ -35,6 +36,7 @@ class Player {
     this.abandoned = false,
     this.pendingItemRevivals = 0,
     this.fishermanCount = 0,
+    this.pendingDogChases = 0,
   }) : catsWon = catsWon ?? CatInventory(),
        currentBets = currentBets ?? Bets(),
        items = items ?? ItemInventory.initial();
@@ -55,6 +57,7 @@ class Player {
       'abandoned': abandoned,
       'pendingItemRevivals': pendingItemRevivals,
       'fishermanCount': fishermanCount,
+      'pendingDogChases': pendingDogChases,
     };
   }
 
@@ -80,6 +83,7 @@ class Player {
       abandoned: map['abandoned'] ?? false,
       pendingItemRevivals: map['pendingItemRevivals'] ?? 0,
       fishermanCount: map['fishermanCount'] ?? 0,
+      pendingDogChases: map['pendingDogChases'] ?? 0,
     );
   }
 
@@ -148,5 +152,6 @@ class Player {
     rolled = false;
     confirmedRoll = false;
     pendingItemRevivals = 0;
+    pendingDogChases = 0;
   }
 }

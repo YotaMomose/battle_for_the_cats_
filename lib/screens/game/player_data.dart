@@ -1,4 +1,5 @@
 import '../../models/game_room.dart';
+import '../../models/chased_card_info.dart';
 import '../../models/bets.dart';
 import '../../models/cat_inventory.dart';
 import '../../models/item_inventory.dart';
@@ -26,6 +27,8 @@ class PlayerData {
   final int myPendingItemRevivals;
   final int myFishermanCount;
   final int opponentFishermanCount;
+  final int myPendingDogChases;
+  final List<ChasedCardInfo> chasedCards;
 
   const PlayerData({
     required this.room,
@@ -47,6 +50,8 @@ class PlayerData {
     required this.myPendingItemRevivals,
     required this.myFishermanCount,
     required this.opponentFishermanCount,
+    required this.myPendingDogChases,
+    required this.chasedCards,
   });
 
   /// 自分の役割
@@ -110,6 +115,8 @@ class PlayerData {
       myPendingItemRevivals: my?.pendingItemRevivals ?? 0,
       myFishermanCount: my?.fishermanCount ?? 0,
       opponentFishermanCount: opponent?.fishermanCount ?? 0,
+      myPendingDogChases: my?.pendingDogChases ?? 0,
+      chasedCards: room.chasedCards,
     );
   }
 }

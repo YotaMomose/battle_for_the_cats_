@@ -589,6 +589,46 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
+  /// 犬の効果を適用できるか
+  bool get canChaseAway => (playerData?.myPendingDogChases ?? 0) > 0;
+
+  /// 犬の効果の残り回数
+  int get remainingDogChases => playerData?.myPendingDogChases ?? 0;
+
+  /// 追い出す対象として選べる相手のカードリスト
+  List<String> get availableTargetsForDog {
+    final data = playerData;
+    if (data == null) return [];
+    return data.opponentCatsWon.names;
+  }
+
+  /// 相手のカードを追い出す
+  Future<void> chaseAwayCard(String? targetCardName) async {
+    try {
+      await _gameService.chaseAwayCard(roomCode, playerId, targetCardName);
+      notifyListeners();
+    } catch (e) {
+      _uiState = _uiState.copyWithError('追い出しに失敗しました: $e');
+      notifyListeners();
+    }
+  }
+
+  /// 犬の効果による通知メッセージリスト
+  List<String> get dogEffectNotifications {
+    final data = playerData;
+    if (data == null) return [];
+
+    return data.chasedCards.map((chased) {
+      if (chased.chaserPlayerId != playerId) {
+        // 相手が自分のカードを追い出した場合
+        return '🐶 相手の犬によって「${chased.cardName}」が逃げてしまいました！';
+      } else {
+        // 自分が相手のカードを追い出した場合
+        return '🐶 あなたの犬が相手の「${chased.cardName}」を追い出しました！';
+      }
+    }).toList();
+  }
+
   @override
   void dispose() {
     _roomSubscription?.cancel();

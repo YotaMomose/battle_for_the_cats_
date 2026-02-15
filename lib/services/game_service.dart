@@ -70,6 +70,12 @@ class GameService {
     ItemType itemType,
   ) => _roomService.reviveItem(roomCode, playerId, itemType);
 
+  Future<void> chaseAwayCard(
+    String roomCode,
+    String playerId,
+    String? targetCardName,
+  ) => _roomService.chaseAwayCard(roomCode, playerId, targetCardName);
+
   Future<void> rollDice(String roomCode, String playerId) =>
       _gameFlowService.rollDice(roomCode, playerId);
   Future<void> placeBets(

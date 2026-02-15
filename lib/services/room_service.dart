@@ -4,6 +4,8 @@ import '../models/game_room.dart';
 import '../models/player.dart';
 import '../repositories/room_repository.dart';
 import '../models/item.dart';
+import '../models/chased_card_info.dart';
+import '../domain/win_condition.dart';
 
 /// ルーム管理を担当するサービス
 class RoomService {
@@ -140,6 +142,70 @@ class RoomService {
 
       _repository.updateRoomInTransaction(transaction, roomCode, {
         isHost ? 'host' : 'guest': player.toMap(),
+      });
+    });
+  }
+
+  /// キャラクターを追い出す（犬の効果）
+  Future<void> chaseAwayCard(
+    String roomCode,
+    String playerId,
+    String? targetCardName,
+  ) async {
+    await _repository.runTransaction((transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) throw Exception('Room not found');
+
+      final isHost = _repository.isHost(room, playerId);
+      final player = isHost ? room.host : room.guest;
+      final opponent = isHost ? room.guest : room.host;
+
+      if (player == null || opponent == null)
+        throw Exception('Player or Opponent not found');
+
+      if (player.pendingDogChases <= 0) {
+        throw Exception('No pending dog chases');
+      }
+
+      // 相手のインベントリから削除（ターゲットが指定されている場合のみ）
+      if (targetCardName != null && targetCardName.isNotEmpty) {
+        opponent.catsWon.removeByName(targetCardName);
+
+        // 通知用に記録
+        room.chasedCards.add(
+          ChasedCardInfo(cardName: targetCardName, chaserPlayerId: playerId),
+        );
+        player.pendingDogChases--;
+      } else {
+        // スキップの場合は残りすべての回数をクリア
+        player.pendingDogChases = 0;
+      }
+
+      // 勝利条件の再評価
+      final hasPendingEffects =
+          room.host.pendingDogChases > 0 ||
+          (room.guest?.pendingDogChases ?? 0) > 0;
+
+      if (!hasPendingEffects) {
+        final condition = StandardWinCondition();
+        room.finalWinner = condition.determineFinalWinner(
+          room.host,
+          room.guest!,
+        );
+        if (room.finalWinner != null) {
+          room.status = GameStatus.finished;
+        }
+      }
+
+      _repository.updateRoomInTransaction(transaction, roomCode, {
+        'host': room.host.toMap(),
+        'guest': room.guest?.toMap(),
+        'finalWinner': room.finalWinner?.value,
+        'status': room.status.value,
+        'chasedCards': room.chasedCards.map((c) => c.toMap()).toList(),
       });
     });
   }

@@ -7,6 +7,7 @@ import 'bets.dart';
 import 'round_result.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
+import 'chased_card_info.dart';
 import '../domain/battle_evaluator.dart';
 import 'cards/card_type.dart';
 
@@ -31,6 +32,9 @@ class GameRoom {
   // 最終勝者
   Winner? finalWinner;
 
+  // 犬の効果で逃がされたカード（通知用）
+  List<ChasedCardInfo> chasedCards;
+
   GameRoom({
     required this.roomId,
     required this.host,
@@ -41,7 +45,8 @@ class GameRoom {
     this.currentRound,
     this.winners,
     this.finalWinner,
-  });
+    List<ChasedCardInfo>? chasedCards,
+  }) : chasedCards = chasedCards ?? [];
 
   String get hostId => host.id;
   String? get guestId => guest?.id;
@@ -57,6 +62,7 @@ class GameRoom {
       'winners': winners?.toMap(),
       'finalWinner': finalWinner?.value,
       'lastRoundResult': lastRoundResult?.toMap(),
+      'chasedCards': chasedCards.map((c) => c.toMap()).toList(),
     };
   }
 
@@ -81,6 +87,9 @@ class GameRoom {
       lastRoundResult: map['lastRoundResult'] != null
           ? RoundResult.fromMap(map['lastRoundResult'])
           : null,
+      chasedCards: (map['chasedCards'] as List?)
+          ?.map((c) => ChasedCardInfo.fromMap(Map<String, dynamic>.from(c)))
+          .toList(),
     );
   }
 
@@ -122,10 +131,19 @@ class GameRoom {
     _applyRoundWinners(winnersMap);
 
     // 5. 最終勝利判定 (Domain Object)
-    finalWinner = condition.determineFinalWinner(host, g);
-    if (finalWinner != null) {
-      status = GameStatus.finished;
+    // 犬の効果がある場合は、効果発動後に判定するため一旦保留
+    final hasPendingDogEffects =
+        host.pendingDogChases > 0 || g.pendingDogChases > 0;
+
+    if (!hasPendingDogEffects) {
+      finalWinner = condition.determineFinalWinner(host, g);
+      if (finalWinner != null) {
+        status = GameStatus.finished;
+      } else {
+        status = GameStatus.roundResult;
+      }
     } else {
+      finalWinner = null;
       status = GameStatus.roundResult;
     }
 
@@ -164,6 +182,9 @@ class GameRoom {
         if (card.cardType == CardType.fisherman) {
           host.fishermanCount++;
         }
+        if (card.cardType == CardType.dog) {
+          host.pendingDogChases++;
+        }
       } else if (winner == Winner.guest) {
         guest?.addWonCat(card.displayName, card.baseCost);
         if (card.cardType == CardType.itemShop ||
@@ -172,6 +193,9 @@ class GameRoom {
         }
         if (card.cardType == CardType.fisherman) {
           guest?.fishermanCount++;
+        }
+        if (card.cardType == CardType.dog) {
+          guest?.pendingDogChases++;
         }
       }
     }
@@ -187,6 +211,7 @@ class GameRoom {
 
     currentRound = nextRoundCards;
     winners = null;
+    chasedCards.clear();
   }
 
   /// 指定されたプレイヤーIDがホストか
