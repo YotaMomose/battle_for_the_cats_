@@ -37,21 +37,18 @@ class RoundResultView extends StatelessWidget {
                 'このターン: あなた $myRoundWins匹 - $opponentRoundWins匹 相手',
                 style: const TextStyle(fontSize: 18),
               ),
+              const SizedBox(height: 12),
+              const Text(
+                '累計: あなた',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              _buildWonCardsIconList(viewModel.myWonCardDetails),
               const SizedBox(height: 8),
-              Text(
-                '累計: あなた ${viewModel.myCatsWonSummary}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              const Text(
+                '累計: 相手',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
-              Text(
-                '累計: 相手 ${viewModel.opponentCatsWonSummary}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              _buildWonCardsIconList(viewModel.opponentWonCardDetails),
               const SizedBox(height: 24),
 
               // 各猫の結果（横並び）
@@ -228,6 +225,27 @@ class RoundResultView extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildWonCardsIconList(List<FinalResultCardInfo> cards) {
+    if (cards.isEmpty) {
+      return const Text(
+        'なし',
+        style: TextStyle(fontSize: 12, color: Colors.grey),
+      );
+    }
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 4,
+      runSpacing: 4,
+      children: cards.map((card) {
+        return Tooltip(
+          message: card.name,
+          child: Icon(card.icon, size: 18, color: card.color),
+        );
+      }).toList(),
     );
   }
 }
