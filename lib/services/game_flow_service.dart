@@ -5,6 +5,7 @@ import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
 import '../models/item.dart';
 import '../domain/dice.dart';
+import '../domain/round_resolver.dart';
 import '../repositories/room_repository.dart';
 
 /// ゲーム進行（サイコロ、賭け、ターン進行）を担当するサービス
@@ -12,11 +13,16 @@ class GameFlowService {
   final RoomRepository _repository;
   final Dice _dice;
   final Random _random;
+  final RoundResolver _roundResolver;
 
-  GameFlowService({required RoomRepository repository, Dice? dice})
-    : _repository = repository,
-      _dice = dice ?? StandardDice(),
-      _random = Random();
+  GameFlowService({
+    required RoomRepository repository,
+    Dice? dice,
+    RoundResolver? roundResolver,
+  }) : _repository = repository,
+       _dice = dice ?? StandardDice(),
+       _random = Random(),
+       _roundResolver = roundResolver ?? RoundResolver();
 
   /// サイコロを振る
   Future<void> rollDice(String roomCode, String playerId) async {
@@ -81,7 +87,7 @@ class GameFlowService {
 
   /// ラウンド結果を判定
   Future<void> _resolveRound(String roomCode, GameRoom room) async {
-    room.resolveRound();
+    _roundResolver.resolve(room);
 
     await _repository.updateRoom(roomCode, room.toMap());
   }

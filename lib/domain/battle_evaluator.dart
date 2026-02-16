@@ -1,6 +1,7 @@
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 
 import '../models/cards/round_cards.dart';
+import '../models/cards/game_card.dart';
 import '../models/player.dart';
 import '../models/round_winners.dart';
 import '../models/item.dart';
@@ -14,63 +15,115 @@ class BattleEvaluator {
 
     for (int i = 0; i < cards.length; i++) {
       final catIndex = i.toString();
-      final card = cards[i];
-      final cost = card.baseCost;
-
-      final hostItem = host.currentBets.getItem(catIndex);
-      final guestItem = guest.currentBets.getItem(catIndex);
-
-      // --- まねきねこの効果 ---
-      // 猫の必要魚数を2倍にする（いずれかが置いていれば適用）
-      final isLuckyCatActive =
-          hostItem == ItemType.luckyCat || guestItem == ItemType.luckyCat;
-      final effectiveCost = isLuckyCatActive ? cost * 2 : cost;
-
-      // --- びっくりホーンの効果 ---
-      // 全員の魚を無効化する
-      final isSurpriseHornActive =
-          hostItem == ItemType.surpriseHorn ||
-          guestItem == ItemType.surpriseHorn;
-
-      int effectiveHostBet = host.currentBets.getBet(catIndex);
-      int effectiveGuestBet = guest.currentBets.getBet(catIndex);
-
-      if (isSurpriseHornActive) {
-        effectiveHostBet = 0;
-        effectiveGuestBet = 0;
-      }
-
-      // --- ねこじゃらしの効果 ---
-      // 相手が魚を置いていなければ、ねこじゃらし使用者が無条件勝利
-      final hostTeaserWins =
-          hostItem == ItemType.catTeaser && effectiveGuestBet == 0;
-      final guestTeaserWins =
-          guestItem == ItemType.catTeaser && effectiveHostBet == 0;
-
-      if (hostTeaserWins && !guestTeaserWins) {
-        winnersMap[catIndex] = Winner.host;
-        continue;
-      } else if (guestTeaserWins && !hostTeaserWins) {
-        winnersMap[catIndex] = Winner.guest;
-        continue;
-      }
-      // 両者がねこじゃらしを使い、両者の魚が0の場合は引き分け（通常ロジックへ）
-      // -----------------------
-
-      final hostQualified = effectiveHostBet >= effectiveCost;
-      final guestQualified = effectiveGuestBet >= effectiveCost;
-
-      if (hostQualified &&
-          (!guestQualified || effectiveHostBet > effectiveGuestBet)) {
-        winnersMap[catIndex] = Winner.host;
-      } else if (guestQualified &&
-          (!hostQualified || effectiveGuestBet > effectiveHostBet)) {
-        winnersMap[catIndex] = Winner.guest;
-      } else {
-        winnersMap[catIndex] = Winner.draw;
-      }
+      winnersMap[catIndex] = _evaluateSingleCat(
+        cards[i],
+        catIndex,
+        host,
+        guest,
+      );
     }
 
     return RoundWinners(winnersMap);
+  }
+
+  /// 1匹の猫に対する勝敗を判定する
+  Winner _evaluateSingleCat(
+    GameCard card,
+    String catIndex,
+    Player host,
+    Player guest,
+  ) {
+    final hostItem = host.currentBets.getItem(catIndex);
+    final guestItem = guest.currentBets.getItem(catIndex);
+
+    // 1. 各種効果を適用した実効コストと実効賭け金を算出
+    final effectiveCost = _calculateEffectiveCost(
+      card.baseCost,
+      hostItem,
+      guestItem,
+    );
+    final (hostBet, guestBet) = _calculateEffectiveBets(
+      catIndex,
+      host,
+      guest,
+      hostItem,
+      guestItem,
+    );
+
+    // 2. ねこじゃらしによる特殊勝利判定
+    final teaserWinner = _checkTeaserVictory(
+      hostItem,
+      guestItem,
+      hostBet,
+      guestBet,
+    );
+    if (teaserWinner != null) return teaserWinner;
+
+    // 3. 通常の賭け金比較による勝敗判定
+    return _determineWinner(effectiveCost, hostBet, guestBet);
+  }
+
+  /// まねきねこの効果を適用したコストを計算
+  int _calculateEffectiveCost(
+    int cost,
+    ItemType? hostItem,
+    ItemType? guestItem,
+  ) {
+    final isLuckyCatActive =
+        hostItem == ItemType.luckyCat || guestItem == ItemType.luckyCat;
+    return isLuckyCatActive ? cost * 2 : cost;
+  }
+
+  /// びっくりホーンの効果を適用した賭け金を算出
+  (int, int) _calculateEffectiveBets(
+    String catIndex,
+    Player host,
+    Player guest,
+    ItemType? hostItem,
+    ItemType? guestItem,
+  ) {
+    final isSurpriseHornActive =
+        hostItem == ItemType.surpriseHorn || guestItem == ItemType.surpriseHorn;
+
+    if (isSurpriseHornActive) {
+      return (0, 0);
+    }
+
+    return (
+      host.currentBets.getBet(catIndex),
+      guest.currentBets.getBet(catIndex),
+    );
+  }
+
+  /// ねこじゃらしによる特殊勝利があるか判定
+  Winner? _checkTeaserVictory(
+    ItemType? hostItem,
+    ItemType? guestItem,
+    int hostBet,
+    int guestBet,
+  ) {
+    final hostTeaserWins = hostItem == ItemType.catTeaser && guestBet == 0;
+    final guestTeaserWins = guestItem == ItemType.catTeaser && hostBet == 0;
+
+    if (hostTeaserWins && !guestTeaserWins) {
+      return Winner.host;
+    } else if (guestTeaserWins && !hostTeaserWins) {
+      return Winner.guest;
+    }
+    return null;
+  }
+
+  /// 通常の賭け金比較による勝者を決定
+  Winner _determineWinner(int cost, int hostBet, int guestBet) {
+    final hostQualified = hostBet >= cost;
+    final guestQualified = guestBet >= cost;
+
+    if (hostQualified && (!guestQualified || hostBet > guestBet)) {
+      return Winner.host;
+    } else if (guestQualified && (!hostQualified || guestBet > hostBet)) {
+      return Winner.guest;
+    } else {
+      return Winner.draw;
+    }
   }
 }

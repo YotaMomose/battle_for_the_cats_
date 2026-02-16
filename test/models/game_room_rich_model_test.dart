@@ -4,10 +4,12 @@ import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
+import 'package:battle_for_the_cats/domain/round_resolver.dart';
 
 void main() {
   group('GameRoom Rich Domain Model Tests', () {
     late GameRoom room;
+    late RoundResolver resolver;
 
     setUp(() {
       room = GameRoom(
@@ -15,6 +17,7 @@ void main() {
         host: Player(id: 'h'),
         guest: Player(id: 'g'),
       );
+      resolver = RoundResolver();
     });
 
     test('canStartRound should be true when both ready', () {
@@ -49,10 +52,10 @@ void main() {
         {'0': null, '1': null, '2': null},
       );
 
-      room.resolveRound();
+      resolver.resolve(room);
 
-      expect(room.host.catsWon, contains('Cat1'));
-      expect(room.guest?.catsWon, contains('Cat2'));
+      expect(room.host.wonCatNames, contains('Cat1'));
+      expect(room.guest?.wonCatNames, contains('Cat2'));
       expect(room.status, GameStatus.roundResult);
       expect(room.lastRoundResult?.winners, isNotNull);
       expect(room.host.confirmedRoundResult, isFalse);

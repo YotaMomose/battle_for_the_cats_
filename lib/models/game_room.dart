@@ -1,6 +1,5 @@
 import 'dart:math';
 import '../constants/game_constants.dart';
-import '../domain/win_condition.dart';
 import 'cards/round_cards.dart';
 import 'player.dart';
 import 'bets.dart';
@@ -8,8 +7,8 @@ import 'round_result.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
 import 'chased_card_info.dart';
-import '../domain/battle_evaluator.dart';
 import 'cards/card_type.dart';
+import 'cards/game_card.dart';
 
 class GameRoom {
   final String roomId;
@@ -113,53 +112,13 @@ class GameRoom {
   bool get bothConfirmedFatCatEvent =>
       host.confirmedFatCatEvent && (guest?.confirmedFatCatEvent ?? false);
 
-  /// ラウンド結果を判定し、自身に適用する
-  void resolveRound({WinCondition? winCondition}) {
-    final g = guest;
-    if (g == null) return;
+  // ===== Domain Methods =====
 
-    final condition = winCondition ?? StandardWinCondition();
-    final evaluator = BattleEvaluator();
+  /// ラウンドの結果をルームの状態に反映する
+  void applyRoundResults(RoundWinners winnersMap) {
+    this.winners = winnersMap;
 
-    // 1. 各猫について勝敗を判定 (Domain Service)
-    final winnersMap = evaluator.evaluate(currentRound!, host, g);
-
-    // 2. 履歴の記録
-    _recordRoundResult(winnersMap);
-
-    // 3. コストの支払い（魚とアイテム消費）
-    host.payCosts();
-    g.payCosts();
-
-    // 4. プレイヤーへの猫の付与
-    _applyRoundWinners(winnersMap);
-
-    // 5. 最終勝利判定 (Domain Object)
-    // 犬の効果がある場合は、効果発動後に判定するため一旦保留
-    final hasPendingDogEffects =
-        host.pendingDogChases > 0 || g.pendingDogChases > 0;
-
-    if (!hasPendingDogEffects) {
-      finalWinner = condition.determineFinalWinner(host, g);
-      if (finalWinner != null) {
-        status = GameStatus.finished;
-      } else {
-        status = GameStatus.roundResult;
-      }
-    } else {
-      finalWinner = null;
-      status = GameStatus.roundResult;
-    }
-
-    winners = winnersMap;
-
-    // 確認フラグをリセット
-    host.confirmedRoundResult = false;
-    g.confirmedRoundResult = false;
-  }
-
-  /// 獲得情報（履歴）を保存する
-  void _recordRoundResult(RoundWinners winnersMap) {
+    // 1. 履歴の記録
     final cards = currentRound?.toList() ?? [];
     lastRoundResult = RoundResult(
       cats: cards
@@ -169,39 +128,57 @@ class GameRoom {
       hostBets: host.currentBets,
       guestBets: guest?.currentBets ?? Bets.empty(),
     );
-  }
 
-  /// 勝者に基づいてプレイヤーに猫とコストを付与する
-  void _applyRoundWinners(RoundWinners winnersMap) {
-    final cards = currentRound?.toList() ?? [];
+    // 2. コストの支払い（魚とアイテム消費）
+    host.payCosts();
+    guest?.payCosts();
+
+    // 3. プレイヤーへの猫・特殊効果の付与
     for (int i = 0; i < cards.length; i++) {
       final winner = winnersMap.at(i);
       final card = cards[i];
       if (winner == Winner.host) {
-        host.addWonCat(card.displayName, card.baseCost);
-        if (card.cardType == CardType.itemShop ||
-            card.cardType == CardType.bossKitty) {
-          host.pendingItemRevivals++;
-        }
-        if (card.cardType == CardType.fisherman) {
-          host.fishermanCount++;
-        }
-        if (card.cardType == CardType.dog) {
-          host.pendingDogChases++;
-        }
-      } else if (winner == Winner.guest) {
-        guest?.addWonCat(card.displayName, card.baseCost);
-        if (card.cardType == CardType.itemShop ||
-            card.cardType == CardType.bossKitty) {
-          guest?.pendingItemRevivals++;
-        }
-        if (card.cardType == CardType.fisherman) {
-          guest?.fishermanCount++;
-        }
-        if (card.cardType == CardType.dog) {
-          guest?.pendingDogChases++;
-        }
+        _assignCardToPlayer(host, card);
+      } else if (winner == Winner.guest && guest != null) {
+        _assignCardToPlayer(guest!, card);
       }
+    }
+
+    // 4. 確認フラグのリセット
+    host.confirmedRoundResult = false;
+    guest?.confirmedRoundResult = false;
+  }
+
+  /// 指定したプレイヤーにカードを付与し、特殊効果の保留数を更新する
+  void _assignCardToPlayer(Player player, GameCard card) {
+    player.addWonCat(card.displayName, card.baseCost);
+
+    switch (card.cardType) {
+      case CardType.itemShop:
+      case CardType.bossKitty:
+        player.pendingItemRevivals++;
+        break;
+      case CardType.fisherman:
+        player.fishermanCount++;
+        break;
+      case CardType.dog:
+        player.pendingDogChases++;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /// ラウンド終了後のステータスと最終勝者を更新する
+  void updatePostRoundState(
+    Winner? newFinalWinner, {
+    required bool hasPendingEffects,
+  }) {
+    finalWinner = newFinalWinner;
+    if (finalWinner != null) {
+      status = GameStatus.finished;
+    } else {
+      status = GameStatus.roundResult;
     }
   }
 
