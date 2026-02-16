@@ -1,7 +1,5 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../constants/game_constants.dart';
-import '../models/cards/round_cards.dart';
 import '../models/game_room.dart';
 import '../models/item.dart';
 import '../domain/dice.dart';
@@ -12,7 +10,6 @@ import '../repositories/room_repository.dart';
 class GameFlowService {
   final RoomRepository _repository;
   final Dice _dice;
-  final Random _random;
   final RoundResolver _roundResolver;
 
   GameFlowService({
@@ -21,7 +18,6 @@ class GameFlowService {
     RoundResolver? roundResolver,
   }) : _repository = repository,
        _dice = dice ?? StandardDice(),
-       _random = Random(),
        _roundResolver = roundResolver ?? RoundResolver();
 
   /// サイコロを振る
@@ -105,29 +101,9 @@ class GameFlowService {
 
       final room = GameRoom.fromMap(snapshot.data()!);
 
-      // 自分の確認フラグを立てる
-      final isHost = room.isHost(playerId);
-      final player = isHost ? room.host : room.guest;
-      if (player != null) {
-        player.confirmedRoundResult = true;
-      }
-
-      // 両者が確認済みになったら、次のターンの準備、あるいはイベント発生
-      if (room.bothConfirmedRoundResult &&
-          room.status == GameStatus.roundResult) {
-        // 50%の確率で太っちょネコイベント発生
-        if (_random.nextDouble() < GameConstants.fatCatEventProbability) {
-          room.status = GameStatus.fatCatEvent;
-          // 両者の魚を没収
-          room.host.fishCount = 0;
-          if (room.guest != null) {
-            room.guest!.fishCount = 0;
-          }
-        } else {
-          // 通常通り次へ
-          room.prepareNextTurn(RoundCards.random());
-        }
-      }
+      // ドメイン層に確認と遷移を委譲
+      room.confirmRoundResult(playerId);
+      _roundResolver.advanceFromRoundResult(room);
 
       transaction.update(roomRef, room.toMap());
     });
@@ -144,18 +120,10 @@ class GameFlowService {
       if (!snapshot.exists || snapshot.data() == null) return;
 
       final room = GameRoom.fromMap(snapshot.data()!);
-      if (room.status != GameStatus.fatCatEvent) return;
 
-      final isHost = room.isHost(playerId);
-      final player = isHost ? room.host : room.guest;
-      if (player != null) {
-        player.confirmedFatCatEvent = true;
-      }
-
-      // 両者が確認済みになったら、次のターンの準備をする
-      if (room.bothConfirmedFatCatEvent) {
-        room.prepareNextTurn(RoundCards.random());
-      }
+      // ドメイン層に確認と遷移を委譲
+      room.confirmFatCatEvent(playerId);
+      _roundResolver.advanceFromFatCatEvent(room);
 
       transaction.update(roomRef, room.toMap());
     });

@@ -62,6 +62,35 @@ void main() {
       expect(room.guest?.confirmedRoundResult, isFalse);
     });
 
+    test('confirmRoundResult should update individual flags', () {
+      room.confirmRoundResult('h');
+      expect(room.host.confirmedRoundResult, isTrue);
+      expect(room.guest?.confirmedRoundResult, isFalse);
+
+      room.confirmRoundResult('g');
+      expect(room.guest?.confirmedRoundResult, isTrue);
+    });
+
+    test('triggerFatCatEvent should change status and clear fish', () {
+      room.host.fishCount = 5;
+      room.guest?.fishCount = 10;
+
+      room.triggerFatCatEvent();
+
+      expect(room.status, GameStatus.fatCatEvent);
+      expect(room.host.fishCount, 0);
+      expect(room.guest?.fishCount, 0);
+    });
+
+    test('confirmFatCatEvent should update individual flags', () {
+      room.confirmFatCatEvent('h');
+      expect(room.host.confirmedFatCatEvent, isTrue);
+      expect(room.guest?.confirmedFatCatEvent, isFalse);
+
+      room.confirmFatCatEvent('g');
+      expect(room.guest?.confirmedFatCatEvent, isTrue);
+    });
+
     test('prepareNextTurn should increment turn and reset players', () {
       room.currentTurn = 1;
       room.status = GameStatus.roundResult;

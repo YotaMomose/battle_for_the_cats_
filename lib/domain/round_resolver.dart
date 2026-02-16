@@ -1,4 +1,6 @@
+import 'dart:math';
 import '../models/game_room.dart';
+import '../models/cards/round_cards.dart';
 import '../constants/game_constants.dart';
 import 'battle_evaluator.dart';
 import 'win_condition.dart';
@@ -7,10 +9,15 @@ import 'win_condition.dart';
 class RoundResolver {
   final BattleEvaluator _evaluator;
   final WinCondition _winCondition;
+  final Random _random;
 
-  RoundResolver({BattleEvaluator? evaluator, WinCondition? winCondition})
-    : _evaluator = evaluator ?? BattleEvaluator(),
-      _winCondition = winCondition ?? StandardWinCondition();
+  RoundResolver({
+    BattleEvaluator? evaluator,
+    WinCondition? winCondition,
+    Random? random,
+  }) : _evaluator = evaluator ?? BattleEvaluator(),
+       _winCondition = winCondition ?? StandardWinCondition(),
+       _random = random ?? Random();
 
   /// ラウンドの結果を判定し、ルームの状態を更新する
   void resolve(GameRoom room) {
@@ -42,5 +49,28 @@ class RoundResolver {
       finalWinner,
       hasPendingEffects: hasPendingEffects,
     );
+  }
+
+  /// ラウンド結果画面から次へ進む
+  void advanceFromRoundResult(GameRoom room) {
+    if (!room.bothConfirmedRoundResult) return;
+    if (room.status != GameStatus.roundResult) return;
+
+    // 50%の確率で太っちょネコイベント発生
+    if (_random.nextDouble() < GameConstants.fatCatEventProbability) {
+      room.triggerFatCatEvent();
+    } else {
+      // 通常通り次へ
+      room.prepareNextTurn(RoundCards.random());
+    }
+  }
+
+  /// 太っちょネコイベント画面から次へ進む
+  void advanceFromFatCatEvent(GameRoom room) {
+    if (!room.bothConfirmedFatCatEvent) return;
+    if (room.status != GameStatus.fatCatEvent) return;
+
+    // 確認後に次のターンへ
+    room.prepareNextTurn(RoundCards.random());
   }
 }

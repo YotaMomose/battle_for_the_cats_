@@ -182,6 +182,32 @@ class GameRoom {
     }
   }
 
+  /// 指定されたプレイヤーのラウンド結果確認フラグを立てる
+  void confirmRoundResult(String playerId) {
+    if (isHost(playerId)) {
+      host.confirmedRoundResult = true;
+    } else {
+      guest?.confirmedRoundResult = true;
+    }
+  }
+
+  /// 指定されたプレイヤーの太っちょネコイベント確認フラグを立てる
+  void confirmFatCatEvent(String playerId) {
+    if (isHost(playerId)) {
+      host.confirmedFatCatEvent = true;
+    } else {
+      guest?.confirmedFatCatEvent = true;
+    }
+  }
+
+  /// 太っちょネコイベントを発生させる
+  void triggerFatCatEvent() {
+    status = GameStatus.fatCatEvent;
+    // 両者の魚を没収
+    host.fishCount = 0;
+    guest?.fishCount = 0;
+  }
+
   /// 次のターンの準備をする
   void prepareNextTurn(RoundCards nextRoundCards) {
     currentTurn++;
