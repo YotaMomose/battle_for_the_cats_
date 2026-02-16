@@ -49,7 +49,7 @@ class RoundCards {
   /// ランダムなカードを生成するヘルパー
   static GameCard _randomCard(int index) {
     final rand = Random().nextDouble();
-    // 10%の確率でボスねこが出現（テスト用）
+    // 10%の確率でボスねこが出現
     if (rand < 0.1) {
       return BossCat.random(index);
     }
@@ -62,7 +62,7 @@ class RoundCards {
       return Fisherman.random(index);
     }
     // 10%の確率で犬が出現
-    if (rand < 0.7) {
+    if (rand < 0.4) {
       return Dog.random(index);
     }
     return RegularCat.random(index);

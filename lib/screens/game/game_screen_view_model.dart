@@ -88,6 +88,12 @@ class GameScreenViewModel extends ChangeNotifier {
   bool get hasPlacedBet => _hasPlacedBet;
   Map<String, int> get bets => _bets.toMap();
   int get totalBet => _bets.total;
+  bool get isWaiting => _uiState is WaitingState;
+  bool get isRolling => _uiState is RollingState;
+  bool get isPlaying => _uiState is PlayingState;
+  bool get isRoundResult => _uiState is RoundResultState;
+  bool get isFinished => _uiState is FinishedState;
+  bool get isFatCatEvent => _uiState is FatCatEventState;
   ItemType? getPlacedItem(String catIndex) => _bets.getItem(catIndex);
 
   /// プレイヤーデータ（計算プロパティ）
@@ -444,6 +450,9 @@ class GameScreenViewModel extends ChangeNotifier {
       case GameStatus.finished:
         _uiState = GameScreenState.finished(room);
         break;
+      case GameStatus.fatCatEvent:
+        _uiState = GameScreenState.fatCatEvent(room);
+        break;
     }
   }
 
@@ -512,6 +521,16 @@ class GameScreenViewModel extends ChangeNotifier {
       await _gameService.nextTurn(roomCode, playerId);
     } catch (e) {
       _uiState = _uiState.copyWithError('次のターンに進めませんでした: $e');
+      notifyListeners();
+    }
+  }
+
+  /// 太っちょネコイベントを承認する
+  Future<void> confirmFatCatEvent() async {
+    try {
+      await _gameService.confirmFatCatEvent(roomCode, playerId);
+    } catch (e) {
+      _uiState = _uiState.copyWithError('太っちょネコイベントの承認に失敗しました: $e');
       notifyListeners();
     }
   }

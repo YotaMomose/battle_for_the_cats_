@@ -8,6 +8,7 @@ import 'game/views/rolling_phase_view.dart';
 import 'game/views/betting_phase_view.dart';
 import 'game/views/round_result_view.dart';
 import 'game/views/final_result_view.dart';
+import 'game/views/fat_cat_event_view.dart';
 import '../services/game_service.dart';
 
 /// ゲーム画面（MVVM）
@@ -86,7 +87,10 @@ class _GameScreenContent extends StatelessWidget {
       PlayingState(:final room) => BettingPhaseView(room: room),
       RoundResultState(:final room) => RoundResultView(room: room),
       FinishedState(:final room) => FinalResultView(room: room),
-      _ => const Center(child: Text('不明な状態')),
+      FatCatEventState(:final room) => FatCatEventView(
+        room: room,
+        onConfirm: vm.confirmFatCatEvent,
+      ),
     };
   }
 

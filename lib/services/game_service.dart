@@ -88,4 +88,6 @@ class GameService {
       _gameFlowService.confirmRoll(roomCode, playerId);
   Future<void> nextTurn(String roomCode, String playerId) =>
       _gameFlowService.nextTurn(roomCode, playerId);
+  Future<void> confirmFatCatEvent(String roomCode, String playerId) =>
+      _gameFlowService.confirmFatCatEvent(roomCode, playerId);
 }

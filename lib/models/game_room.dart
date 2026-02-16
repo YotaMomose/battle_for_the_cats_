@@ -105,9 +105,13 @@ class GameRoom {
   bool get bothConfirmedRoll =>
       host.confirmedRoll && (guest?.confirmedRoll ?? false);
 
-  /// 両プレイヤーがラウンド結果を確認したか
+  /// 両者がラウンド結果を確認したか
   bool get bothConfirmedRoundResult =>
       host.confirmedRoundResult && (guest?.confirmedRoundResult ?? false);
+
+  /// 両者が太っちょネコイベントを確認したか
+  bool get bothConfirmedFatCatEvent =>
+      host.confirmedFatCatEvent && (guest?.confirmedFatCatEvent ?? false);
 
   /// ラウンド結果を判定し、自身に適用する
   void resolveRound({WinCondition? winCondition}) {

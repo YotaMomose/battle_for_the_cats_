@@ -1,7 +1,7 @@
 import '../../models/game_room.dart';
 
 /// ゲーム画面の状態を表す抽象クラス
-abstract class GameScreenState {
+sealed class GameScreenState {
   final String? errorMessage;
   final bool isOpponentLeft;
 
@@ -13,6 +13,7 @@ abstract class GameScreenState {
   factory GameScreenState.playing(GameRoom room) = PlayingState;
   factory GameScreenState.roundResult(GameRoom room) = RoundResultState;
   factory GameScreenState.finished(GameRoom room) = FinishedState;
+  factory GameScreenState.fatCatEvent(GameRoom room) = FatCatEventState;
 
   GameScreenState copyWithError(String error);
   GameScreenState copyWithOpponentLeft();
@@ -129,6 +130,30 @@ class FinishedState extends GameScreenState {
   @override
   FinishedState copyWithOpponentLeft() {
     return FinishedState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: true,
+    );
+  }
+}
+
+/// 太っちょネコイベント
+class FatCatEventState extends GameScreenState {
+  final GameRoom room;
+  const FatCatEventState(this.room, {super.errorMessage, super.isOpponentLeft});
+
+  @override
+  GameScreenState copyWithError(String error) {
+    return FatCatEventState(
+      room,
+      errorMessage: error,
+      isOpponentLeft: isOpponentLeft,
+    );
+  }
+
+  @override
+  FatCatEventState copyWithOpponentLeft() {
+    return FatCatEventState(
       room,
       errorMessage: errorMessage,
       isOpponentLeft: true,

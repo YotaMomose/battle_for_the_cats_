@@ -17,6 +17,9 @@ class GameConstants {
 
   // マッチング
   static const int matchmakingSearchLimit = 10; // マッチング検索数上限
+
+  // イベント
+  static const double fatCatEventProbability = 0.5; // 太っちょネコイベント発生確率
 }
 
 /// ゲーム状態
@@ -25,6 +28,7 @@ enum GameStatus {
   rolling('rolling'),
   playing('playing'),
   roundResult('roundResult'),
+  fatCatEvent('fatCatEvent'),
   finished('finished');
 
   const GameStatus(this.value);
