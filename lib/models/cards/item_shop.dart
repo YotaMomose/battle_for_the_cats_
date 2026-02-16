@@ -46,7 +46,7 @@ class ItemShop implements GameCard {
   factory ItemShop.fromMap(Map<String, dynamic> map) {
     return ItemShop(
       id: map['id'] ?? '',
-      displayName: map['displayName'] ?? 'アイテム屋',
+      displayName: map['displayName'] ?? GameConstants.itemShop,
       baseCost: map['baseCost'] ?? 1,
     );
   }
@@ -60,7 +60,7 @@ class ItemShop implements GameCard {
 
     return ItemShop(
       id: 'item_shop_${DateTime.now().millisecondsSinceEpoch}_$index',
-      displayName: 'アイテム屋',
+      displayName: GameConstants.itemShop,
       baseCost: cost,
     );
   }

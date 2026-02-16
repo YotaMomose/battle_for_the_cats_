@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/game_room.dart';
-import '../../models/won_cat.dart';
 import '../../models/bets.dart';
 import '../../models/item.dart';
 import '../../models/cat_inventory.dart';
@@ -188,19 +187,19 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 猫の名前に応じて色を返す（内部用ヘルパー）
   Color _getCatColor(String catName) {
-    if (catName.contains('茶トラねこ')) {
+    if (catName.contains(GameConstants.catOrange)) {
       return Colors.orange;
     }
-    if (catName.contains('白ねこ')) {
+    if (catName.contains(GameConstants.catWhite)) {
       return Colors.grey[300]!;
     }
-    if (catName.contains('黒ねこ')) {
+    if (catName.contains(GameConstants.catBlack)) {
       return Colors.grey[800]!;
     }
-    if (catName == 'アイテム屋') {
+    if (catName == GameConstants.itemShop) {
       return Colors.blue;
     }
-    if (catName == '漁師') {
+    if (catName == GameConstants.fisherman) {
       return Colors.cyan;
     }
     return Colors.grey;
@@ -211,10 +210,10 @@ class GameScreenViewModel extends ChangeNotifier {
     if (catName.startsWith('ボス')) {
       return Icons.stars;
     }
-    if (catName == 'アイテム屋') {
+    if (catName == GameConstants.itemShop) {
       return Icons.store;
     }
-    if (catName == '漁師') {
+    if (catName == GameConstants.fisherman) {
       return Icons.sailing;
     }
     return Icons.pets;
@@ -223,9 +222,9 @@ class GameScreenViewModel extends ChangeNotifier {
   /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
   String _formatCatsSummary(CatInventory inventory) {
     final counts = inventory.countByName();
-    final brown = counts['茶トラねこ'] ?? 0;
-    final white = counts['白ねこ'] ?? 0;
-    final black = counts['黒ねこ'] ?? 0;
+    final brown = counts[GameConstants.catOrange] ?? 0;
+    final white = counts[GameConstants.catWhite] ?? 0;
+    final black = counts[GameConstants.catBlack] ?? 0;
     return '茶トラ$brown匹 白$white匹 黒$black匹';
   }
 

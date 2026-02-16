@@ -46,7 +46,7 @@ class Fisherman implements GameCard {
   factory Fisherman.fromMap(Map<String, dynamic> map) {
     return Fisherman(
       id: map['id'] ?? '',
-      displayName: map['displayName'] ?? '漁師',
+      displayName: map['displayName'] ?? GameConstants.fisherman,
       baseCost: map['baseCost'] ?? 1,
     );
   }
@@ -60,7 +60,7 @@ class Fisherman implements GameCard {
 
     return Fisherman(
       id: 'fisherman_${DateTime.now().millisecondsSinceEpoch}_$index',
-      displayName: '漁師',
+      displayName: GameConstants.fisherman,
       baseCost: cost,
     );
   }

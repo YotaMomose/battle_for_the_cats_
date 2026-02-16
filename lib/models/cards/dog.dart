@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../../constants/game_constants.dart';
 import 'game_card.dart';
 import 'card_type.dart';
 import 'card_effect.dart';
@@ -38,7 +39,7 @@ class Dog implements GameCard {
   factory Dog.fromMap(Map<String, dynamic> map) {
     return Dog(
       id: map['id'] ?? '',
-      displayName: map['displayName'] ?? '犬',
+      displayName: map['displayName'] ?? GameConstants.dog,
       baseCost: map['baseCost'] ?? 1,
     );
   }
@@ -49,7 +50,7 @@ class Dog implements GameCard {
     final cost = random.nextInt(4) + 1; // 1-4
     return Dog(
       id: 'dog_${DateTime.now().millisecondsSinceEpoch}_$index',
-      displayName: '犬',
+      displayName: GameConstants.dog,
       baseCost: cost,
     );
   }
