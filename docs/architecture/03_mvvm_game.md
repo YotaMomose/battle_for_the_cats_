@@ -21,6 +21,7 @@
     - `rolling`: サイコロフェーズ。
     - `playing`: ベット中。
     - `round_result`: ラウンド結果。
+    - `fat_cat_event`: 太っちょネコイベント発生。
     - `finished`: ゲーム終了。
 
 ## PlayerData の役割
@@ -47,9 +48,10 @@ class PlayerData {
 - `updateBet()`: ローカル状態の `Bets` を更新。
 - `placeBets()`: `ready: true` と共に現在の `Bets` を送信。
 
-### 3. 進行操作 (`nextTurn`)
-- `confirmedRoundResult: true` に更新。
-- フィールドが両者埋まると、バックエンド（GameFlowService）側で次のターンへ移行。
+### 3. 進行操作 (`nextTurn` / `confirmFatCatEvent`)
+- `nextTurn()`: ラウンド結果を確認完了 (`confirmedRoundResult: true`) に更新。
+- `confirmFatCatEvent()`: 太っちょネコイベントの確認完了 (`confirmedFatCatEvent: true`) に更新。
+- 両者が確認完了すると、ドメイン層の `RoundResolver` を通じて次の状態へ移行。
 
 ### 4. 退出操作 (`leaveRoom`)
 - **条件付き削除**:

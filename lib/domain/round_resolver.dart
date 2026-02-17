@@ -56,7 +56,7 @@ class RoundResolver {
     if (!room.bothConfirmedRoundResult) return;
     if (room.status != GameStatus.roundResult) return;
 
-    // 50%の確率で太っちょネコイベント発生
+    // 太っちょネコイベント発生
     if (_random.nextDouble() < GameConstants.fatCatEventProbability) {
       room.triggerFatCatEvent();
     } else {

@@ -116,7 +116,7 @@ class GameRoom {
 
   /// ラウンドの結果をルームの状態に反映する
   void applyRoundResults(RoundWinners winnersMap) {
-    this.winners = winnersMap;
+    winners = winnersMap;
 
     // 1. 履歴の記録
     final cards = currentRound?.toList() ?? [];

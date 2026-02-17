@@ -109,12 +109,40 @@ sequenceDiagram
     G->>FS: placeBets(Map) → ready: true
     
     Note over FS: 全員 ready
-    FS->>BE: evaluate(cats, host, guest)
-    BE-->>FS: RoundResult生成
-    FS->>FS: 魚の消費・猫の付与・statusを roundResult に更新
+    FS->>RR: resolve(room)
+    RR->>BE: evaluate(cats, host, guest)
+    BE-->>RR: RoundWinners生成
+    RR->>GR: applyRoundResults(winnersMap)
+    GR->>GR: 魚の消費・猫の付与・statusを roundResult に更新
+    GR-->>FS: データ保存
 ```
 
-### 3.3 退出処理 (Transaction)
+### 3.3 ラウンド終了と次ターン遷移 (RoundResolver)
+
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant GS as GameFlowService
+    participant RR as RoundResolver
+    participant GR as GameRoom
+    participant FS as Firestore
+    
+    P->>GS: nextTurn(roomCode, playerId)
+    GS->>GR: confirmRoundResult(playerId)
+    GS->>RR: advanceFromRoundResult(room)
+    
+    alt イベント発生 (例: FatCatEvent)
+        RR->>GR: triggerFatCatEvent()
+        GR->>GR: status = fatCatEvent, 魚全没収
+    else 通常遷移
+        RR->>GR: prepareNextTurn(nextCards)
+        GR->>GR: ターンのインクリメント, status = rolling
+    end
+    
+    GS->>FS: updateRoom()
+```
+
+### 3.4 退出処理 (Transaction)
 レースコンディションを防ぎ、最新の状態に基づいて削除を判定するため、トランザクションを使用します。
 
 ```mermaid

@@ -52,6 +52,7 @@ lib/
 │
 ├── domain/                                      【ドメイン層：純粋ロジック】
 │   ├── battle_evaluator.dart                   (37行) - 勝敗捕捉判定
+│   ├── round_resolver.dart                     (約60行) - ラウンド遷移制御
 │   ├── dice.dart                               (21行) - サイコロインターフェース
 │   └── win_condition.dart                      (52行) - 勝利条件判定
 │
@@ -64,9 +65,13 @@ lib/
 │   ├── won_cat.dart                            (約20行) - 獲得した猫のデータ
 │   ├── cat_inventory.dart                      (約50行) - 猫のコレクション
 │   └── cards/                                   【カード定義（静的データ）】
-│       ├── round_cards.dart                    (約50行) - ラウンドの3枚
+│       ├── round_cards.dart                    (約80行) - ラウンドの3枚
 │       ├── game_card.dart                      (約40行) - 基本カード
-│       └── regular_cat.dart                    (約60行) - 通常の猫
+│       ├── regular_cat.dart                    (約70行) - 通常の猫
+│       ├── boss_cat.dart                       (約70行) - ボス猫
+│       ├── fisherman.dart                      (約60行) - 漁師
+│       ├── item_shop.dart                      (約60行) - アイテム屋
+│       └── dog.dart                             (約70行) - 犬
 │
 ├── repositories/                                【リポジトリ層：データアクセス】
 │   ├── firestore_repository.dart               (104行)
@@ -183,11 +188,11 @@ lib/repositories/
 |---|---|---|---|
 | **Presentation** | 15 | 約2,400行 | ViewModelや詳細UIの分割が進んでいる |
 | **Service** | 4 | 約500行 | マッチングとゲームフローに重み |
-| **Domain** | 3 | 約110行 | 密度の高い純粋ロジック |
-| **Models** | 10 | 約700行 | データ構造とカプセル化されたロジック |
+| **Domain** | 4 | 約170行 | RoundResolverによるオーケストレーション |
+| **Models** | 16 | 約1,100行 | 特殊カードクラスの拡充 |
 | **Repository** | 2 | 約200行 | 抽象化により簡潔 |
-| **Constants** | 1 | 72行 | 定数・Enumの集約 |
-| **合計** | 35 | 約4,000行 | 大規模なリファクタリングにより整合性が向上 |
+| **Constants** | 1 | 80行 | 定数・Enumの集約 |
+| **合計** | 42 | 約4,450行 | 機能追加に伴いモデルとドメインが成長 |
 
 **考察**:
 - 1ファイルあたり平均100行程度で適切に分割

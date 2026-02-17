@@ -24,6 +24,7 @@ classDiagram
         +confirmRoll() Future
         +placeBets() Future
         +nextTurn() Future
+        +confirmFatCatEvent() Future
     }
     
     %% Service Layer
@@ -37,10 +38,19 @@ classDiagram
     class GameFlowService {
         -RoomRepository _repository
         -Dice _dice
+        -RoundResolver _roundResolver
         +rollDice(roomCode, playerId) Future
         +confirmRoll(roomCode, playerId) Future
-        +placeBets(roomCode, playerId, bets) Future
+        +placeBets(roomCode, playerId, bets, itemPlacements) Future
         +nextTurn(roomCode, playerId) Future
+        +confirmFatCatEvent(roomCode, playerId) Future
+    }
+
+    class RoundResolver {
+        -Random _random
+        +resolve(room) void
+        +advanceFromRoundResult(room) void
+        +advanceFromFatCatEvent(room) void
     }
     
     %% Domain Layer
@@ -67,7 +77,10 @@ classDiagram
         +GameStatus status
         +RoundCards? currentRound
         +RoundWinners? winners
-        +resolveRound(winCondition) void
+        +applyRoundResults(winnersMap) void
+        +triggerFatCatEvent() void
+        +confirmRoundResult(playerId) void
+        +confirmFatCatEvent(playerId) void
         +prepareNextTurn(nextRoundCards) void
     }
     
@@ -98,8 +111,9 @@ classDiagram
     GameFlowService --> Dice
     
     GameRoom "1" *-- "1..2" Player : contains
-    GameRoom --> BattleEvaluator : uses
-    GameRoom --> WinCondition : uses
+    GameFlowService --> RoundResolver : uses
+    RoundResolver --> BattleEvaluator : uses
+    RoundResolver --> WinCondition : uses
     Player --> Dice : uses
     GameRoom --> RoundResult : creates
     

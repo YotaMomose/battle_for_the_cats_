@@ -21,6 +21,7 @@ graph TB
     
     subgraph "Domain Layer"
         BattleEvaluator[BattleEvaluator]
+        RoundResolver[RoundResolver]
         Dice[Dice / StandardDice]
         WinCondition[WinCondition]
     end
@@ -31,7 +32,7 @@ graph TB
         RoundResult[RoundResult]
         Bets[Bets]
         CatInventory[CatInventory]
-        Cards[Cards / RoundCards]
+        RoundCards[RoundCards]
     end
     
     subgraph "Repository Layer"
@@ -55,6 +56,7 @@ graph TB
     MatchmakingService -->|use| FirestoreRepository
     MatchmakingService -->|use| RoomService
     GameFlowService -->|use| RoomRepository
+    GameFlowService -->|use| RoundResolver
     
     GameRoom -->|use| BattleEvaluator
     GameRoom -->|use| WinCondition
@@ -98,7 +100,7 @@ graph TB
   - Serviceレイヤーへの依存性注入
 - **State**: 型安全な状態表現
   - `HomeScreenState` (Idle, Loading, Matchmaking)
-  - `GameScreenState` (Loading, Waiting, Rolling, Playing, RoundResult, Finished)
+  - `GameScreenState` (Loading, Waiting, Rolling, Playing, RoundResult, FatCatEvent, Finished)
 
 **パターン**:
 - MVVM (Model-View-ViewModel)
@@ -130,6 +132,7 @@ graph TB
 
 **構成要素**:
 - **BattleEvaluator**: 各猫について、賭け金とコストを比較して勝敗を判定
+- **RoundResolver**: ラウンド解決から次ターンへの遷移、イベント発生判定のオーケストレーション
 - **Dice**: サイコロを振るインターフェースと標準的な実装（StandardDice）
 - **WinCondition**: 勝利条件の判定ロジック（StandardWinCondition）
 

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:battle_for_the_cats/models/game_room.dart';
 import 'package:battle_for_the_cats/constants/game_constants.dart';
 import 'package:battle_for_the_cats/models/player.dart';

@@ -36,7 +36,7 @@ class GameConstants {
   static const int matchmakingSearchLimit = 10; // マッチング検索数上限
 
   // イベント
-  static const double fatCatEventProbability = 0.5; // 太っちょネコイベント発生確率
+  static const double fatCatEventProbability = 0.1; // 太っちょネコイベント発生確率
 }
 
 /// ゲーム状態
