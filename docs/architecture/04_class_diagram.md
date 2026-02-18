@@ -60,7 +60,7 @@ classDiagram
     
     class WinCondition {
         <<Interface>>
-        +checkWin(inventory) bool
+        +isAchieved(inventory) bool
         +determineFinalWinner(host, guest) Winner?
     }
     

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../player.dart';
+
 import '../../constants/game_constants.dart';
 import 'game_card.dart';
 import 'card_type.dart';
@@ -63,5 +65,10 @@ class BossCat implements GameCard {
       displayName: bossType,
       baseCost: cost,
     );
+  }
+
+  @override
+  void applyAcquisitionEffect(Player player) {
+    player.pendingItemRevivals++;
   }
 }

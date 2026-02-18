@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../player.dart';
+
 import '../../constants/game_constants.dart';
 import 'game_card.dart';
 import 'card_type.dart';
@@ -67,5 +69,10 @@ class RegularCat implements GameCard {
       displayName: catType,
       baseCost: cost,
     );
+  }
+
+  @override
+  void applyAcquisitionEffect(Player player) {
+    // 通常の猫には獲得時の特殊効果はない
   }
 }

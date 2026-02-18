@@ -1,4 +1,6 @@
 import 'dart:math';
+
+import '../player.dart';
 import '../../constants/game_constants.dart';
 import 'game_card.dart';
 import 'card_type.dart';
@@ -53,5 +55,10 @@ class Dog implements GameCard {
       displayName: GameConstants.dog,
       baseCost: cost,
     );
+  }
+
+  @override
+  void applyAcquisitionEffect(Player player) {
+    player.pendingDogChases++;
   }
 }

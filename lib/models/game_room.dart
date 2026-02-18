@@ -119,6 +119,20 @@ class GameRoom {
     winners = winnersMap;
 
     // 1. 履歴の記録
+    _recordRoundHistory(winnersMap);
+
+    // 2. コストの支払い（魚とアイテム消費）
+    _payRoundCosts();
+
+    // 3. プレイヤーへの猫・特殊効果の付与
+    _distributeCards(winnersMap);
+
+    // 4. 確認フラグのリセット
+    _resetConfirmationFlags();
+  }
+
+  /// ラウンドの結果を履歴として記録する
+  void _recordRoundHistory(RoundWinners winnersMap) {
     final cards = currentRound?.toList() ?? [];
     lastRoundResult = RoundResult(
       cats: cards
@@ -128,12 +142,17 @@ class GameRoom {
       hostBets: host.currentBets,
       guestBets: guest?.currentBets ?? Bets.empty(),
     );
+  }
 
-    // 2. コストの支払い（魚とアイテム消費）
+  /// 両プレイヤーにラウンドのコスト（魚、アイテム）を支払わせる
+  void _payRoundCosts() {
     host.payCosts();
     guest?.payCosts();
+  }
 
-    // 3. プレイヤーへの猫・特殊効果の付与
+  /// 勝者に応じてカードと特殊効果を分配する
+  void _distributeCards(RoundWinners winnersMap) {
+    final cards = currentRound?.toList() ?? [];
     for (int i = 0; i < cards.length; i++) {
       final winner = winnersMap.at(i);
       final card = cards[i];
@@ -143,8 +162,10 @@ class GameRoom {
         _assignCardToPlayer(guest!, card);
       }
     }
+  }
 
-    // 4. 確認フラグのリセット
+  /// ラウンド結果の確認フラグをリセットする
+  void _resetConfirmationFlags() {
     host.confirmedRoundResult = false;
     guest?.confirmedRoundResult = false;
   }
@@ -152,21 +173,7 @@ class GameRoom {
   /// 指定したプレイヤーにカードを付与し、特殊効果の保留数を更新する
   void _assignCardToPlayer(Player player, GameCard card) {
     player.addWonCat(card.displayName, card.baseCost);
-
-    switch (card.cardType) {
-      case CardType.itemShop:
-      case CardType.bossKitty:
-        player.pendingItemRevivals++;
-        break;
-      case CardType.fisherman:
-        player.fishermanCount++;
-        break;
-      case CardType.dog:
-        player.pendingDogChases++;
-        break;
-      default:
-        break;
-    }
+    card.applyAcquisitionEffect(player);
   }
 
   /// ラウンド終了後のステータスと最終勝者を更新する

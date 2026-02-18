@@ -1,3 +1,4 @@
+import '../player.dart';
 import 'card_type.dart';
 import 'card_effect.dart';
 import 'regular_cat.dart';
@@ -23,6 +24,9 @@ abstract class GameCard {
   /// このカードを獲得するのに必要な魚の数
   /// 通常ネコは1-4のランダム、特殊カードは固定値
   int get baseCost;
+
+  /// カードを獲得した際の効果をプレイヤーに適用する
+  void applyAcquisitionEffect(Player player);
 
   /// Firestore保存用のMap化
   Map<String, dynamic> toMap() {

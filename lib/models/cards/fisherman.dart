@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../player.dart';
+
 import '../../constants/game_constants.dart';
 import 'game_card.dart';
 import 'card_type.dart';
@@ -49,6 +51,11 @@ class Fisherman implements GameCard {
       displayName: map['displayName'] ?? GameConstants.fisherman,
       baseCost: map['baseCost'] ?? 1,
     );
+  }
+
+  @override
+  void applyAcquisitionEffect(Player player) {
+    player.fishermanCount++;
   }
 
   /// ランダムな漁師を生成する
