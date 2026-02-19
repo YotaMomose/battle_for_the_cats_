@@ -9,7 +9,7 @@ import 'card_effect.dart';
 
 /// 漁師カード
 /// 獲得するとサイコロの出目にボーナス魚が加算される（永続効果）
-class Fisherman implements GameCard {
+final class Fisherman implements GameCard {
   @override
   final String id;
 

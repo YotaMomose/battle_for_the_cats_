@@ -9,7 +9,7 @@ import 'card_effect.dart';
 
 /// ボスねこカード
 /// 通常ネコの効果（勝利条件への寄与）とアイテム屋の効果（アイテム復活）を併せ持つ
-class BossCat implements GameCard {
+final class BossCat implements GameCard {
   @override
   final String id;
 

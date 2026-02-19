@@ -8,7 +8,7 @@ import 'fisherman.dart';
 import 'dog.dart';
 
 /// ゲーム内の全カード（猫、犬、漁師など）が実装すべきインターフェース
-abstract class GameCard {
+abstract interface class GameCard {
   /// カードの一意なID
   String get id;
 

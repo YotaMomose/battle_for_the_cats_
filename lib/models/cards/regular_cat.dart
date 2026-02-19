@@ -9,7 +9,7 @@ import 'card_effect.dart';
 
 /// 通常の猫カード
 /// 場に出るときにコスト（1-4の魚が必要）がランダムに決定される
-class RegularCat implements GameCard {
+final class RegularCat implements GameCard {
   @override
   final String id;
 

@@ -7,7 +7,6 @@ import 'round_result.dart';
 import 'round_winners.dart';
 import 'won_cat.dart';
 import 'chased_card_info.dart';
-import 'cards/card_type.dart';
 import 'cards/game_card.dart';
 
 class GameRoom {

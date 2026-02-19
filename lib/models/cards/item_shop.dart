@@ -9,7 +9,7 @@ import 'card_effect.dart';
 
 /// アイテム屋カード
 /// 獲得時に使用済みアイテムを1つ復活させる
-class ItemShop implements GameCard {
+final class ItemShop implements GameCard {
   @override
   final String id;
 
