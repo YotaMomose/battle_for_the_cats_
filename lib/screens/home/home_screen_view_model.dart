@@ -1,32 +1,68 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../../services/game_service.dart';
+import '../../services/auth_service.dart';
+import '../../repositories/firestore_repository.dart';
+import '../../repositories/user_repository.dart';
 import '../../models/match_result.dart';
+import '../../models/user_profile.dart';
 import 'home_screen_state.dart';
 
 /// ホーム画面のViewModel
 /// ホーム画面の状態管理とビジネスロジックを担当する
 class HomeScreenViewModel extends ChangeNotifier {
   final GameService _gameService;
+  late final AuthService _authService;
+  late final UserRepository _userRepository;
   final Function(String roomCode, String playerId, bool isHost)
   onNavigateToGame;
 
   HomeScreenState _state = HomeScreenState.idle();
   StreamSubscription? _matchmakingSubscription;
-  String? _sessionPlayerId;
+  UserProfile? _userProfile;
 
   HomeScreenState get state => _state;
+  UserProfile? get userProfile => _userProfile;
 
   HomeScreenViewModel({
     required GameService gameService,
     required this.onNavigateToGame,
-  }) : _gameService = gameService;
+    AuthService? authService,
+    UserRepository? userRepository,
+  }) : _gameService = gameService {
+    _authService = authService ?? AuthService();
+    _userRepository =
+        userRepository ?? UserRepository(repository: FirestoreRepository());
+    _loadProfile();
+  }
 
-  /// Player ID を一意に生成 (セッション内で固定)
-  String _generatePlayerId() {
-    _sessionPlayerId ??= const Uuid().v4();
-    return _sessionPlayerId!;
+  /// 現在のユーザーIDを取得（Firebase Auth の永続的な uid）
+  String get _playerId => _authService.currentUserId ?? '';
+
+  /// ユーザープロフィールを読み込む
+  ///
+  /// 認証が未完了の場合は自動的に初期化を行う。
+  Future<void> _loadProfile() async {
+    try {
+      final uid = await _authService.initialize();
+      _userProfile = await _userRepository.getProfile(uid);
+      _userProfile ??= UserProfile.defaultProfile(uid);
+      notifyListeners();
+    } catch (e) {
+      // 認証失敗時はデフォルトプロフィールで続行
+      debugPrint('プロフィール読み込みエラー: $e');
+    }
+  }
+
+  /// プロフィールを更新する
+  Future<void> updateProfile({String? displayName, String? iconId}) async {
+    if (_userProfile == null) return;
+    _userProfile = _userProfile!.copyWith(
+      displayName: displayName,
+      iconId: iconId,
+    );
+    await _userRepository.saveProfile(_userProfile!);
+    notifyListeners();
   }
 
   /// 状態を更新して通知
@@ -47,8 +83,12 @@ class HomeScreenViewModel extends ChangeNotifier {
     _updateState(HomeScreenState.loading());
 
     try {
-      final playerId = _generatePlayerId();
-      final roomCode = await _gameService.createRoom(playerId);
+      final playerId = _playerId;
+      final roomCode = await _gameService.createRoom(
+        playerId,
+        displayName: _userProfile?.displayName,
+        iconId: _userProfile?.iconId,
+      );
 
       // ゲーム画面へ遷移
       onNavigateToGame(roomCode, playerId, true);
@@ -64,12 +104,16 @@ class HomeScreenViewModel extends ChangeNotifier {
   /// ランダムマッチングを開始
   Future<void> startRandomMatch() async {
     if (_state is! IdleState) return;
-    final playerId = _generatePlayerId();
+    final playerId = _playerId;
     _updateState(HomeScreenState.matchmaking(playerId));
 
     try {
       // 待機リストに登録
-      await _gameService.joinMatchmaking(playerId);
+      await _gameService.joinMatchmaking(
+        playerId,
+        displayName: _userProfile?.displayName,
+        iconId: _userProfile?.iconId,
+      );
 
       // join処理（書き込み）完了後のガード：
       // 書き込みの非同期処理中にキャンセルボタンが押されていないか、
@@ -121,7 +165,6 @@ class HomeScreenViewModel extends ChangeNotifier {
       _gameService.cancelMatchmaking(playerId);
 
       // 状態を元に戻す
-      _sessionPlayerId = null; // 次回のためにIDをリセット
       _updateState(HomeScreenState.idle());
     } catch (e) {
       _handleMatchmakingError(e);
@@ -168,8 +211,13 @@ class HomeScreenViewModel extends ChangeNotifier {
     _updateState(HomeScreenState.loading());
 
     try {
-      final playerId = _generatePlayerId();
-      final success = await _gameService.joinRoom(validCode, playerId);
+      final playerId = _playerId;
+      final success = await _gameService.joinRoom(
+        validCode,
+        playerId,
+        displayName: _userProfile?.displayName,
+        iconId: _userProfile?.iconId,
+      );
 
       // 参加に失敗した場合はエラーメッセージを表示
       if (!success) {

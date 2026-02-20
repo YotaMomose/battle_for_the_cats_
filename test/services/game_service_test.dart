@@ -38,20 +38,55 @@ void main() {
 
       test('createRoom をリクエストすると RoomService に委譲される', () async {
         when(
-          mockRoomService.createRoom('host_001'),
+          mockRoomService.createRoom(
+            'host_001',
+            displayName: anyNamed('displayName'),
+            iconId: anyNamed('iconId'),
+          ),
         ).thenAnswer((_) async => 'ROOM_CODE_001');
-        final result = await gameService.createRoom('host_001');
+
+        final result = await gameService.createRoom(
+          'host_001',
+          displayName: 'Name',
+          iconId: 'Icon',
+        );
+
         expect(result, equals('ROOM_CODE_001'));
-        verify(mockRoomService.createRoom('host_001')).called(1);
+        verify(
+          mockRoomService.createRoom(
+            'host_001',
+            displayName: 'Name',
+            iconId: 'Icon',
+          ),
+        ).called(1);
       });
 
       test('joinRoom をリクエストすると RoomService に委譲される', () async {
         when(
-          mockRoomService.joinRoom('ROOM_CODE', 'guest_001'),
+          mockRoomService.joinRoom(
+            'ROOM_CODE',
+            'guest_001',
+            displayName: anyNamed('displayName'),
+            iconId: anyNamed('iconId'),
+          ),
         ).thenAnswer((_) async => true);
-        final result = await gameService.joinRoom('ROOM_CODE', 'guest_001');
+
+        final result = await gameService.joinRoom(
+          'ROOM_CODE',
+          'guest_001',
+          displayName: 'Name',
+          iconId: 'Icon',
+        );
+
         expect(result, isTrue);
-        verify(mockRoomService.joinRoom('ROOM_CODE', 'guest_001')).called(1);
+        verify(
+          mockRoomService.joinRoom(
+            'ROOM_CODE',
+            'guest_001',
+            displayName: 'Name',
+            iconId: 'Icon',
+          ),
+        ).called(1);
       });
     });
 

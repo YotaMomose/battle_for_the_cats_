@@ -68,19 +68,19 @@ class RoundResultView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'このターン: あなた $myRoundWins匹 - $opponentRoundWins匹 相手',
+                'このターン: ${viewModel.myIconEmoji}${viewModel.myDisplayName} $myRoundWins匹 - $opponentRoundWins匹 ${viewModel.opponentIconEmoji}${viewModel.opponentDisplayName}',
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 12),
-              const Text(
-                '累計: あなた',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              Text(
+                '累計: ${viewModel.myDisplayName}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               _buildWonCardsIconList(viewModel.myWonCardDetails),
               const SizedBox(height: 8),
-              const Text(
-                '累計: 相手',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              Text(
+                '累計: ${viewModel.opponentDisplayName}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               _buildWonCardsIconList(viewModel.opponentWonCardDetails),
               const SizedBox(height: 24),
@@ -136,13 +136,13 @@ class RoundResultView extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   _buildPlayerResultRow(
-                                    'あなた',
+                                    viewModel.myDisplayName,
                                     item.myBet,
                                     item.myItem,
                                     viewModel,
                                   ),
                                   _buildPlayerResultRow(
-                                    '相手',
+                                    viewModel.opponentDisplayName,
                                     item.opponentBet,
                                     item.opponentItem,
                                     viewModel,

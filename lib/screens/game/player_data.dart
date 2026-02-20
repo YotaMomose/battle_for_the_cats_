@@ -10,6 +10,10 @@ import '../../constants/game_constants.dart';
 class PlayerData {
   final GameRoom room;
   final bool isHost;
+  final String myDisplayName;
+  final String myIconId;
+  final String opponentDisplayName;
+  final String opponentIconId;
   final int myFishCount;
   final int opponentFishCount;
   final CatInventory myCatsWon;
@@ -33,6 +37,10 @@ class PlayerData {
   const PlayerData({
     required this.room,
     required this.isHost,
+    required this.myDisplayName,
+    required this.myIconId,
+    required this.opponentDisplayName,
+    required this.opponentIconId,
     required this.myFishCount,
     required this.opponentFishCount,
     required this.myCatsWon,
@@ -98,6 +106,10 @@ class PlayerData {
     return PlayerData(
       room: room,
       isHost: isHost,
+      myDisplayName: my?.displayName ?? 'あなた',
+      myIconId: my?.iconId ?? 'cat_orange',
+      opponentDisplayName: opponent?.displayName ?? '相手',
+      opponentIconId: opponent?.iconId ?? 'cat_orange',
       myFishCount: my?.fishCount ?? 0,
       opponentFishCount: opponent?.fishCount ?? 0,
       myCatsWon: my?.catsWon ?? CatInventory(),

@@ -8,6 +8,8 @@ import '../models/item.dart';
 /// プレイヤー（ホストまたはゲスト）の状態を保持するデータモデル
 class Player {
   final String id;
+  String displayName;
+  String iconId;
   int fishCount;
   CatInventory catsWon;
   int? diceRoll;
@@ -25,6 +27,8 @@ class Player {
 
   Player({
     required this.id,
+    this.displayName = 'ゲスト',
+    this.iconId = 'cat_orange',
     this.fishCount = 0,
     CatInventory? catsWon,
     this.diceRoll,
@@ -46,6 +50,8 @@ class Player {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'displayName': displayName,
+      'iconId': iconId,
       'fishCount': fishCount,
       'catsWon': catsWon.toMapList(),
       'diceRoll': diceRoll,
@@ -67,6 +73,8 @@ class Player {
   factory Player.fromMap(Map<String, dynamic> map) {
     return Player(
       id: map['id'] ?? '',
+      displayName: map['displayName'] ?? 'ゲスト',
+      iconId: map['iconId'] ?? 'cat_orange',
       fishCount: map['fishCount'] ?? 0,
       catsWon: CatInventory.fromMapList(map['catsWon'] as List?),
       diceRoll: map['diceRoll'],

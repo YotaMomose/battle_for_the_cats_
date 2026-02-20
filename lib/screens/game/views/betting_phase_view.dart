@@ -40,16 +40,34 @@ class BettingPhaseView extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'あなたの獲得カード:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Text(
+                          viewModel.myIconEmoji,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${viewModel.myDisplayName}の獲得カード:',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     _buildWonCatsList(playerData.myCatsWon, viewModel),
                     const SizedBox(height: 12),
-                    const Text(
-                      '相手の獲得カード:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Text(
+                          viewModel.opponentIconEmoji,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${viewModel.opponentDisplayName}の獲得カード:',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     _buildWonCatsList(playerData.opponentCatsWon, viewModel),
@@ -66,12 +84,22 @@ class BettingPhaseView extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    const Text(
-                      '対戦相手',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          viewModel.opponentIconEmoji,
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          viewModel.opponentDisplayName,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Text(

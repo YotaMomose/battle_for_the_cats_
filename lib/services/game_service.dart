@@ -44,9 +44,23 @@ class GameService {
 
   // ルーム管理
   String generateRoomCode() => _roomService.generateRoomCode();
-  Future<String> createRoom(String hostId) => _roomService.createRoom(hostId);
-  Future<bool> joinRoom(String roomCode, String guestId) =>
-      _roomService.joinRoom(roomCode, guestId);
+  Future<String> createRoom(
+    String hostId, {
+    String? displayName,
+    String? iconId,
+  }) =>
+      _roomService.createRoom(hostId, displayName: displayName, iconId: iconId);
+  Future<bool> joinRoom(
+    String roomCode,
+    String guestId, {
+    String? displayName,
+    String? iconId,
+  }) => _roomService.joinRoom(
+    roomCode,
+    guestId,
+    displayName: displayName,
+    iconId: iconId,
+  );
   Stream<GameRoom?> watchRoom(String roomCode) =>
       _roomService.watchRoom(roomCode);
   Future<void> leaveRoom(String roomCode, String playerId) =>
@@ -54,8 +68,15 @@ class GameService {
   Future<void> deleteRoom(String roomCode) => _roomService.deleteRoom(roomCode);
 
   // マッチング
-  Future<String> joinMatchmaking(String playerId) =>
-      _matchmakingService.joinMatchmaking(playerId);
+  Future<String> joinMatchmaking(
+    String playerId, {
+    String? displayName,
+    String? iconId,
+  }) => _matchmakingService.joinMatchmaking(
+    playerId,
+    displayName: displayName,
+    iconId: iconId,
+  );
   Stream<MatchResult?> watchMatchmaking(String playerId) =>
       _matchmakingService.watchMatchmaking(playerId);
   Future<void> cancelMatchmaking(String playerId) =>

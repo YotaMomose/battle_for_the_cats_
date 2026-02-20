@@ -19,7 +19,11 @@ class RoomService {
   }
 
   /// ルームを作成
-  Future<String> createRoom(String hostId) async {
+  Future<String> createRoom(
+    String hostId, {
+    String? displayName,
+    String? iconId,
+  }) async {
     String roomCode;
     // 重複チェック: 生成されたコードが既に存在する場合は再生成
     do {
@@ -28,7 +32,11 @@ class RoomService {
 
     final room = GameRoom(
       roomId: roomCode,
-      host: Player(id: hostId),
+      host: Player(
+        id: hostId,
+        displayName: displayName ?? 'ゲスト',
+        iconId: iconId ?? 'cat_orange',
+      ),
       currentRound: RoundCards.random(),
     );
 
@@ -37,7 +45,12 @@ class RoomService {
   }
 
   /// ルームに参加
-  Future<bool> joinRoom(String roomCode, String guestId) async {
+  Future<bool> joinRoom(
+    String roomCode,
+    String guestId, {
+    String? displayName,
+    String? iconId,
+  }) async {
     final room = await _repository.getRoom(roomCode);
 
     if (room == null) {
@@ -49,7 +62,11 @@ class RoomService {
     }
 
     await _repository.updateRoom(roomCode, {
-      'guest': Player(id: guestId).toMap(),
+      'guest': Player(
+        id: guestId,
+        displayName: displayName ?? 'ゲスト',
+        iconId: iconId ?? 'cat_orange',
+      ).toMap(),
       'status': GameStatus.rolling.value, // サイコロフェーズから開始
     });
 

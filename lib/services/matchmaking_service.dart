@@ -21,11 +21,17 @@ class MatchmakingService {
        _roomService = roomService;
 
   /// 待機リストに登録
-  Future<String> joinMatchmaking(String playerId) async {
+  Future<String> joinMatchmaking(
+    String playerId, {
+    String? displayName,
+    String? iconId,
+  }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
 
     await _repository.setDocument(_collection, playerId, {
       'playerId': playerId,
+      'displayName': displayName ?? 'ゲスト',
+      'iconId': iconId ?? 'cat_orange',
       'timestamp': timestamp,
       'status': MatchmakingStatus.waiting.value,
     });
@@ -129,9 +135,20 @@ class MatchmakingService {
         return;
       }
 
+      final myData = myDoc.data()!;
+      final opponentData = opponentDoc.data()!;
+
       // ルームを作成
       final roomCode = _roomService.generateRoomCode();
-      final room = _createGameRoomObject(roomCode, playerId, opponentId);
+      final room = _createGameRoomObject(
+        roomCode,
+        playerId,
+        opponentId,
+        myDisplayName: myData['displayName'] as String?,
+        myIconId: myData['iconId'] as String?,
+        opponentDisplayName: opponentData['displayName'] as String?,
+        opponentIconId: opponentData['iconId'] as String?,
+      );
 
       // トランザクション内でルームを保存
       _createRoomInTransaction(transaction, roomCode, room);
@@ -164,12 +181,24 @@ class MatchmakingService {
   GameRoom _createGameRoomObject(
     String roomCode,
     String hostId,
-    String guestId,
-  ) {
+    String guestId, {
+    String? myDisplayName,
+    String? myIconId,
+    String? opponentDisplayName,
+    String? opponentIconId,
+  }) {
     return GameRoom(
       roomId: roomCode,
-      host: Player(id: hostId),
-      guest: Player(id: guestId),
+      host: Player(
+        id: hostId,
+        displayName: myDisplayName ?? 'ゲスト',
+        iconId: myIconId ?? 'cat_orange',
+      ),
+      guest: Player(
+        id: guestId,
+        displayName: opponentDisplayName ?? 'ゲスト',
+        iconId: opponentIconId ?? 'cat_orange',
+      ),
       status: GameStatus.rolling,
       currentRound: RoundCards.random(),
     );

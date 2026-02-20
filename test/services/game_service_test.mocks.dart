@@ -48,22 +48,43 @@ class MockRoomService extends _i1.Mock implements _i2.RoomService {
           as String);
 
   @override
-  _i4.Future<String> createRoom(String? hostId) =>
+  _i4.Future<String> createRoom(
+    String? hostId, {
+    String? displayName,
+    String? iconId,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#createRoom, [hostId]),
+            Invocation.method(
+              #createRoom,
+              [hostId],
+              {#displayName: displayName, #iconId: iconId},
+            ),
             returnValue: _i4.Future<String>.value(
               _i3.dummyValue<String>(
                 this,
-                Invocation.method(#createRoom, [hostId]),
+                Invocation.method(
+                  #createRoom,
+                  [hostId],
+                  {#displayName: displayName, #iconId: iconId},
+                ),
               ),
             ),
           )
           as _i4.Future<String>);
 
   @override
-  _i4.Future<bool> joinRoom(String? roomCode, String? guestId) =>
+  _i4.Future<bool> joinRoom(
+    String? roomCode,
+    String? guestId, {
+    String? displayName,
+    String? iconId,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#joinRoom, [roomCode, guestId]),
+            Invocation.method(
+              #joinRoom,
+              [roomCode, guestId],
+              {#displayName: displayName, #iconId: iconId},
+            ),
             returnValue: _i4.Future<bool>.value(false),
           )
           as _i4.Future<bool>);
@@ -113,13 +134,25 @@ class MockMatchmakingService extends _i1.Mock
   }
 
   @override
-  _i4.Future<String> joinMatchmaking(String? playerId) =>
+  _i4.Future<String> joinMatchmaking(
+    String? playerId, {
+    String? displayName,
+    String? iconId,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#joinMatchmaking, [playerId]),
+            Invocation.method(
+              #joinMatchmaking,
+              [playerId],
+              {#displayName: displayName, #iconId: iconId},
+            ),
             returnValue: _i4.Future<String>.value(
               _i3.dummyValue<String>(
                 this,
-                Invocation.method(#joinMatchmaking, [playerId]),
+                Invocation.method(
+                  #joinMatchmaking,
+                  [playerId],
+                  {#displayName: displayName, #iconId: iconId},
+                ),
               ),
             ),
           )

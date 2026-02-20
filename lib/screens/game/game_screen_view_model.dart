@@ -4,6 +4,7 @@ import '../../models/game_room.dart';
 import '../../models/bets.dart';
 import '../../models/item.dart';
 import '../../models/cat_inventory.dart';
+import '../../models/user_profile.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
 import '../../domain/win_condition.dart';
@@ -235,7 +236,12 @@ class GameScreenViewModel extends ChangeNotifier {
 
     final myRole = isHost ? Winner.host : Winner.guest;
     if (room.finalWinner == Winner.draw) return '引き分け';
-    return room.finalWinner == myRole ? 'あなたの勝利！' : '敗北...';
+    final winnerName = room.finalWinner == myRole
+        ? myDisplayName
+        : opponentDisplayName;
+    return room.finalWinner == myRole
+        ? '👑 $winnerName の勝利！'
+        : '$winnerName の勝利...';
   }
 
   /// 最終勝者の色
@@ -275,12 +281,26 @@ class GameScreenViewModel extends ChangeNotifier {
     return data.opponentReady ? Colors.green : Colors.orange;
   }
 
+  /// 自分の表示名
+  String get myDisplayName => playerData?.myDisplayName ?? 'あなた';
+
+  /// 自分のアイコン（絵文字）
+  String get myIconEmoji =>
+      UserIcon.fromId(playerData?.myIconId ?? 'cat_orange').emoji;
+
+  /// 相手の表示名
+  String get opponentDisplayName => playerData?.opponentDisplayName ?? '相手';
+
+  /// 相手のアイコン（絵文字）
+  String get opponentIconEmoji =>
+      UserIcon.fromId(playerData?.opponentIconId ?? 'cat_orange').emoji;
+
   /// 残りの魚の表示ラベル
   String get myRemainingFishLabel {
     final data = playerData;
     if (data == null) return '';
     final remaining = data.myFishCount - totalBet;
-    return '残りの魚: $remaining / ${data.myFishCount} 🐟';
+    return '$myDisplayName の魚: $remaining / ${data.myFishCount} 🐟';
   }
 
   /// 確定ボタンのラベル
@@ -304,9 +324,9 @@ class GameScreenViewModel extends ChangeNotifier {
     if (data == null) return '';
     if (data.opponentRolled && data.opponentDiceRoll != null) {
       final totalFish = data.opponentDiceRoll! + data.opponentFishermanCount;
-      return '魚を $totalFish 匹獲得しました！';
+      return '$opponentDisplayName は 魚を $totalFish 匹獲得しました！';
     }
-    return 'サイコロを振っています...';
+    return '$opponentDisplayName がサイコロを振っています...';
   }
 
   /// 相手のサイコロ結果ステータスラベルの色
@@ -639,10 +659,10 @@ class GameScreenViewModel extends ChangeNotifier {
     return data.chasedCards.map((chased) {
       if (chased.chaserPlayerId != playerId) {
         // 相手が自分のカードを追い出した場合
-        return '🐶 相手の犬によって「${chased.cardName}」が逃げてしまいました！';
+        return '🐶 $opponentDisplayName の犬によって「${chased.cardName}」が逃げてしまいました！';
       } else {
         // 自分が相手のカードを追い出した場合
-        return '🐶 あなたの犬が相手の「${chased.cardName}」を追い出しました！';
+        return '🐶 $myDisplayName の犬が相手の「${chased.cardName}」を追い出しました！';
       }
     }).toList();
   }

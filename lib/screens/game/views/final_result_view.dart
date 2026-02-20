@@ -88,7 +88,7 @@ class FinalResultView extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '自: ${item.myBet}${item.myItem != null ? '*' : ''} 敵: ${item.opponentBet}${item.opponentItem != null ? '*' : ''}',
+                                    '${viewModel.myIconEmoji}: ${item.myBet}${item.myItem != null ? '*' : ''} ${viewModel.opponentIconEmoji}: ${item.opponentBet}${item.opponentItem != null ? '*' : ''}',
                                     style: const TextStyle(fontSize: 9),
                                   ),
                                 ],
@@ -132,7 +132,7 @@ class FinalResultView extends StatelessWidget {
                     const SizedBox(height: 24),
                     _buildPlayerCards(
                       context,
-                      'あなた',
+                      '${viewModel.myIconEmoji} ${viewModel.myDisplayName}',
                       viewModel.myWonCardDetails,
                     ),
                     const Padding(
@@ -141,7 +141,7 @@ class FinalResultView extends StatelessWidget {
                     ),
                     _buildPlayerCards(
                       context,
-                      '相手',
+                      '${viewModel.opponentIconEmoji} ${viewModel.opponentDisplayName}',
                       viewModel.opponentWonCardDetails,
                     ),
                     const SizedBox(height: 24),

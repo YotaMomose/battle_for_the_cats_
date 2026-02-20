@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../home_screen_state.dart';
 import '../home_screen_view_model.dart';
+import '../../../models/user_profile.dart';
+import '../../profile_screen.dart';
 
 /// メインメニュー画面
 class MainMenuView extends StatefulWidget {
@@ -29,6 +31,23 @@ class _MainMenuViewState extends State<MainMenuView> {
       appBar: AppBar(
         title: const Text('ねこ争奪戦！'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'プロフィール設定',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChangeNotifierProvider.value(
+                    value: viewModel,
+                    child: const ProfileScreen(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Padding(
@@ -37,14 +56,27 @@ class _MainMenuViewState extends State<MainMenuView> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.pets, size: 80, color: Colors.orange),
+              // プロフィール表示
+              if (viewModel.userProfile != null)
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        UserIcon.fromId(viewModel.userProfile!.iconId).emoji,
+                        style: const TextStyle(fontSize: 64),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        viewModel.userProfile!.displayName,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               const SizedBox(height: 24),
-              const Text(
-                'ねこ争奪戦！',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 48),
               ElevatedButton(
                 onPressed: isNotIdle ? null : () => viewModel.createRoom(),
                 style: ElevatedButton.styleFrom(
