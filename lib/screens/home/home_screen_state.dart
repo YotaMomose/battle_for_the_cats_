@@ -4,7 +4,7 @@ abstract class HomeScreenState {
 
   const HomeScreenState({this.errorMessage});
 
-  factory HomeScreenState.idle() = IdleState;
+  factory HomeScreenState.idle({String? errorMessage}) = IdleState;
   factory HomeScreenState.loading() = LoadingState;
   factory HomeScreenState.matchmaking(String playerId) = MatchmakingState;
 

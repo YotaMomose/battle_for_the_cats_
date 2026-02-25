@@ -87,7 +87,7 @@ class HomeScreenViewModel extends ChangeNotifier {
       await _userRepository.saveProfile(_userProfile!);
       notifyListeners();
     } catch (e) {
-      _setError('プロフィールの更新に失敗しました: $e');
+      _updateState(HomeScreenState.idle(errorMessage: 'プロフィールの更新に失敗しました: $e'));
     }
   }
 
@@ -97,10 +97,11 @@ class HomeScreenViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// エラーを設定
-  void _setError(String message) {
-    _state = _state.copyWithError(message);
-    notifyListeners();
+  /// エラー状況をクリアする
+  void clearError() {
+    if (_state.errorMessage != null) {
+      _updateState(HomeScreenState.idle());
+    }
   }
 
   /// ルームを作成
@@ -122,8 +123,7 @@ class HomeScreenViewModel extends ChangeNotifier {
       // 状態を元に戻す
       _updateState(HomeScreenState.idle());
     } catch (e) {
-      _setError('ルーム作成に失敗しました: $e');
-      _updateState(HomeScreenState.idle());
+      _updateState(HomeScreenState.idle(errorMessage: 'ルーム作成に失敗しました: $e'));
     }
   }
 
@@ -199,8 +199,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   /// マッチングエラー処理
   void _handleMatchmakingError(dynamic error) {
-    _setError('マッチングに失敗しました: $error');
-    _updateState(HomeScreenState.idle());
+    _updateState(HomeScreenState.idle(errorMessage: 'マッチングに失敗しました: $error'));
   }
 
   /// ランダムマッチングをキャンセル
@@ -220,7 +219,7 @@ class HomeScreenViewModel extends ChangeNotifier {
         // 3. Firestore削除を実行し、完了を待機する
         await _gameService.cancelMatchmaking(pId);
       } catch (e) {
-        _setError('キャンセル処理（削除）に失敗しました。');
+        // もともとキャンセルなので、通知はしつつアイドルに戻す
       } finally {
         // 4. メインメニューに戻す
         _updateState(HomeScreenState.idle());
@@ -247,15 +246,17 @@ class HomeScreenViewModel extends ChangeNotifier {
 
       // 参加に失敗した場合はエラーメッセージを表示
       if (!success) {
-        _setError('ルームが見つからないか、すでに満員です');
-        _updateState(HomeScreenState.idle());
+        _updateState(
+          HomeScreenState.idle(
+            errorMessage: 'ルームが見つからないか、すでに満員です。ホストが退出した可能性があります。',
+          ),
+        );
         return;
       }
 
       _handleJoinSuccess(validCode, playerId);
     } catch (e) {
-      _setError('ルーム参加に失敗しました: $e');
-      _updateState(HomeScreenState.idle());
+      _updateState(HomeScreenState.idle(errorMessage: 'ルーム参加に失敗しました: $e'));
     }
   }
 
@@ -265,11 +266,11 @@ class HomeScreenViewModel extends ChangeNotifier {
     final trimmedCode = roomCode.trim().toUpperCase();
 
     if (trimmedCode.isEmpty) {
-      _setError('ルームコードを入力してください');
+      _updateState(HomeScreenState.idle(errorMessage: 'ルームコードを入力してください'));
       return null;
     }
     if (trimmedCode.length != 6) {
-      _setError('ルームコードは6桁です');
+      _updateState(HomeScreenState.idle(errorMessage: 'ルームコードは6桁です'));
       return null;
     }
 
@@ -297,7 +298,9 @@ class HomeScreenViewModel extends ChangeNotifier {
           },
           onError: (e) {
             debugPrint('[HomeScreenViewModel] watchInvitations Error: $e');
-            _setError('招待の監視中にエラーが発生しました: $e');
+            _updateState(
+              HomeScreenState.idle(errorMessage: '招待の監視中にエラーが発生しました: $e'),
+            );
           },
         );
 

@@ -44,9 +44,7 @@ class _HomeScreenContent extends StatelessWidget {
     final errorMessage = viewModel.state.errorMessage;
     if (errorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
+        _showErrorDialog(context, viewModel, errorMessage);
       });
     }
 
@@ -57,5 +55,28 @@ class _HomeScreenContent extends StatelessWidget {
       MatchmakingState() => const MatchmakingView(),
       _ => const MainMenuView(),
     };
+  }
+
+  void _showErrorDialog(
+    BuildContext context,
+    HomeScreenViewModel viewModel,
+    String message,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('エラー'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              viewModel.clearError();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 }
