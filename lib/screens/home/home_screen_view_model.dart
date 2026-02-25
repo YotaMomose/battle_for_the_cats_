@@ -4,6 +4,8 @@ import '../../services/game_service.dart';
 import '../../services/auth_service.dart';
 import '../../repositories/firestore_repository.dart';
 import '../../repositories/user_repository.dart';
+import '../../services/invitation_service.dart';
+import '../../models/invitation.dart';
 import '../../models/match_result.dart';
 import '../../models/user_profile.dart';
 import 'home_screen_state.dart';
@@ -19,10 +21,14 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   HomeScreenState _state = HomeScreenState.idle();
   StreamSubscription? _matchmakingSubscription;
+  StreamSubscription? _invitationSubscription;
   UserProfile? _userProfile;
+  List<Invitation> _invitations = [];
+  final InvitationService _invitationService = InvitationService();
 
   HomeScreenState get state => _state;
   UserProfile? get userProfile => _userProfile;
+  List<Invitation> get invitations => _invitations;
 
   HomeScreenViewModel({
     required GameService gameService,
@@ -45,8 +51,24 @@ class HomeScreenViewModel extends ChangeNotifier {
   Future<void> _loadProfile() async {
     try {
       final uid = await _authService.initialize();
-      _userProfile = await _userRepository.getProfile(uid);
-      _userProfile ??= UserProfile.defaultProfile(uid);
+      var profile = await _userRepository.getProfile(uid);
+
+      // プロフィールがない、またはフレンドコードがない場合は初期化/保存して生成させる
+      if (profile == null ||
+          profile.friendCode == null ||
+          profile.friendCode!.isEmpty) {
+        profile ??= UserProfile.defaultProfile(uid);
+        // saveProfile の中で friendCode が自動生成される
+        await _userRepository.saveProfile(profile);
+        // 生成されたコードを含むデータを再取得
+        profile = await _userRepository.getProfile(uid);
+      }
+
+      _userProfile = profile;
+
+      // 招待の監視を開始
+      _startInvitationMonitoring(uid);
+
       notifyListeners();
     } catch (e) {
       // 認証失敗時はデフォルトプロフィールで続行
@@ -57,12 +79,16 @@ class HomeScreenViewModel extends ChangeNotifier {
   /// プロフィールを更新する
   Future<void> updateProfile({String? displayName, String? iconId}) async {
     if (_userProfile == null) return;
-    _userProfile = _userProfile!.copyWith(
-      displayName: displayName,
-      iconId: iconId,
-    );
-    await _userRepository.saveProfile(_userProfile!);
-    notifyListeners();
+    try {
+      _userProfile = _userProfile!.copyWith(
+        displayName: displayName,
+        iconId: iconId,
+      );
+      await _userRepository.saveProfile(_userProfile!);
+      notifyListeners();
+    } catch (e) {
+      _setError('プロフィールの更新に失敗しました: $e');
+    }
   }
 
   /// 状態を更新して通知
@@ -259,9 +285,52 @@ class HomeScreenViewModel extends ChangeNotifier {
     _updateState(HomeScreenState.idle());
   }
 
+  /// 招待の監視を開始
+  void _startInvitationMonitoring(String uid) {
+    _invitationSubscription?.cancel();
+    _invitationSubscription = _invitationService
+        .watchInvitations(uid)
+        .listen(
+          (invitations) {
+            _invitations = invitations;
+            notifyListeners();
+          },
+          onError: (e) {
+            debugPrint('[HomeScreenViewModel] watchInvitations Error: $e');
+            _setError('招待の監視中にエラーが発生しました: $e');
+          },
+        );
+
+    // 古い招待のクリーンアップもついでに行う
+    _invitationService.cleanupOldInvitations(uid);
+  }
+
+  /// 招待を受諾
+  Future<void> acceptInvitation(Invitation invitation) async {
+    final roomCode = invitation.roomCode;
+    _invitations.removeWhere((i) => i.id == invitation.id);
+    notifyListeners();
+
+    // 招待を期限切れにする
+    await _invitationService.expireInvitation(invitation.id);
+
+    // ルームに参加
+    await joinRoom(roomCode);
+  }
+
+  /// 招待を拒否
+  Future<void> rejectInvitation(Invitation invitation) async {
+    _invitations.removeWhere((i) => i.id == invitation.id);
+    notifyListeners();
+
+    // 招待を期限切れにする
+    await _invitationService.expireInvitation(invitation.id);
+  }
+
   @override
   void dispose() {
     _matchmakingSubscription?.cancel();
+    _invitationSubscription?.cancel();
 
     // マッチング中の場合はキャンセル
     final currentState = _state;

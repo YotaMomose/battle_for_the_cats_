@@ -5,11 +5,13 @@ class UserProfile {
   final String uid;
   final String displayName;
   final String iconId;
+  final String? friendCode;
 
   const UserProfile({
     required this.uid,
     required this.displayName,
     required this.iconId,
+    this.friendCode,
   });
 
   /// デフォルトのプロフィール（初回ログイン時に使用）
@@ -21,16 +23,26 @@ class UserProfile {
     );
   }
 
-  UserProfile copyWith({String? displayName, String? iconId}) {
+  UserProfile copyWith({
+    String? displayName,
+    String? iconId,
+    String? friendCode,
+  }) {
     return UserProfile(
       uid: uid,
       displayName: displayName ?? this.displayName,
       iconId: iconId ?? this.iconId,
+      friendCode: friendCode ?? this.friendCode,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'uid': uid, 'displayName': displayName, 'iconId': iconId};
+    return {
+      'uid': uid,
+      'displayName': displayName,
+      'iconId': iconId,
+      if (friendCode != null) 'friendCode': friendCode,
+    };
   }
 
   factory UserProfile.fromMap(Map<String, dynamic> map) {
@@ -38,6 +50,7 @@ class UserProfile {
       uid: map['uid'] ?? '',
       displayName: map['displayName'] ?? 'ゲスト',
       iconId: map['iconId'] ?? UserIcon.defaultIcon.id,
+      friendCode: map['friendCode'],
     );
   }
 
@@ -47,14 +60,15 @@ class UserProfile {
       other is UserProfile &&
           uid == other.uid &&
           displayName == other.displayName &&
-          iconId == other.iconId;
+          iconId == other.iconId &&
+          friendCode == other.friendCode;
 
   @override
-  int get hashCode => Object.hash(uid, displayName, iconId);
+  int get hashCode => Object.hash(uid, displayName, iconId, friendCode);
 
   @override
   String toString() =>
-      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId)';
+      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode)';
 }
 
 /// プリセットアイコンの定義

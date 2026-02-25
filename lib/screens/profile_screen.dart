@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
@@ -70,6 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<HomeScreenViewModel>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('プロフィール設定'),
@@ -109,6 +111,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               maxLength: 12,
             ),
+            const SizedBox(height: 12),
+
+            // フレンドコード表示
+            if (viewModel.userProfile?.friendCode != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceVariant.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.people_outline, size: 20),
+                    const SizedBox(width: 8),
+                    const Text('フレンドコード: '),
+                    Text(
+                      viewModel.userProfile!.friendCode!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 20),
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(
+                            text: viewModel.userProfile!.friendCode!,
+                          ),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('コピーしました')),
+                        );
+                      },
+                      tooltip: 'コピー',
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 24),
 
             // アイコン選択

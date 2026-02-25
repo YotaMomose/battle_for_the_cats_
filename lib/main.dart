@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
+import 'repositories/firestore_repository.dart';
+import 'repositories/user_repository.dart';
+import 'repositories/friend_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +16,20 @@ void main() async {
   final authService = AuthService();
   await authService.initialize();
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (_) => FirestoreRepository()),
+        ProxyProvider<FirestoreRepository, UserRepository>(
+          update: (_, firestore, __) => UserRepository(repository: firestore),
+        ),
+        ProxyProvider<FirestoreRepository, FriendRepository>(
+          update: (_, firestore, __) => FriendRepository(repository: firestore),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

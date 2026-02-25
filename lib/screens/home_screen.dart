@@ -44,9 +44,9 @@ class _HomeScreenContent extends StatelessWidget {
     final errorMessage = viewModel.state.errorMessage;
     if (errorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMessage)));
       });
     }
 

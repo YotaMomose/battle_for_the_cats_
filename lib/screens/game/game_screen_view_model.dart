@@ -8,6 +8,10 @@ import '../../models/user_profile.dart';
 import '../../constants/game_constants.dart';
 import '../../services/game_service.dart';
 import '../../domain/win_condition.dart';
+import '../../repositories/firestore_repository.dart';
+import '../../repositories/user_repository.dart';
+import '../../repositories/friend_repository.dart';
+import '../../services/invitation_service.dart';
 import 'game_screen_state.dart';
 import 'player_data.dart';
 
@@ -62,6 +66,20 @@ class GameScreenViewModel extends ChangeNotifier {
   final String roomCode;
   final String playerId;
   final bool isHost;
+
+  final UserRepository _userRepository = UserRepository(
+    repository: FirestoreRepository(),
+  );
+  final FriendRepository _friendRepository = FriendRepository(
+    repository: FirestoreRepository(),
+  );
+  final InvitationService _invitationService = InvitationService();
+
+  // フレンドリスト
+  List<UserProfile> _friends = [];
+  List<UserProfile> get friends => _friends;
+  bool _isLoadingFriends = false;
+  bool get isLoadingFriends => _isLoadingFriends;
 
   // ===== View用の状態 =====
   GameRoom? _currentRoom;
@@ -598,6 +616,49 @@ class GameScreenViewModel extends ChangeNotifier {
     } catch (e) {
       _isExiting = false; // 失敗した場合はフラグを戻す
       _uiState = _uiState.copyWithError('退出に失敗しました: $e');
+      notifyListeners();
+    }
+  }
+
+  /// フレンド一覧を読み込む
+  Future<void> loadFriends() async {
+    if (_isLoadingFriends) return;
+    _isLoadingFriends = true;
+    notifyListeners();
+
+    try {
+      final friendIds = await _friendRepository.getFriendIds(playerId);
+      final profiles = <UserProfile>[];
+      for (final id in friendIds) {
+        final profile = await _userRepository.getProfile(id);
+        if (profile != null) profiles.add(profile);
+      }
+      _friends = profiles;
+    } finally {
+      _isLoadingFriends = false;
+      notifyListeners();
+    }
+  }
+
+  /// フレンドを招待する
+  Future<void> inviteFriend(UserProfile friend) async {
+    final data = playerData;
+    if (data == null) return;
+
+    final sender = UserProfile(
+      uid: playerId,
+      displayName: data.myDisplayName,
+      iconId: data.myIconId,
+    );
+
+    try {
+      await _invitationService.sendInvitation(
+        sender: sender,
+        receiverId: friend.uid,
+        roomCode: roomCode,
+      );
+    } catch (e) {
+      _uiState = _uiState.copyWithError('招待の送信に失敗しました: $e');
       notifyListeners();
     }
   }
