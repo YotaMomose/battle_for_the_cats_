@@ -32,6 +32,9 @@ class FriendManagementViewModel extends ChangeNotifier {
   UserProfile? _searchResult;
   UserProfile? get searchResult => _searchResult;
 
+  bool _isSearchResultFriend = false;
+  bool get isSearchResultFriend => _isSearchResultFriend;
+
   void initialize() {
     _loadFriends();
     _watchRequests();
@@ -88,6 +91,11 @@ class FriendManagementViewModel extends ChangeNotifier {
         _searchError = '自分自身は検索できません';
       } else {
         _searchResult = result;
+        // フレンドかどうかチェック
+        _isSearchResultFriend = await _friendRepository.isFriend(
+          _currentUserId,
+          result.uid,
+        );
       }
     } finally {
       _isLoading = false;

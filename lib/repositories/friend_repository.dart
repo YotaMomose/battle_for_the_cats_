@@ -106,4 +106,15 @@ class FriendRepository {
 
     return snapshot.docs.map((doc) => doc.id).toList();
   }
+
+  /// 既にフレンドかチェック
+  Future<bool> isFriend(String userId, String otherId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection(_usersCollection)
+        .doc(userId)
+        .collection('friends')
+        .doc(otherId)
+        .get();
+    return doc.exists;
+  }
 }

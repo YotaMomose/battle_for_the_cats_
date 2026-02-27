@@ -199,13 +199,21 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
               ),
               title: Text(viewModel.searchResult!.displayName),
               subtitle: Text(viewModel.searchResult!.friendCode ?? ''),
-              trailing: ElevatedButton(
-                onPressed: () => viewModel.sendRequest(
-                  myProfile,
-                  viewModel.searchResult!.uid,
-                ),
-                child: const Text('申請する'),
-              ),
+              trailing: viewModel.isSearchResultFriend
+                  ? const Text(
+                      'すでにフレンドです',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => viewModel.sendRequest(
+                        myProfile,
+                        viewModel.searchResult!.uid,
+                      ),
+                      child: const Text('申請する'),
+                    ),
             ),
           ),
       ],
