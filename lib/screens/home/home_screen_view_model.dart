@@ -18,6 +18,7 @@ class HomeScreenViewModel extends ChangeNotifier {
   late final UserRepository _userRepository;
   final Function(String roomCode, String playerId, bool isHost)
   onNavigateToGame;
+  final VoidCallback onNavigateToProfileSetup;
 
   HomeScreenState _state = HomeScreenState.idle();
   StreamSubscription? _matchmakingSubscription;
@@ -33,6 +34,7 @@ class HomeScreenViewModel extends ChangeNotifier {
   HomeScreenViewModel({
     required GameService gameService,
     required this.onNavigateToGame,
+    required this.onNavigateToProfileSetup,
     AuthService? authService,
     UserRepository? userRepository,
   }) : _gameService = gameService {
@@ -53,14 +55,20 @@ class HomeScreenViewModel extends ChangeNotifier {
       final uid = await _authService.initialize();
       var profile = await _userRepository.getProfile(uid);
 
-      // プロフィールがない、またはフレンドコードがない場合は初期化/保存して生成させる
+      // プロフィールがない、またはフレンドコードがない場合は初期化が必要
       if (profile == null ||
           profile.friendCode == null ||
           profile.friendCode!.isEmpty) {
-        profile ??= UserProfile.defaultProfile(uid);
-        // saveProfile の中で friendCode が自動生成される
+        if (profile == null) {
+          // 初回起動：設定画面へ遷移させる
+          _userProfile = UserProfile.defaultProfile(uid);
+          notifyListeners(); // 暫定的なプロフィールをセット
+          onNavigateToProfileSetup();
+          return;
+        }
+
+        // フレンドコードだけない場合は補完して保存
         await _userRepository.saveProfile(profile);
-        // 生成されたコードを含むデータを再取得
         profile = await _userRepository.getProfile(uid);
       }
 
@@ -78,13 +86,25 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   /// プロフィールを更新する
   Future<void> updateProfile({String? displayName, String? iconId}) async {
-    if (_userProfile == null) return;
+    final uid = _authService.currentUserId;
+    if (uid == null) return;
+
     try {
-      _userProfile = _userProfile!.copyWith(
+      final currentProfile = _userProfile ?? UserProfile.defaultProfile(uid);
+      _userProfile = currentProfile.copyWith(
         displayName: displayName,
         iconId: iconId,
       );
       await _userRepository.saveProfile(_userProfile!);
+
+      // 再取得してフレンドコードなどを含めた最新状態にする
+      _userProfile = await _userRepository.getProfile(uid);
+
+      // 初回設定後の場合は招待監視を開始
+      if (_invitationSubscription == null) {
+        _startInvitationMonitoring(uid);
+      }
+
       notifyListeners();
     } catch (e) {
       _updateState(HomeScreenState.idle(errorMessage: 'プロフィールの更新に失敗しました: $e'));

@@ -6,6 +6,7 @@ import 'home/home_screen_state.dart';
 import 'home/home_screen_view_model.dart';
 import 'home/views/main_menu_view.dart';
 import 'home/views/matchmaking_view.dart';
+import 'profile_setup_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,21 +14,40 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => HomeScreenViewModel(
-        gameService: GameService(),
-        onNavigateToGame: (roomCode, playerId, isHost) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GameScreen(
-                roomCode: roomCode,
-                playerId: playerId,
-                isHost: isHost,
+      create: (context) {
+        late final HomeScreenViewModel viewModel;
+        viewModel = HomeScreenViewModel(
+          gameService: GameService(),
+          onNavigateToGame: (roomCode, playerId, isHost) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GameScreen(
+                  roomCode: roomCode,
+                  playerId: playerId,
+                  isHost: isHost,
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+          onNavigateToProfileSetup: () {
+            // 次のフレームで遷移させる（ビルド中のナビゲーションを避けるため）
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true, // 下から競り上がるスタイル
+                  builder: (context) => ChangeNotifierProvider.value(
+                    value: viewModel,
+                    child: const ProfileSetupScreen(),
+                  ),
+                ),
+              );
+            });
+          },
+        );
+        return viewModel;
+      },
       child: const _HomeScreenContent(),
     );
   }
