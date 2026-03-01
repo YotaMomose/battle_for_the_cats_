@@ -26,6 +26,7 @@ class HomeScreenViewModel extends ChangeNotifier {
   UserProfile? _userProfile;
   List<Invitation> _invitations = [];
   final InvitationService _invitationService = InvitationService();
+  bool _isLoading = false;
 
   HomeScreenState get state => _state;
   UserProfile? get userProfile => _userProfile;
@@ -51,6 +52,8 @@ class HomeScreenViewModel extends ChangeNotifier {
   ///
   /// 認証が未完了の場合は自動的に初期化を行う。
   Future<void> _loadProfile() async {
+    if (_isLoading) return;
+    _isLoading = true;
     try {
       final uid = await _authService.initialize();
       var profile = await _userRepository.getProfile(uid);
@@ -81,6 +84,8 @@ class HomeScreenViewModel extends ChangeNotifier {
     } catch (e) {
       // 認証失敗時はデフォルトプロフィールで続行
       debugPrint('プロフィール読み込みエラー: $e');
+    } finally {
+      _isLoading = false;
     }
   }
 

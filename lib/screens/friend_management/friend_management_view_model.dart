@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../models/friend_request.dart';
+import '../../models/friend.dart';
 import '../../repositories/friend_repository.dart';
 import '../../repositories/user_repository.dart';
 
@@ -17,8 +18,8 @@ class FriendManagementViewModel extends ChangeNotifier {
        _friendRepository = friendRepository,
        _currentUserId = currentUserId;
 
-  List<UserProfile> _friends = [];
-  List<UserProfile> get friends => _friends;
+  List<Friend> _friends = [];
+  List<Friend> get friends => _friends;
 
   List<FriendRequest> _incomingRequests = [];
   List<FriendRequest> get incomingRequests => _incomingRequests;
@@ -45,13 +46,13 @@ class FriendManagementViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final friendIds = await _friendRepository.getFriendIds(_currentUserId);
-      final profiles = <UserProfile>[];
-      for (final id in friendIds) {
-        final profile = await _userRepository.getProfile(id);
-        if (profile != null) profiles.add(profile);
-      }
-      _friends = profiles;
+      final friends = await _friendRepository.getFriendsWithStats(
+        _currentUserId,
+        _userRepository,
+      );
+      _friends = friends;
+    } catch (e) {
+      debugPrint('[FriendManagementViewModel] _loadFriends Error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

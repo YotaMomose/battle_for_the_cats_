@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/firestore_repository.dart';
 import '../models/friend_request.dart';
 import '../models/user_profile.dart';
+import '../models/friend.dart';
+import 'user_repository.dart';
 
 /// フレンド関係と申請を管理するリポジトリ
 class FriendRepository {
@@ -86,14 +88,41 @@ class FriendRepository {
 
         transaction.set(myFriendRef, {
           'friendId': request.fromId,
+          'winCount': 0,
+          'lossCount': 0,
           'timestamp': FieldValue.serverTimestamp(),
         });
         transaction.set(opponentFriendRef, {
           'friendId': request.toId,
+          'winCount': 0,
+          'lossCount': 0,
           'timestamp': FieldValue.serverTimestamp(),
         });
       }
     });
+  }
+
+  /// フレンド一覧（戦績付き）を取得
+  Future<List<Friend>> getFriendsWithStats(
+    String userId,
+    UserRepository userRepository,
+  ) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_usersCollection)
+        .doc(userId)
+        .collection('friends')
+        .get();
+
+    final friends = <Friend>[];
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final friendId = doc.id;
+      final profile = await userRepository.getProfile(friendId);
+      if (profile != null) {
+        friends.add(Friend.fromMap(profile, data));
+      }
+    }
+    return friends;
   }
 
   /// フレンド一覧を取得
@@ -116,5 +145,29 @@ class FriendRepository {
         .doc(otherId)
         .get();
     return doc.exists;
+  }
+
+  /// 対戦結果を記録する
+  Future<void> recordMatchResult({
+    required String userId,
+    required String friendId,
+    required bool isWin,
+  }) async {
+    final friendRef = FirebaseFirestore.instance
+        .collection(_usersCollection)
+        .doc(userId)
+        .collection('friends')
+        .doc(friendId);
+
+    // ドキュメントが存在する場合のみ更新（フレンドでない場合は記録しない）
+    final doc = await friendRef.get();
+    if (!doc.exists) return;
+
+    await friendRef.update({
+      if (isWin)
+        'winCount': FieldValue.increment(1)
+      else
+        'lossCount': FieldValue.increment(1),
+    });
   }
 }

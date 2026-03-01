@@ -100,6 +100,9 @@ class GameScreenViewModel extends ChangeNotifier {
   // 退出処理中かどうか
   bool _isExiting = false;
 
+  // 戦績記録済みフラグ
+  bool _hasRecordedFinalResult = false;
+
   // ===== Getters (Viewから参照) =====
   GameScreenState get uiState => _uiState;
   bool get hasRolled => _hasRolled;
@@ -486,6 +489,7 @@ class GameScreenViewModel extends ChangeNotifier {
         break;
       case GameStatus.finished:
         _uiState = GameScreenState.finished(room);
+        _recordMatchResultIfFinished(room);
         break;
       case GameStatus.fatCatEvent:
         _uiState = GameScreenState.fatCatEvent(room);
@@ -496,6 +500,36 @@ class GameScreenViewModel extends ChangeNotifier {
   void _handleOpponentLeft() {
     _uiState = _uiState.copyWithOpponentLeft();
     notifyListeners();
+  }
+
+  /// ゲーム終了時に戦績を記録する
+  Future<void> _recordMatchResultIfFinished(GameRoom room) async {
+    if (_hasRecordedFinalResult) return;
+    if (room.status != GameStatus.finished || room.finalWinner == null) return;
+
+    final myRole = isHost ? Winner.host : Winner.guest;
+    final opponentId = isHost ? room.guestId : room.hostId;
+
+    if (opponentId == null) return;
+
+    _hasRecordedFinalResult = true;
+
+    try {
+      if (room.finalWinner == Winner.draw) {
+        // 引き分けの場合は現状記録しない（または両方に敗北扱い？仕様による）
+        return;
+      }
+
+      final isWin = room.finalWinner == myRole;
+      await _friendRepository.recordMatchResult(
+        userId: playerId,
+        friendId: opponentId,
+        isWin: isWin,
+      );
+      debugPrint('[GameScreenViewModel] 戦績を記録しました: ${isWin ? "勝利" : "敗北"}');
+    } catch (e) {
+      debugPrint('[GameScreenViewModel] 戦績の記録に失敗しました: $e');
+    }
   }
 
   /// ターン変更チェック

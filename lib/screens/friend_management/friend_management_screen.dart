@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'friend_management_view_model.dart';
 import '../home/home_screen_view_model.dart';
 import '../../models/user_profile.dart';
+import '../../models/friend.dart';
 import '../../repositories/friend_repository.dart';
 import '../../repositories/user_repository.dart';
 
@@ -93,7 +94,9 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
                 ),
               )
             else
-              ...viewModel.friends.map((friend) => _buildFriendItem(friend)),
+              ...viewModel.friends.map(
+                (friend) => _buildFriendItem(context, friend),
+              ),
           ],
         ),
       ),
@@ -249,14 +252,57 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
     );
   }
 
-  Widget _buildFriendItem(UserProfile friend) {
-    return ListTile(
-      leading: Text(
-        UserIcon.fromId(friend.iconId).emoji,
-        style: const TextStyle(fontSize: 32),
+  Widget _buildFriendItem(BuildContext context, Friend friend) {
+    final profile = friend.profile;
+    return Card(
+      child: ListTile(
+        leading: Text(
+          UserIcon.fromId(profile.iconId).emoji,
+          style: const TextStyle(fontSize: 32),
+        ),
+        title: Text(profile.displayName),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(profile.friendCode ?? ''),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                _buildStatBadge(context, '${friend.winCount}勝', Colors.green),
+                const SizedBox(width: 4),
+                _buildStatBadge(context, '${friend.lossCount}敗', Colors.red),
+                const SizedBox(width: 8),
+                Text(
+                  '勝率 ${(friend.winRate * 100).toStringAsFixed(1)}%',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+        isThreeLine: true,
       ),
-      title: Text(friend.displayName),
-      subtitle: Text(friend.friendCode ?? ''),
+    );
+  }
+
+  Widget _buildStatBadge(BuildContext context, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

@@ -19,6 +19,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        Provider(create: (_) => AuthService()),
         Provider(create: (_) => FirestoreRepository()),
         ProxyProvider<FirestoreRepository, UserRepository>(
           update: (_, firestore, __) => UserRepository(repository: firestore),

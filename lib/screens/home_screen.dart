@@ -1,23 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import '../services/game_service.dart';
 import 'game_screen.dart';
 import 'home/home_screen_state.dart';
 import 'home/home_screen_view_model.dart';
+import '../repositories/user_repository.dart';
 import 'home/views/main_menu_view.dart';
 import 'home/views/matchmaking_view.dart';
 import 'profile_setup_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  HomeScreenViewModel? _viewModel;
+  bool _isNavigationPending = false;
+
+  @override
+  void dispose() {
+    // _viewModel は Provider が dispose するのでここでは何もしない
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userRepository = Provider.of<UserRepository>(context, listen: false);
+
     return ChangeNotifierProvider(
-      create: (context) {
-        late final HomeScreenViewModel viewModel;
-        viewModel = HomeScreenViewModel(
+      create: (providerContext) {
+        _viewModel = HomeScreenViewModel(
           gameService: GameService(),
+          authService: authService,
+          userRepository: userRepository,
           onNavigateToGame: (roomCode, playerId, isHost) {
             Navigator.push(
               context,
@@ -31,22 +51,25 @@ class HomeScreen extends StatelessWidget {
             );
           },
           onNavigateToProfileSetup: () {
-            // 次のフレームで遷移させる（ビルド中のナビゲーションを避けるため）
+            if (_isNavigationPending) return;
+            _isNavigationPending = true;
+
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  fullscreenDialog: true, // 下から競り上がるスタイル
+                  fullscreenDialog: true,
                   builder: (context) => ChangeNotifierProvider.value(
-                    value: viewModel,
+                    value: _viewModel!,
                     child: const ProfileSetupScreen(),
                   ),
                 ),
-              );
+              ).then((_) => _isNavigationPending = false);
             });
           },
         );
-        return viewModel;
+        return _viewModel!;
       },
       child: const _HomeScreenContent(),
     );

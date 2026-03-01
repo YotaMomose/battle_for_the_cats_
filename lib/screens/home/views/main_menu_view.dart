@@ -26,7 +26,11 @@ class _MainMenuViewState extends State<MainMenuView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeScreenViewModel>();
-    final isNotIdle = viewModel.state is! IdleState;
+    // プロフィールが未取得、またはフレンドコードが未作成（初期設定中）の場合は操作不可にする
+    final isProfileNotReady =
+        viewModel.userProfile == null ||
+        viewModel.userProfile?.friendCode == null;
+    final isNotIdle = viewModel.state is! IdleState || isProfileNotReady;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +43,9 @@ class _MainMenuViewState extends State<MainMenuView> {
               IconButton(
                 icon: const Icon(Icons.notifications),
                 tooltip: '招待',
-                onPressed: () => _showInvitationsBox(context, viewModel),
+                onPressed: isNotIdle
+                    ? null
+                    : () => _showInvitationsBox(context, viewModel),
               ),
               if (viewModel.invitations.isNotEmpty)
                 Positioned(
@@ -71,32 +77,36 @@ class _MainMenuViewState extends State<MainMenuView> {
           IconButton(
             icon: const Icon(Icons.people),
             tooltip: 'フレンド管理',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider.value(
-                    value: viewModel,
-                    child: const FriendManagementScreen(),
-                  ),
-                ),
-              );
-            },
+            onPressed: isNotIdle
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider.value(
+                          value: viewModel,
+                          child: const FriendManagementScreen(),
+                        ),
+                      ),
+                    );
+                  },
           ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'プロフィール設定',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider.value(
-                    value: viewModel,
-                    child: const ProfileScreen(),
-                  ),
-                ),
-              );
-            },
+            onPressed: isNotIdle
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider.value(
+                          value: viewModel,
+                          child: const ProfileScreen(),
+                        ),
+                      ),
+                    );
+                  },
           ),
         ],
       ),
