@@ -147,6 +147,17 @@ class FriendRepository {
     return doc.exists;
   }
 
+  /// フレンド数を取得
+  Future<int> getFriendCount(String userId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_usersCollection)
+        .doc(userId)
+        .collection('friends')
+        .count()
+        .get();
+    return snapshot.count ?? 0;
+  }
+
   /// 対戦結果を記録する
   Future<void> recordMatchResult({
     required String userId,

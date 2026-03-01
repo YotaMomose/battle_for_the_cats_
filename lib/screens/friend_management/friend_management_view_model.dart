@@ -4,6 +4,7 @@ import '../../models/friend_request.dart';
 import '../../models/friend.dart';
 import '../../repositories/friend_repository.dart';
 import '../../repositories/user_repository.dart';
+import '../../constants/game_constants.dart';
 
 class FriendManagementViewModel extends ChangeNotifier {
   final UserRepository _userRepository;
@@ -107,6 +108,14 @@ class FriendManagementViewModel extends ChangeNotifier {
   /// 申請送信
   Future<void> sendRequest(UserProfile from, String toId) async {
     try {
+      // 自分のフレンド数をチェック
+      final count = await _friendRepository.getFriendCount(_currentUserId);
+      if (count >= GameConstants.maxFriendLimit) {
+        _searchError = 'フレンドの上限（${GameConstants.maxFriendLimit}人）に達しています';
+        notifyListeners();
+        return;
+      }
+
       await _friendRepository.sendFriendRequest(from, toId);
       _searchResult = null;
       notifyListeners();
@@ -119,6 +128,16 @@ class FriendManagementViewModel extends ChangeNotifier {
   /// 申請に回答
   Future<void> respondToRequest(FriendRequest request, bool accept) async {
     try {
+      if (accept) {
+        // 自分のフレンド数をチェック
+        final count = await _friendRepository.getFriendCount(_currentUserId);
+        if (count >= GameConstants.maxFriendLimit) {
+          _searchError = 'フレンドの上限に達しているため、これ以上追加できません';
+          notifyListeners();
+          return;
+        }
+      }
+
       await _friendRepository.respondToRequest(request, accept);
       if (accept) {
         _loadFriends(); // 一覧を再取得

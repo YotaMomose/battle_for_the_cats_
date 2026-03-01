@@ -37,6 +37,9 @@ class GameConstants {
 
   // イベント
   static const double fatCatEventProbability = 0.1; // 太っちょネコイベント発生確率
+
+  // フレンド
+  static const int maxFriendLimit = 50; // フレンドの上限数
 }
 
 /// ゲーム状態

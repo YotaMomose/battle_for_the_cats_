@@ -7,6 +7,7 @@ import '../../models/user_profile.dart';
 import '../../models/friend.dart';
 import '../../repositories/friend_repository.dart';
 import '../../repositories/user_repository.dart';
+import '../../constants/game_constants.dart';
 
 class FriendManagementScreen extends StatelessWidget {
   const FriendManagementScreen({super.key});
@@ -82,7 +83,19 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
             ],
 
             // フレンド一覧
-            Text('フレンド一覧', style: Theme.of(context).textTheme.titleLarge),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('フレンド一覧', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  '${viewModel.friends.length} / ${GameConstants.maxFriendLimit}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
             if (viewModel.isLoading && viewModel.friends.isEmpty)
               const Center(child: CircularProgressIndicator())
