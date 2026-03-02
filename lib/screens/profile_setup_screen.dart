@@ -19,7 +19,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: 'ゲスト');
+    _nameController = TextEditingController(text: '');
     _selectedIconId = UserIcon.defaultIcon.id;
   }
 
@@ -51,9 +51,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final message = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('設定の保存に失敗しました: $e')));
+        ).showSnackBar(SnackBar(content: Text('設定の保存に失敗しました: $message')));
         setState(() => _isSaving = false);
       }
     }
@@ -122,6 +123,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     controller: _nameController,
                     decoration: InputDecoration(
                       labelText: 'ユーザー名',
+                      hintText: '名前を入力してください',
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
@@ -131,6 +133,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     ),
                     maxLength: 12,
                   ),
+                  const SizedBox(height: 8),
+                  _buildPermanentNameWarning(),
                   const SizedBox(height: 32),
 
                   // アイコン選択
@@ -219,6 +223,37 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPermanentNameWarning() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.amber,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '※ ユーザー名は後から変更できません。慎重に選んでください。',
+              style: TextStyle(
+                color: Colors.amber[900],
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

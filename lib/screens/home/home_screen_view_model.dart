@@ -96,6 +96,18 @@ class HomeScreenViewModel extends ChangeNotifier {
 
     try {
       final currentProfile = _userProfile ?? UserProfile.defaultProfile(uid);
+
+      // 名前変更がある場合、重複チェックを行う
+      if (displayName != null && displayName != currentProfile.displayName) {
+        final isTaken = await _userRepository.isDisplayNameTaken(
+          displayName,
+          excludeUid: uid,
+        );
+        if (isTaken) {
+          throw Exception('このユーザー名は既に使用されています。別の名前を入力してください。');
+        }
+      }
+
       _userProfile = currentProfile.copyWith(
         displayName: displayName,
         iconId: iconId,
@@ -112,7 +124,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      _updateState(HomeScreenState.idle(errorMessage: 'プロフィールの更新に失敗しました: $e'));
+      rethrow;
     }
   }
 

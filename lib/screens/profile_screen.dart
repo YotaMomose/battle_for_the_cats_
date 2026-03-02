@@ -41,31 +41,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isSaving = true);
 
     final viewModel = context.read<HomeScreenViewModel>();
-    final name = _nameController.text.trim();
+    // 名前変更は不可なので、アイコンのみ更新
 
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('ユーザー名を入力してください')));
-      setState(() => _isSaving = false);
-      return;
-    }
+    try {
+      await viewModel.updateProfile(iconId: _selectedIconId);
 
-    if (name.length > 12) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('ユーザー名は12文字以内にしてください')));
-      setState(() => _isSaving = false);
-      return;
-    }
-
-    await viewModel.updateProfile(displayName: name, iconId: _selectedIconId);
-
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('プロフィールを保存しました')));
-      Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('プロフィールを保存しました')));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        final message = e.toString().replaceAll('Exception: ', '');
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存に失敗しました: $message')));
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -100,16 +94,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 32),
 
-            // ユーザー名入力
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'ユーザー名',
-                hintText: '表示名を入力',
-                border: OutlineInputBorder(),
-                counterText: '最大12文字',
+            // ユーザー名表示（変更不可）
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                ),
               ),
-              maxLength: 12,
+              child: Row(
+                children: [
+                  const Icon(Icons.person, color: Colors.grey, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ユーザー名 (変更不可)',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(color: Colors.grey),
+                        ),
+                        Text(
+                          _nameController.text,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
 

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
+import 'services/bgm_service.dart';
 import 'repositories/firestore_repository.dart';
 import 'repositories/user_repository.dart';
 import 'repositories/friend_repository.dart';
@@ -11,6 +12,11 @@ import 'repositories/friend_repository.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // BGMの初期化と再生
+  final bgmService = BgmService();
+  await bgmService.initialize();
+  await bgmService.playBgm('bgm_main.mp3');
 
   // 匿名認証を実行（既存セッションがあれば自動復元）
   final authService = AuthService();
@@ -20,6 +26,7 @@ void main() async {
     MultiProvider(
       providers: [
         Provider(create: (_) => AuthService()),
+        Provider(create: (_) => BgmService()),
         Provider(create: (_) => FirestoreRepository()),
         ProxyProvider<FirestoreRepository, UserRepository>(
           update: (_, firestore, __) => UserRepository(repository: firestore),

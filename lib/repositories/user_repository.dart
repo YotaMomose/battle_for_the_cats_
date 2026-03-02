@@ -49,6 +49,25 @@ class UserRepository {
     return UserProfile.fromMap(results.docs.first.data());
   }
 
+  /// 表示名が既に使用されているかチェック
+  Future<bool> isDisplayNameTaken(String name, {String? excludeUid}) async {
+    final results = await _repository.query(
+      _collection,
+      filters: [QueryFilter('displayName', name)],
+    );
+    if (results.docs.isEmpty) return false;
+
+    // 見つかった場合、それが自分自身でないかチェック
+    for (final doc in results.docs) {
+      final foundUid = doc.id;
+      if (excludeUid != null && foundUid == excludeUid) {
+        continue;
+      }
+      return true; // 別のユーザーが見つかった
+    }
+    return false;
+  }
+
   /// 一意なフレンドコードを生成
   Future<String> _generateUniqueFriendCode() async {
     int attempts = 0;
