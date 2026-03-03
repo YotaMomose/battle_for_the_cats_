@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
 import '../../../models/item.dart';
 import '../game_screen_view_model.dart';
@@ -197,7 +198,10 @@ class RoundResultView extends StatelessWidget {
                           alignment: WrapAlignment.center,
                           children: viewModel.revivableItems.map((item) {
                             return ElevatedButton.icon(
-                              onPressed: () => viewModel.reviveItem(item),
+                              onPressed: () {
+                                SeService().play('button_buni.mp3');
+                                viewModel.reviveItem(item);
+                              },
                               icon: const Icon(Icons.refresh, size: 18),
                               label: Text(item.displayName),
                               style: ElevatedButton.styleFrom(
@@ -251,8 +255,10 @@ class RoundResultView extends StatelessWidget {
                               catName,
                             ) {
                               return ElevatedButton.icon(
-                                onPressed: () =>
-                                    viewModel.chaseAwayCard(catName),
+                                onPressed: () {
+                                  SeService().play('button_buni.mp3');
+                                  viewModel.chaseAwayCard(catName);
+                                },
                                 icon: const Icon(Icons.exit_to_app, size: 18),
                                 label: Text(catName),
                                 style: ElevatedButton.styleFrom(
@@ -283,7 +289,10 @@ class RoundResultView extends StatelessWidget {
               ElevatedButton(
                 onPressed: (isConfirmed || viewModel.canChaseAway)
                     ? null
-                    : viewModel.nextTurn,
+                    : () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.nextTurn();
+                      },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                   backgroundColor: (isConfirmed || viewModel.canChaseAway)

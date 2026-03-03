@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../home_screen_state.dart';
 import '../home_screen_view_model.dart';
 import '../../../models/user_profile.dart';
@@ -45,7 +46,10 @@ class _MainMenuViewState extends State<MainMenuView> {
                 tooltip: '招待',
                 onPressed: isNotIdle
                     ? null
-                    : () => _showInvitationsBox(context, viewModel),
+                    : () {
+                        SeService().play('button_buni.mp3');
+                        _showInvitationsBox(context, viewModel);
+                      },
               ),
               if (viewModel.invitations.isNotEmpty)
                 Positioned(
@@ -80,6 +84,7 @@ class _MainMenuViewState extends State<MainMenuView> {
             onPressed: isNotIdle
                 ? null
                 : () {
+                    SeService().play('button_buni.mp3');
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -97,6 +102,7 @@ class _MainMenuViewState extends State<MainMenuView> {
             onPressed: isNotIdle
                 ? null
                 : () {
+                    SeService().play('button_buni.mp3');
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -139,7 +145,12 @@ class _MainMenuViewState extends State<MainMenuView> {
                 ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: isNotIdle ? null : () => viewModel.createRoom(),
+                onPressed: isNotIdle
+                    ? null
+                    : () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.createRoom();
+                      },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                 ),
@@ -155,7 +166,10 @@ class _MainMenuViewState extends State<MainMenuView> {
               ElevatedButton.icon(
                 onPressed: isNotIdle
                     ? null
-                    : () => viewModel.startRandomMatch(),
+                    : () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.startRandomMatch();
+                      },
                 icon: const Icon(Icons.shuffle),
                 label: const Text('ランダムマッチ', style: TextStyle(fontSize: 18)),
                 style: ElevatedButton.styleFrom(
@@ -182,7 +196,10 @@ class _MainMenuViewState extends State<MainMenuView> {
               ElevatedButton(
                 onPressed: isNotIdle
                     ? null
-                    : () => viewModel.joinRoom(_roomCodeController.text),
+                    : () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.joinRoom(_roomCodeController.text);
+                      },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                 ),

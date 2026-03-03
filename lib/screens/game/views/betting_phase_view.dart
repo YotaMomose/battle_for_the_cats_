@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
 import '../../../models/cat_inventory.dart';
 import '../../../models/item.dart';
@@ -302,7 +303,10 @@ class BettingPhaseView extends StatelessWidget {
                       ElevatedButton(
                         onPressed: viewModel.hasPlacedBet
                             ? null
-                            : viewModel.placeBets,
+                            : () {
+                                SeService().play('button_buni.mp3');
+                                viewModel.placeBets();
+                              },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
                         ),

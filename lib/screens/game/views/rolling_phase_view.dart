@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
 import '../game_screen_view_model.dart';
 
@@ -196,7 +197,10 @@ class RollingPhaseView extends StatelessWidget {
                         const SizedBox(height: 16),
                         if (viewModel.canProceedFromRoll)
                           ElevatedButton(
-                            onPressed: viewModel.confirmRoll,
+                            onPressed: () {
+                              SeService().play('button_buni.mp3');
+                              viewModel.confirmRoll();
+                            },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 48,
@@ -222,7 +226,10 @@ class RollingPhaseView extends StatelessWidget {
                         ElevatedButton.icon(
                           onPressed: viewModel.hasRolled
                               ? null
-                              : viewModel.rollDice,
+                              : () {
+                                  SeService().play('button_buni.mp3');
+                                  viewModel.rollDice();
+                                },
                           icon: const Icon(Icons.casino, size: 32),
                           label: Text(
                             viewModel.rollButtonLabel,

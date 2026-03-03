@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../game_screen_view_model.dart';
 import '../../../models/user_profile.dart';
 
@@ -35,7 +36,10 @@ class WaitingView extends StatelessWidget {
 
           // フレンド招待ボタン
           ElevatedButton.icon(
-            onPressed: () => _showInviteFriendDialog(context, viewModel),
+            onPressed: () {
+              SeService().play('button_buni.mp3');
+              _showInviteFriendDialog(context, viewModel);
+            },
             icon: const Icon(Icons.person_add),
             label: const Text('フレンドを招待'),
             style: ElevatedButton.styleFrom(
@@ -86,6 +90,7 @@ class WaitingView extends StatelessWidget {
                             title: Text(friend.displayName),
                             trailing: ElevatedButton(
                               onPressed: () {
+                                SeService().play('button_buni.mp3');
                                 vm.inviteFriend(friend);
                                 Navigator.pop(context);
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +109,10 @@ class WaitingView extends StatelessWidget {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    SeService().play('button_buni.mp3');
+                    Navigator.pop(context);
+                  },
                   child: const Text('閉じる'),
                 ),
               ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
 import '../game_screen_view_model.dart';
 
@@ -156,6 +157,7 @@ class FinalResultView extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
+                SeService().play('button_buni.mp3');
                 viewModel.leaveRoom();
               },
               style: ElevatedButton.styleFrom(

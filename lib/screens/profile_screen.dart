@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../services/se_service.dart';
 import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
 
@@ -164,6 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     IconButton(
                       icon: const Icon(Icons.copy, size: 20),
                       onPressed: () {
+                        SeService().play('button_buni.mp3');
                         Clipboard.setData(
                           ClipboardData(
                             text: viewModel.userProfile!.friendCode!,
@@ -196,7 +198,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 final icon = UserIcon.presets[index];
                 final isSelected = icon.id == _selectedIconId;
                 return GestureDetector(
-                  onTap: () => setState(() => _selectedIconId = icon.id),
+                  onTap: () {
+                    SeService().play('button_buni.mp3');
+                    setState(() => _selectedIconId = icon.id);
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       color: isSelected
@@ -232,7 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // 保存ボタン
             FilledButton.icon(
-              onPressed: _isSaving ? null : _saveProfile,
+              onPressed: _isSaving
+                  ? null
+                  : () {
+                      SeService().play('button_buni.mp3');
+                      _saveProfile();
+                    },
               icon: _isSaving
                   ? const SizedBox(
                       width: 20,

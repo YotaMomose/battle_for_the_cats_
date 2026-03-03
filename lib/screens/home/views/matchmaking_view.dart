@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
 import '../home_screen_view_model.dart';
 
 /// ランダムマッチング中画面
@@ -34,11 +35,17 @@ class MatchmakingView extends StatelessWidget {
               ),
               const SizedBox(height: 48),
               OutlinedButton.icon(
-                onPressed: () => viewModel.cancelMatchmaking(),
+                onPressed: () {
+                  SeService().play('button_buni.mp3');
+                  viewModel.cancelMatchmaking();
+                },
                 icon: const Icon(Icons.close),
                 label: const Text('キャンセル', style: TextStyle(fontSize: 18)),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                 ),
               ),
             ],

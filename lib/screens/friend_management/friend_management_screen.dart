@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../services/se_service.dart';
 import 'friend_management_view_model.dart';
 import '../home/home_screen_view_model.dart';
 import '../../models/user_profile.dart';
@@ -155,6 +156,7 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
             onPressed: myProfile.friendCode == null
                 ? null
                 : () {
+                    SeService().play('button_buni.mp3');
                     Clipboard.setData(ClipboardData(text: code));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('フレンドコードをコピーしました')),
@@ -192,7 +194,10 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
             ElevatedButton(
               onPressed: viewModel.isLoading
                   ? null
-                  : () => viewModel.searchUser(_searchController.text),
+                  : () {
+                      SeService().play('button_buni.mp3');
+                      viewModel.searchUser(_searchController.text);
+                    },
               child: const Text('検索'),
             ),
           ],
@@ -224,10 +229,13 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
                       ),
                     )
                   : ElevatedButton(
-                      onPressed: () => viewModel.sendRequest(
-                        myProfile,
-                        viewModel.searchResult!.uid,
-                      ),
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.sendRequest(
+                          myProfile,
+                          viewModel.searchResult!.uid,
+                        );
+                      },
                       child: const Text('申請する'),
                     ),
             ),
@@ -252,11 +260,17 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
-              onPressed: () => viewModel.respondToRequest(request, false),
+              onPressed: () {
+                SeService().play('button_buni.mp3');
+                viewModel.respondToRequest(request, false);
+              },
               child: const Text('拒否', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
-              onPressed: () => viewModel.respondToRequest(request, true),
+              onPressed: () {
+                SeService().play('button_buni.mp3');
+                viewModel.respondToRequest(request, true);
+              },
               child: const Text('承認'),
             ),
           ],

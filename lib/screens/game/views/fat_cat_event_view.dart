@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
 
 class FatCatEventView extends StatelessWidget {
@@ -96,7 +97,10 @@ class FatCatEventView extends StatelessWidget {
             ),
             const SizedBox(height: 48),
             ElevatedButton(
-              onPressed: onConfirm,
+              onPressed: () {
+                SeService().play('button_buni.mp3');
+                onConfirm();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
