@@ -2,13 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
+import '../../../constants/game_constants.dart';
 import '../game_screen_view_model.dart';
 
 /// 最終結果画面
-class FinalResultView extends StatelessWidget {
+class FinalResultView extends StatefulWidget {
   final GameRoom room;
 
   const FinalResultView({super.key, required this.room});
+
+  @override
+  State<FinalResultView> createState() => _FinalResultViewState();
+}
+
+class _FinalResultViewState extends State<FinalResultView> {
+  @override
+  void initState() {
+    super.initState();
+    // 画面表示時に勝敗に応じたSEを再生
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _playResultSound();
+    });
+  }
+
+  void _playResultSound() {
+    if (!mounted) return;
+    final viewModel = Provider.of<GameScreenViewModel>(context, listen: false);
+    final room = widget.room;
+
+    final myRole = viewModel.isHost ? Winner.host : Winner.guest;
+    if (room.finalWinner == Winner.draw) {
+      // 引き分けの場合は現状SEなし（または必要に応じて追加）
+    } else if (room.finalWinner == myRole) {
+      SeService().play('victory.mp3');
+    } else {
+      SeService().play('lose.mp3');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +177,7 @@ class FinalResultView extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      '全${room.currentTurn}ターン終了',
+                      '全${widget.room.currentTurn}ターン終了',
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
