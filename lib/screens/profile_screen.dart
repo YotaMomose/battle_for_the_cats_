@@ -5,6 +5,7 @@ import '../services/se_service.dart';
 import '../services/settings_service.dart';
 import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
+import '../services/iap_service.dart';
 
 /// プロフィール設定画面
 ///
@@ -183,6 +184,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             const SizedBox(height: 24),
 
+            // 開発者応援セクション
+            if (!(viewModel.userProfile?.isSupporter ?? false))
+              Card(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withOpacity(0.3),
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.favorite, color: Colors.red),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '開発者を応援する',
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const Text(
+                                  '応援していただくと、限定のプレミアムアイコンがすべて解放されます！',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            SeService().play('button_buni.mp3');
+                            IapService().buySupporter();
+                          },
+                          icon: const Icon(Icons.volunteer_activism, size: 18),
+                          label: const Text('応援する（投げ銭）'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 24),
+
             // アイコン選択
             Text('アイコンを選択', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
@@ -198,15 +250,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               itemBuilder: (context, index) {
                 final icon = UserIcon.presets[index];
                 final isSelected = icon.id == _selectedIconId;
+                final isLocked =
+                    icon.isPremium &&
+                    !(viewModel.userProfile?.isSupporter ?? false);
+
                 return GestureDetector(
                   onTap: () {
                     SeService().play('button_buni.mp3');
+                    if (isLocked) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('このアイコンは開発者を応援すると解放されます')),
+                      );
+                      return;
+                    }
                     setState(() => _selectedIconId = icon.id);
                   },
                   child: Container(
                     decoration: BoxDecoration(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primaryContainer
+                          : isLocked
+                          ? Colors.grey.withOpacity(0.1)
                           : Theme.of(
                               context,
                             ).colorScheme.surfaceContainerHighest,
@@ -218,16 +282,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             )
                           : null,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Text(icon.emoji, style: const TextStyle(fontSize: 32)),
-                        const SizedBox(height: 4),
-                        Text(
-                          icon.label,
-                          style: Theme.of(context).textTheme.labelSmall,
-                          overflow: TextOverflow.ellipsis,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Opacity(
+                              opacity: isLocked ? 0.3 : 1.0,
+                              child: Text(
+                                icon.emoji,
+                                style: const TextStyle(fontSize: 32),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              icon.label,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: isLocked ? Colors.grey : null,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
+                        if (isLocked)
+                          const Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Icon(
+                              Icons.lock,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
                       ],
                     ),
                   ),

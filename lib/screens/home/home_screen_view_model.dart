@@ -8,6 +8,7 @@ import '../../services/invitation_service.dart';
 import '../../models/invitation.dart';
 import '../../models/match_result.dart';
 import '../../models/user_profile.dart';
+import '../../services/iap_service.dart';
 import 'home_screen_state.dart';
 
 /// ホーム画面のViewModel
@@ -43,6 +44,16 @@ class HomeScreenViewModel extends ChangeNotifier {
     _userRepository =
         userRepository ?? UserRepository(repository: FirestoreRepository());
     _loadProfile();
+    _initIap();
+  }
+
+  /// IAPの初期化
+  void _initIap() {
+    IapService().initialize(
+      onPurchaseCompleted: (purchase) async {
+        await updateProfile(isSupporter: true);
+      },
+    );
   }
 
   /// 現在のユーザーIDを取得（Firebase Auth の永続的な uid）
@@ -90,7 +101,11 @@ class HomeScreenViewModel extends ChangeNotifier {
   }
 
   /// プロフィールを更新する
-  Future<void> updateProfile({String? displayName, String? iconId}) async {
+  Future<void> updateProfile({
+    String? displayName,
+    String? iconId,
+    bool? isSupporter,
+  }) async {
     final uid = _authService.currentUserId;
     if (uid == null) return;
 
@@ -111,6 +126,7 @@ class HomeScreenViewModel extends ChangeNotifier {
       _userProfile = currentProfile.copyWith(
         displayName: displayName,
         iconId: iconId,
+        isSupporter: isSupporter,
       );
       await _userRepository.saveProfile(_userProfile!);
 

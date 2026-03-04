@@ -6,12 +6,14 @@ class UserProfile {
   final String displayName;
   final String iconId;
   final String? friendCode;
+  final bool isSupporter;
 
   const UserProfile({
     required this.uid,
     required this.displayName,
     required this.iconId,
     this.friendCode,
+    this.isSupporter = false,
   });
 
   /// デフォルトのプロフィール（初回ログイン時に使用）
@@ -20,6 +22,7 @@ class UserProfile {
       uid: uid,
       displayName: 'ゲスト',
       iconId: UserIcon.defaultIcon.id,
+      isSupporter: false,
     );
   }
 
@@ -27,12 +30,14 @@ class UserProfile {
     String? displayName,
     String? iconId,
     String? friendCode,
+    bool? isSupporter,
   }) {
     return UserProfile(
       uid: uid,
       displayName: displayName ?? this.displayName,
       iconId: iconId ?? this.iconId,
       friendCode: friendCode ?? this.friendCode,
+      isSupporter: isSupporter ?? this.isSupporter,
     );
   }
 
@@ -41,6 +46,7 @@ class UserProfile {
       'uid': uid,
       'displayName': displayName,
       'iconId': iconId,
+      'isSupporter': isSupporter,
       if (friendCode != null) 'friendCode': friendCode,
     };
   }
@@ -51,6 +57,7 @@ class UserProfile {
       displayName: map['displayName'] ?? 'ゲスト',
       iconId: map['iconId'] ?? UserIcon.defaultIcon.id,
       friendCode: map['friendCode'],
+      isSupporter: map['isSupporter'] ?? false,
     );
   }
 
@@ -61,14 +68,16 @@ class UserProfile {
           uid == other.uid &&
           displayName == other.displayName &&
           iconId == other.iconId &&
-          friendCode == other.friendCode;
+          friendCode == other.friendCode &&
+          isSupporter == other.isSupporter;
 
   @override
-  int get hashCode => Object.hash(uid, displayName, iconId, friendCode);
+  int get hashCode =>
+      Object.hash(uid, displayName, iconId, friendCode, isSupporter);
 
   @override
   String toString() =>
-      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode)';
+      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode, isSupporter: $isSupporter)';
 }
 
 /// プリセットアイコンの定義
@@ -76,8 +85,14 @@ class UserIcon {
   final String id;
   final String label;
   final String emoji;
+  final bool isPremium;
 
-  const UserIcon({required this.id, required this.label, required this.emoji});
+  const UserIcon({
+    required this.id,
+    required this.label,
+    required this.emoji,
+    this.isPremium = false,
+  });
 
   /// デフォルトアイコン
   static const defaultIcon = UserIcon(
@@ -96,6 +111,12 @@ class UserIcon {
     UserIcon(id: 'octopus', label: 'たこ', emoji: '🐙'),
     UserIcon(id: 'penguin', label: 'ペンギン', emoji: '🐧'),
     UserIcon(id: 'rabbit', label: 'うさぎ', emoji: '🐰'),
+
+    // プレミアムアイコン
+    UserIcon(id: 'cat_crown', label: '王冠ねこ', emoji: '🤴', isPremium: true),
+    UserIcon(id: 'cat_diamond', label: '宝石ねこ', emoji: '💎', isPremium: true),
+    UserIcon(id: 'trophy', label: 'トロフィー', emoji: '🏆', isPremium: true),
+    UserIcon(id: 'star', label: 'スター', emoji: '⭐', isPremium: true),
   ];
 
   /// IDからアイコンを取得
