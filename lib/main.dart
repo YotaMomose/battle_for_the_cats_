@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
 import 'services/bgm_service.dart';
+import 'services/settings_service.dart';
 import 'repositories/firestore_repository.dart';
 import 'repositories/user_repository.dart';
 import 'repositories/friend_repository.dart';
@@ -12,6 +13,10 @@ import 'repositories/friend_repository.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // 設定の初期化
+  final settingsService = SettingsService();
+  await settingsService.initialize();
 
   // BGMの初期化と再生
   final bgmService = BgmService();
@@ -25,6 +30,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: settingsService),
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => BgmService()),
         Provider(create: (_) => FirestoreRepository()),

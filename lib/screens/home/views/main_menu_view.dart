@@ -148,6 +148,7 @@ class _MainMenuViewState extends State<MainMenuView> {
                 onPressed: isNotIdle
                     ? null
                     : () {
+                        FocusScope.of(context).unfocus();
                         SeService().play('button_buni.mp3');
                         viewModel.createRoom();
                       },
@@ -167,6 +168,7 @@ class _MainMenuViewState extends State<MainMenuView> {
                 onPressed: isNotIdle
                     ? null
                     : () {
+                        FocusScope.of(context).unfocus();
                         SeService().play('button_buni.mp3');
                         viewModel.startRandomMatch();
                       },
@@ -197,6 +199,7 @@ class _MainMenuViewState extends State<MainMenuView> {
                 onPressed: isNotIdle
                     ? null
                     : () {
+                        FocusScope.of(context).unfocus();
                         SeService().play('button_buni.mp3');
                         viewModel.joinRoom(_roomCodeController.text);
                       },

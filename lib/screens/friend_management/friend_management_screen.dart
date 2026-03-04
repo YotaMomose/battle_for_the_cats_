@@ -195,6 +195,7 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
               onPressed: viewModel.isLoading
                   ? null
                   : () {
+                      FocusScope.of(context).unfocus();
                       SeService().play('button_buni.mp3');
                       viewModel.searchUser(_searchController.text);
                     },

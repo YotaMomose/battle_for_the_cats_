@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'settings_service.dart';
 
 class SeService {
   static final SeService _instance = SeService._internal();
@@ -7,6 +8,10 @@ class SeService {
 
   // 短い音（SE）を再生する
   Future<void> play(String fileName) async {
+    if (!SettingsService().seEnabled) {
+      return;
+    }
+
     try {
       // SEは重なる可能性があるため、再生のたびに一時的なプレイヤーを使用する
       final player = AudioPlayer();

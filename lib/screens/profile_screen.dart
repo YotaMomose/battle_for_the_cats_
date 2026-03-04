@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/se_service.dart';
+import '../services/settings_service.dart';
 import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
 
@@ -230,6 +231,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+
+            // 音設定
+            Text('サウンド設定', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Consumer<SettingsService>(
+              builder: (context, settings, child) {
+                return Column(
+                  children: [
+                    SwitchListTile(
+                      title: const Text('BGM'),
+                      secondary: const Icon(Icons.music_note),
+                      value: settings.bgmEnabled,
+                      onChanged: (value) {
+                        SeService().play('button_buni.mp3');
+                        settings.setBgmEnabled(value);
+                      },
+                    ),
+                    SwitchListTile(
+                      title: const Text('SE'),
+                      secondary: const Icon(Icons.volume_up),
+                      value: settings.seEnabled,
+                      onChanged: (value) {
+                        SeService().play('button_buni.mp3');
+                        settings.setSeEnabled(value);
+                      },
+                    ),
+                  ],
                 );
               },
             ),
