@@ -10,6 +10,7 @@ import 'services/settings_service.dart';
 import 'repositories/firestore_repository.dart';
 import 'repositories/user_repository.dart';
 import 'repositories/friend_repository.dart';
+import 'services/ad_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +28,13 @@ void main() async {
   await bgmService.initialize();
   await bgmService.playBgm('bgm_main.mp3');
 
-  // 匿名認証を実行（既存セッションがあれば自動復元）
+  // 認証を初期化
   final authService = AuthService();
   await authService.initialize();
+
+  // 広告の初期化
+  final adService = AdService();
+  await adService.initialize();
 
   runApp(
     MultiProvider(

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../services/se_service.dart';
 import '../../../models/game_room.dart';
 import '../../../constants/game_constants.dart';
+import '../../../repositories/user_repository.dart';
+import '../../../services/ad_service.dart';
 import '../game_screen_view_model.dart';
 
 /// 最終結果画面
@@ -186,9 +188,34 @@ class _FinalResultViewState extends State<FinalResultView> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 SeService().play('button_buni.mp3');
-                viewModel.leaveRoom();
+
+                // サポーターかどうかを確認
+                final userRepository = Provider.of<UserRepository>(
+                  context,
+                  listen: false,
+                );
+                final profile = await userRepository.getProfile(
+                  viewModel.playerId,
+                );
+                final isSupporter = profile?.isSupporter ?? false;
+
+                if (!isSupporter) {
+                  // サポーターでない場合は広告を表示
+                  if (context.mounted) {
+                    await AdService().showInterstitialAd(
+                      onAdClosed: () {
+                        if (context.mounted) {
+                          viewModel.leaveRoom();
+                        }
+                      },
+                    );
+                  }
+                } else {
+                  // サポーターの場合はそのまま戻る
+                  viewModel.leaveRoom();
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: resultColor,
