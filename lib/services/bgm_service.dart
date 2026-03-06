@@ -14,8 +14,9 @@ class BgmService {
   String? _currentFileName;
 
   void _onSettingsChanged() {
+    _player.setVolume(SettingsService().bgmVolume);
     if (!SettingsService().bgmEnabled && _isPlaying) {
-      _stopBgmInternal();
+      // 消音になっても即座に停止はせず、ボリューム0として扱う（再開時の挙動をスムーズにするため）
     } else if (SettingsService().bgmEnabled &&
         !_isPlaying &&
         _currentFileName != null) {
@@ -25,15 +26,11 @@ class BgmService {
 
   Future<void> initialize() async {
     await _player.setReleaseMode(ReleaseMode.loop);
+    await _player.setVolume(SettingsService().bgmVolume);
   }
 
   Future<void> playBgm(String fileName) async {
     _currentFileName = fileName;
-
-    if (!SettingsService().bgmEnabled) {
-      print('BGM: Disabled by settings');
-      return;
-    }
 
     print('BGM: Attempting to play $fileName');
     if (_isPlaying) {
@@ -43,6 +40,7 @@ class BgmService {
     try {
       final source = AssetSource('audio/$fileName');
       print('BGM: Setting source...');
+      await _player.setVolume(SettingsService().bgmVolume);
       await _player.play(source);
       _isPlaying = true;
       print('BGM: Playback started successfully');

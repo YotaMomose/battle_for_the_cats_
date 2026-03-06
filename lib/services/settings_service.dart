@@ -6,33 +6,37 @@ class SettingsService with ChangeNotifier {
   factory SettingsService() => _instance;
   SettingsService._internal();
 
-  static const String _bgmEnabledKey = 'bgm_enabled';
-  static const String _seEnabledKey = 'se_enabled';
+  static const String _bgmVolumeKey = 'bgm_volume';
+  static const String _seVolumeKey = 'se_volume';
 
-  bool _bgmEnabled = true;
-  bool _seEnabled = true;
+  double _bgmVolume = 0.5;
+  double _seVolume = 0.5;
 
-  bool get bgmEnabled => _bgmEnabled;
-  bool get seEnabled => _seEnabled;
+  double get bgmVolume => _bgmVolume;
+  double get seVolume => _seVolume;
+
+  // 後方互換性またはON/OFF扱いのためのフラグ
+  bool get bgmEnabled => _bgmVolume > 0;
+  bool get seEnabled => _seVolume > 0;
 
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
-    _bgmEnabled = prefs.getBool(_bgmEnabledKey) ?? true;
-    _seEnabled = prefs.getBool(_seEnabledKey) ?? true;
+    _bgmVolume = prefs.getDouble(_bgmVolumeKey) ?? 0.5;
+    _seVolume = prefs.getDouble(_seVolumeKey) ?? 0.5;
     notifyListeners();
   }
 
-  Future<void> setBgmEnabled(bool enabled) async {
-    _bgmEnabled = enabled;
+  Future<void> setBgmVolume(double volume) async {
+    _bgmVolume = volume;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_bgmEnabledKey, enabled);
+    await prefs.setDouble(_bgmVolumeKey, volume);
     notifyListeners();
   }
 
-  Future<void> setSeEnabled(bool enabled) async {
-    _seEnabled = enabled;
+  Future<void> setSeVolume(double volume) async {
+    _seVolume = volume;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_seEnabledKey, enabled);
+    await prefs.setDouble(_seVolumeKey, volume);
     notifyListeners();
   }
 }

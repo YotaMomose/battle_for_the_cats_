@@ -398,23 +398,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Consumer<SettingsService>(
               builder: (context, settings, child) {
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SwitchListTile(
-                      title: const Text('BGM'),
-                      secondary: const Icon(Icons.music_note),
-                      value: settings.bgmEnabled,
+                    // BGM設定
+                    Row(
+                      children: [
+                        const Icon(Icons.music_note, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        const Text('BGM音量'),
+                        const Spacer(),
+                        Text(
+                          (settings.bgmVolume * 10).round().toString(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Slider(
+                      value: settings.bgmVolume,
+                      min: 0,
+                      max: 1.0,
+                      divisions: 10,
+                      label: (settings.bgmVolume * 10).round().toString(),
                       onChanged: (value) {
+                        settings.setBgmVolume(value);
+                      },
+                      onChangeEnd: (value) {
                         SeService().play('button_buni.mp3');
-                        settings.setBgmEnabled(value);
                       },
                     ),
-                    SwitchListTile(
-                      title: const Text('SE'),
-                      secondary: const Icon(Icons.volume_up),
-                      value: settings.seEnabled,
+                    const SizedBox(height: 16),
+                    // SE設定
+                    Row(
+                      children: [
+                        const Icon(Icons.volume_up, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        const Text('SE音量'),
+                        const Spacer(),
+                        Text(
+                          (settings.seVolume * 10).round().toString(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Slider(
+                      value: settings.seVolume,
+                      min: 0,
+                      max: 1.0,
+                      divisions: 10,
+                      label: (settings.seVolume * 10).round().toString(),
                       onChanged: (value) {
+                        settings.setSeVolume(value);
+                      },
+                      onChangeEnd: (value) {
                         SeService().play('button_buni.mp3');
-                        settings.setSeEnabled(value);
                       },
                     ),
                   ],

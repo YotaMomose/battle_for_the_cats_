@@ -8,13 +8,10 @@ class SeService {
 
   // 短い音（SE）を再生する
   Future<void> play(String fileName) async {
-    if (!SettingsService().seEnabled) {
-      return;
-    }
-
     try {
       // SEは重なる可能性があるため、再生のたびに一時的なプレイヤーを使用する
       final player = AudioPlayer();
+      await player.setVolume(SettingsService().seVolume);
       await player.play(AssetSource('audio/$fileName'));
 
       // 再生完了後にプレイヤーを破棄してメモリを解放
