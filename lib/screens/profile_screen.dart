@@ -184,54 +184,122 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             const SizedBox(height: 24),
 
-            // 開発者応援セクション
-            if (!(viewModel.userProfile?.isSupporter ?? false))
-              Card(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withOpacity(0.3),
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
+            // 開発者応援・広告非表示セクション
+            if (viewModel.shouldShowAds)
+              Column(
+                children: [
+                  // 開発者応援カード
+                  Card(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withOpacity(0.3),
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                         children: [
-                          const Icon(Icons.favorite, color: Colors.red),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '開発者を応援する',
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                          Row(
+                            children: [
+                              const Icon(Icons.favorite, color: Colors.red),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '開発者を応援する（限定アイコン解放）',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    const Text(
+                                      'プレミアムアイコンがすべて解放され、広告も非表示になります。',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ],
                                 ),
-                                const Text(
-                                  '応援していただくと、限定のプレミアムアイコンがすべて解放されます！',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                SeService().play('button_buni.mp3');
+                                IapService().buySupporter();
+                              },
+                              icon: const Icon(
+                                Icons.volunteer_activism,
+                                size: 18,
+                              ),
+                              label: const Text('応援する（投げ銭）'),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            SeService().play('button_buni.mp3');
-                            IapService().buySupporter();
-                          },
-                          icon: const Icon(Icons.volunteer_activism, size: 18),
-                          label: const Text('応援する（投げ銭）'),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  // 広告非表示カード
+                  Card(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceVariant.withOpacity(0.3),
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.block, color: Colors.blueGrey),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '広告を非表示にする',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    const Text(
+                                      'ゲーム内の広告が表示されなくなります。',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                SeService().play('button_buni.mp3');
+                                IapService().buyRemoveAds();
+                              },
+                              icon: const Icon(
+                                Icons.ad_units_outlined,
+                                size: 18,
+                              ),
+                              label: const Text('広告非表示を購入'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             const SizedBox(height: 24),
 

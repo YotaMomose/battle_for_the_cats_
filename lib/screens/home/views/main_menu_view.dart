@@ -35,7 +35,7 @@ class _MainMenuViewState extends State<MainMenuView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ねこ争奪戦！'),
+        title: const Text('ねこホイホイ！'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           // 招待通知アイコン

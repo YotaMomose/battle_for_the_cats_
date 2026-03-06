@@ -7,6 +7,7 @@ class UserProfile {
   final String iconId;
   final String? friendCode;
   final bool isSupporter;
+  final bool adsRemoved;
 
   const UserProfile({
     required this.uid,
@@ -14,6 +15,7 @@ class UserProfile {
     required this.iconId,
     this.friendCode,
     this.isSupporter = false,
+    this.adsRemoved = false,
   });
 
   /// デフォルトのプロフィール（初回ログイン時に使用）
@@ -23,6 +25,7 @@ class UserProfile {
       displayName: 'ゲスト',
       iconId: UserIcon.defaultIcon.id,
       isSupporter: false,
+      adsRemoved: false,
     );
   }
 
@@ -31,6 +34,7 @@ class UserProfile {
     String? iconId,
     String? friendCode,
     bool? isSupporter,
+    bool? adsRemoved,
   }) {
     return UserProfile(
       uid: uid,
@@ -38,6 +42,7 @@ class UserProfile {
       iconId: iconId ?? this.iconId,
       friendCode: friendCode ?? this.friendCode,
       isSupporter: isSupporter ?? this.isSupporter,
+      adsRemoved: adsRemoved ?? this.adsRemoved,
     );
   }
 
@@ -47,6 +52,7 @@ class UserProfile {
       'displayName': displayName,
       'iconId': iconId,
       'isSupporter': isSupporter,
+      'adsRemoved': adsRemoved,
       if (friendCode != null) 'friendCode': friendCode,
     };
   }
@@ -58,6 +64,7 @@ class UserProfile {
       iconId: map['iconId'] ?? UserIcon.defaultIcon.id,
       friendCode: map['friendCode'],
       isSupporter: map['isSupporter'] ?? false,
+      adsRemoved: map['adsRemoved'] ?? false,
     );
   }
 
@@ -69,15 +76,22 @@ class UserProfile {
           displayName == other.displayName &&
           iconId == other.iconId &&
           friendCode == other.friendCode &&
-          isSupporter == other.isSupporter;
+          isSupporter == other.isSupporter &&
+          adsRemoved == other.adsRemoved;
 
   @override
-  int get hashCode =>
-      Object.hash(uid, displayName, iconId, friendCode, isSupporter);
+  int get hashCode => Object.hash(
+    uid,
+    displayName,
+    iconId,
+    friendCode,
+    isSupporter,
+    adsRemoved,
+  );
 
   @override
   String toString() =>
-      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode, isSupporter: $isSupporter)';
+      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode, isSupporter: $isSupporter, adsRemoved: $adsRemoved)';
 }
 
 /// プリセットアイコンの定義

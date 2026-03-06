@@ -33,6 +33,12 @@ class HomeScreenViewModel extends ChangeNotifier {
   UserProfile? get userProfile => _userProfile;
   List<Invitation> get invitations => _invitations;
 
+  /// 広告を表示すべきかどうか
+  bool get shouldShowAds =>
+      _userProfile != null &&
+      !_userProfile!.isSupporter &&
+      !_userProfile!.adsRemoved;
+
   HomeScreenViewModel({
     required GameService gameService,
     required this.onNavigateToGame,
@@ -51,7 +57,11 @@ class HomeScreenViewModel extends ChangeNotifier {
   void _initIap() {
     IapService().initialize(
       onPurchaseCompleted: (purchase) async {
-        await updateProfile(isSupporter: true);
+        if (purchase.productID == IapService.supporterProductId) {
+          await updateProfile(isSupporter: true);
+        } else if (purchase.productID == IapService.removeAdsProductId) {
+          await updateProfile(adsRemoved: true);
+        }
       },
     );
   }
@@ -105,6 +115,7 @@ class HomeScreenViewModel extends ChangeNotifier {
     String? displayName,
     String? iconId,
     bool? isSupporter,
+    bool? adsRemoved,
   }) async {
     final uid = _authService.currentUserId;
     if (uid == null) return;
@@ -127,6 +138,7 @@ class HomeScreenViewModel extends ChangeNotifier {
         displayName: displayName,
         iconId: iconId,
         isSupporter: isSupporter,
+        adsRemoved: adsRemoved,
       );
       await _userRepository.saveProfile(_userProfile!);
 

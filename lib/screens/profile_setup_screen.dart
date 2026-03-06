@@ -143,47 +143,56 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                    itemCount: UserIcon.presets.length,
-                    itemBuilder: (context, index) {
-                      final icon = UserIcon.presets[index];
-                      final isSelected = icon.id == _selectedIconId;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedIconId = icon.id),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withOpacity(0.4),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                          child: Center(
-                            child: Text(
-                              icon.emoji,
-                              style: const TextStyle(fontSize: 32),
+                  Builder(
+                    builder: (context) {
+                      final availableIcons = UserIcon.presets
+                          .where((icon) => !icon.isPremium)
+                          .toList();
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
                             ),
-                          ),
-                        ),
+                        itemCount: availableIcons.length,
+                        itemBuilder: (context, index) {
+                          final icon = availableIcons[index];
+                          final isSelected = icon.id == _selectedIconId;
+                          return GestureDetector(
+                            onTap: () =>
+                                setState(() => _selectedIconId = icon.id),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  icon.emoji,
+                                  style: const TextStyle(fontSize: 32),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
