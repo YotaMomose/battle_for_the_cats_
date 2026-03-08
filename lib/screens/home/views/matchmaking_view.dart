@@ -12,10 +12,6 @@ class MatchmakingView extends StatelessWidget {
     final viewModel = context.watch<HomeScreenViewModel>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ランダムマッチング'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),

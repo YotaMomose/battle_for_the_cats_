@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../services/se_service.dart';
 import 'game/game_screen_view_model.dart';
 import 'game/game_screen_state.dart';
 import 'game/views/waiting_view.dart';
@@ -52,8 +52,76 @@ class _GameScreenContent extends StatelessWidget {
     final state = viewModel.uiState;
 
     return Scaffold(
-      appBar: _buildAppBar(context, viewModel),
-      body: _buildBody(context, state, viewModel),
+      body: Stack(
+        children: [
+          _buildBody(context, state, viewModel),
+          // 左上の退出ボタン（最終結果画面以外で表示）
+          if (state is! FinishedState)
+            Positioned(
+              top: 16,
+              left: 16,
+              child: SafeArea(
+                child: _buildCircleButton(
+                  icon: Icons.exit_to_app,
+                  onPressed: () {
+                    SeService().play('button_buni.mp3');
+                    _showLeaveDialog(context, viewModel);
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircleButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.grey.shade700),
+        onPressed: onPressed,
+      ),
+    );
+  }
+
+  void _showLeaveDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('退出しますか？'),
+        content: const Text('退出するとゲームが中断されます。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              SeService().play('button_buni.mp3');
+              Navigator.pop(context);
+            },
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () {
+              SeService().play('button_buni.mp3');
+              Navigator.pop(context);
+              vm.leaveRoom();
+            },
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -92,60 +160,6 @@ class _GameScreenContent extends StatelessWidget {
         onConfirm: vm.confirmFatCatEvent,
       ),
     };
-  }
-
-  AppBar _buildAppBar(BuildContext context, GameScreenViewModel vm) {
-    final state = vm.uiState;
-    final isWaiting = state is WaitingState;
-
-    return AppBar(
-      automaticallyImplyLeading: false,
-      title: isWaiting ? Text('ルーム: ${vm.roomCode}') : null,
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      actions: [
-        if (isWaiting)
-          IconButton(
-            icon: const Icon(Icons.copy),
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: vm.roomCode));
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('ルームコードをコピーしました')));
-            },
-            tooltip: 'ルームコードをコピー',
-          ),
-        IconButton(
-          icon: const Icon(Icons.exit_to_app),
-          onPressed: () {
-            _showLeaveDialog(context, vm);
-          },
-          tooltip: '退出する',
-        ),
-      ],
-    );
-  }
-
-  void _showLeaveDialog(BuildContext context, GameScreenViewModel vm) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('退出しますか？'),
-        content: const Text('退出するとゲームが中断されます。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              vm.leaveRoom();
-            },
-            child: const Text('退出', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showOpponentLeftDialog(BuildContext context, GameScreenViewModel vm) {

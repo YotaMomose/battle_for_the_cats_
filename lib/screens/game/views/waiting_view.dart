@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../services/se_service.dart';
 import '../game_screen_view_model.dart';
 import '../../../models/user_profile.dart';
+import 'package:flutter/services.dart';
 
 /// 対戦相手待機画面
 class WaitingView extends StatelessWidget {
@@ -34,17 +35,94 @@ class WaitingView extends StatelessWidget {
           const Text('このコードを相手に共有してください'),
           const SizedBox(height: 48),
 
-          // フレンド招待ボタン
-          ElevatedButton.icon(
+          const SizedBox(height: 48),
+
+          // ボタン群を縦に配置
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ルームコードコピーボタン
+              SizedBox(
+                width: 200,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    SeService().play('button_buni.mp3');
+                    Clipboard.setData(ClipboardData(text: roomCode));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('ルームコードをコピーしました')),
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('コードをコピー'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // フレンド招待ボタン
+              SizedBox(
+                width: 200,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    SeService().play('button_buni.mp3');
+                    _showInviteFriendDialog(context, viewModel);
+                  },
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('フレンドを招待'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 退出ボタン
+              SizedBox(
+                width: 200,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    SeService().play('button_buni.mp3');
+                    _showLeaveDialog(context, viewModel);
+                  },
+                  icon: const Icon(Icons.exit_to_app),
+                  label: const Text('退出する'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Colors.grey.shade200,
+                    foregroundColor: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLeaveDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('退出しますか？'),
+        content: const Text('退出するとゲームが中断されます。'),
+        actions: [
+          TextButton(
             onPressed: () {
               SeService().play('button_buni.mp3');
-              _showInviteFriendDialog(context, viewModel);
+              Navigator.pop(context);
             },
-            icon: const Icon(Icons.person_add),
-            label: const Text('フレンドを招待'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () {
+              SeService().play('button_buni.mp3');
+              Navigator.pop(context);
+              vm.leaveRoom();
+            },
+            child: const Text('退出', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
