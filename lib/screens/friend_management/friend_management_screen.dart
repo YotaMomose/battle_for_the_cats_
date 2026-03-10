@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../services/se_service.dart';
+import '../../widgets/paw_background.dart';
 import 'friend_management_view_model.dart';
 import '../home/home_screen_view_model.dart';
 import '../../models/user_profile.dart';
@@ -55,63 +56,67 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
     final homeViewModel = context.read<HomeScreenViewModel>();
     final myProfile = homeViewModel.userProfile!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('フレンド管理'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 自分のフレンドコード表示
-            _buildMyCodeSection(context, myProfile),
-            const SizedBox(height: 16),
+    return PawBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('フレンド管理'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 自分のフレンドコード表示
+              _buildMyCodeSection(context, myProfile),
+              const SizedBox(height: 16),
 
-            // 検索セクション
-            _buildSearchSection(viewModel, myProfile),
-            const SizedBox(height: 24),
-
-            // 申請セクション
-            if (viewModel.incomingRequests.isNotEmpty) ...[
-              Text('届いている申請', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 12),
-              ...viewModel.incomingRequests.map(
-                (req) => _buildRequestItem(viewModel, req),
-              ),
+              // 検索セクション
+              _buildSearchSection(viewModel, myProfile),
               const SizedBox(height: 24),
-            ],
 
-            // フレンド一覧
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('フレンド一覧', style: Theme.of(context).textTheme.titleLarge),
-                Text(
-                  '${viewModel.friends.length} / ${GameConstants.maxFriendLimit}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
+              // 申請セクション
+              if (viewModel.incomingRequests.isNotEmpty) ...[
+                Text('届いている申請', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 12),
+                ...viewModel.incomingRequests.map(
+                  (req) => _buildRequestItem(viewModel, req),
                 ),
+                const SizedBox(height: 24),
               ],
-            ),
-            const SizedBox(height: 12),
-            if (viewModel.isLoading && viewModel.friends.isEmpty)
-              const Center(child: CircularProgressIndicator())
-            else if (viewModel.friends.isEmpty)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Text('フレンドがまだいません'),
-                ),
-              )
-            else
-              ...viewModel.friends.map(
-                (friend) => _buildFriendItem(context, friend),
+
+              // フレンド一覧
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('フレンド一覧', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    '${viewModel.friends.length} / ${GameConstants.maxFriendLimit}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-          ],
+              const SizedBox(height: 12),
+              if (viewModel.isLoading && viewModel.friends.isEmpty)
+                const Center(child: CircularProgressIndicator())
+              else if (viewModel.friends.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Text('フレンドがまだいません'),
+                  ),
+                )
+              else
+                ...viewModel.friends.map(
+                  (friend) => _buildFriendItem(context, friend),
+                ),
+            ],
+          ),
         ),
       ),
     );

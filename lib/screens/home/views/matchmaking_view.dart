@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../widgets/paw_background.dart';
 import '../../../services/se_service.dart';
 import '../home_screen_view_model.dart';
 
@@ -11,40 +12,43 @@ class MatchmakingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeScreenViewModel>();
 
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(strokeWidth: 6),
-              const SizedBox(height: 32),
-              const Text(
-                'マッチング中...',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '対戦相手を探しています',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 48),
-              OutlinedButton.icon(
-                onPressed: () {
-                  SeService().play('button_buni.mp3');
-                  viewModel.cancelMatchmaking();
-                },
-                icon: const Icon(Icons.close),
-                label: const Text('キャンセル', style: TextStyle(fontSize: 18)),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
+    return PawBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(strokeWidth: 6),
+                const SizedBox(height: 32),
+                const Text(
+                  'マッチング中...',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  '対戦相手を探しています',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 48),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    SeService().play('button_buni.mp3');
+                    viewModel.cancelMatchmaking();
+                  },
+                  icon: const Icon(Icons.close),
+                  label: const Text('キャンセル', style: TextStyle(fontSize: 18)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

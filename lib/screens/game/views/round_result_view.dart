@@ -88,14 +88,15 @@ class RoundResultView extends StatelessWidget {
 
               // 各猫の結果（横並び）
               SizedBox(
-                height: 160,
+                height: 200,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     viewModel.lastRoundDisplayItems.length,
                     (index) {
                       final item = viewModel.lastRoundDisplayItems[index];
 
-                      return Flexible(
+                      return Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: Card(
@@ -105,11 +106,7 @@ class RoundResultView extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    item.catIcon,
-                                    size: 24,
-                                    color: item.catIconColor,
-                                  ),
+                                  _buildCatAvatar(item, size: 56),
                                   const SizedBox(height: 4),
                                   Flexible(
                                     child: Text(
@@ -357,9 +354,39 @@ class RoundResultView extends StatelessWidget {
       children: cards.map((card) {
         return Tooltip(
           message: card.name,
-          child: Icon(card.icon, size: 18, color: card.color),
+          child: _buildCatAvatarFromCard(card, size: 18),
         );
       }).toList(),
     );
+  }
+
+  /// 猫のアバター（画像優先、なければアイコン）を構築する
+  Widget _buildCatAvatar(RoundDisplayItem item, {double size = 56}) {
+    if (item.imagePath != null) {
+      return Image.asset(
+        item.imagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) =>
+            Icon(item.catIcon, size: size, color: item.catIconColor),
+      );
+    }
+    return Icon(item.catIcon, size: size, color: item.catIconColor);
+  }
+
+  /// 猫のアバター（画像優先、なければアイコン）を構築する
+  Widget _buildCatAvatarFromCard(FinalResultCardInfo card, {double size = 18}) {
+    if (card.imagePath != null) {
+      return Image.asset(
+        card.imagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) =>
+            Icon(card.icon, size: size, color: card.color),
+      );
+    }
+    return Icon(card.icon, size: size, color: card.color);
   }
 }

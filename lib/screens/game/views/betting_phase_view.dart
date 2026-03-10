@@ -136,8 +136,9 @@ class BettingPhaseView extends StatelessWidget {
 
             // 3匹の猫カード（横並び）
             SizedBox(
-              height: 220,
+              height: 260,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(3, (index) {
                   final catIndex = index.toString();
                   final cards = room.currentRound?.toList() ?? [];
@@ -149,7 +150,7 @@ class BettingPhaseView extends StatelessWidget {
                   final currentBet = viewModel.bets[catIndex] ?? 0;
                   final placedItem = viewModel.getPlacedItem(catIndex);
 
-                  return Flexible(
+                  return Expanded(
                     child: DragTarget<ItemType>(
                       onWillAccept: (data) => !viewModel.hasPlacedBet,
                       onAccept: (item) {
@@ -168,11 +169,7 @@ class BettingPhaseView extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    viewModel.getCatIconData(catName),
-                                    size: 24,
-                                    color: viewModel.getCatIconColor(catName),
-                                  ),
+                                  _buildCatAvatar(viewModel, catName),
                                   const SizedBox(height: 2),
                                   Flexible(
                                     child: Text(
@@ -604,11 +601,7 @@ class BettingPhaseView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(
-                viewModel.getCatIconData(cat.name),
-                size: 20,
-                color: viewModel.getCatIconColor(cat.name),
-              ),
+              _buildCatAvatar(viewModel, cat.name, size: 24),
               Text(
                 cat.name,
                 style: const TextStyle(
@@ -638,6 +631,33 @@ class BettingPhaseView extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// 猫のアバター（画像優先、なければアイコン）を構築する
+  Widget _buildCatAvatar(
+    GameScreenViewModel viewModel,
+    String catName, {
+    double size = 64,
+  }) {
+    final imagePath = viewModel.getCatImagePath(catName);
+    if (imagePath != null) {
+      return Image.asset(
+        imagePath,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Icon(
+          viewModel.getCatIconData(catName),
+          size: size,
+          color: viewModel.getCatIconColor(catName),
+        ),
+      );
+    }
+    return Icon(
+      viewModel.getCatIconData(catName),
+      size: size,
+      color: viewModel.getCatIconColor(catName),
     );
   }
 

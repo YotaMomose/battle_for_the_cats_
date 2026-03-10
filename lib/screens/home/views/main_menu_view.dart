@@ -5,6 +5,7 @@ import '../home_screen_state.dart';
 import '../home_screen_view_model.dart';
 import '../../../models/user_profile.dart';
 import '../../../models/player.dart';
+import '../../../widgets/paw_background.dart';
 import '../../profile_screen.dart';
 import '../../friend_management/friend_management_screen.dart';
 
@@ -35,235 +36,227 @@ class _MainMenuViewState extends State<MainMenuView> {
     final isNotIdle = viewModel.state is! IdleState || isProfileNotReady;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // 背景画像 (SafeAreaの外に配置して全画面をカバー)
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/paw_background.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          SafeArea(
-            child: Stack(
-              children: [
-                // 左上の自分のアイコン
-                if (viewModel.userProfile != null)
-                  Positioned(
-                    top: 16,
-                    left: 16,
-                    child: _buildCircleButton(
-                      onPressed: () {
-                        SeService().play('button_buni.mp3');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider.value(
-                              value: viewModel,
-                              child: const ProfileScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      tooltip: 'プロフィール',
-                      child: Text(
-                        UserIcon.fromId(viewModel.userProfile!.iconId).emoji,
-                        style: const TextStyle(fontSize: 24),
-                      ),
-                    ),
-                  ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0,
-                      vertical: 8.0,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // タイトルをより大きく（flex: 3）表示し、画面に収まるよう調整
-                        Flexible(
-                          flex: 3,
-                          child: Center(
-                            child: Image.asset(
-                              'assets/images/title.png',
-                              fit: BoxFit.contain,
-                            ),
+      backgroundColor: Colors.transparent, // 背景を透過させてPawBackgroundが見えるようにする
+      body: PawBackground(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // 左上の自分のアイコン
+              if (viewModel.userProfile != null)
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: _buildCircleButton(
+                    onPressed: () {
+                      SeService().play('button_buni.mp3');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChangeNotifierProvider.value(
+                            value: viewModel,
+                            child: const ProfileScreen(),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: isNotIdle
-                              ? null
-                              : () {
-                                  FocusScope.of(context).unfocus();
-                                  SeService().play('button_buni.mp3');
-                                  viewModel.createRoom();
-                                },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(12),
-                          ),
-                          child: (viewModel.state is LoadingState)
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'ルームを作成',
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton.icon(
-                          onPressed: isNotIdle
-                              ? null
-                              : () {
-                                  FocusScope.of(context).unfocus();
-                                  SeService().play('button_buni.mp3');
-                                  viewModel.startRandomMatch();
-                                },
-                          icon: const Icon(Icons.shuffle),
-                          label: const Text(
-                            'ランダムマッチ',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(12),
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _roomCodeController,
-                          decoration: const InputDecoration(
-                            labelText: 'ルームコード',
-                            border: OutlineInputBorder(),
-                            hintText: '6桁のコードを入力',
-                            isDense: true, // 入力フィールドをコンパクトに
-                          ),
-                          textCapitalization: TextCapitalization.characters,
-                          enabled: !isNotIdle,
-                          maxLength: 6,
-                        ),
-                        const SizedBox(height: 4),
-                        ElevatedButton(
-                          onPressed: isNotIdle
-                              ? null
-                              : () => _handleJoinRoom(context, viewModel),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(12),
-                          ),
-                          child: (viewModel.state is LoadingState)
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'ルームに参加',
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                        ),
-                      ],
+                      );
+                    },
+                    tooltip: 'プロフィール',
+                    child: Text(
+                      UserIcon.fromId(viewModel.userProfile!.iconId).emoji,
+                      style: const TextStyle(fontSize: 24),
                     ),
                   ),
                 ),
-                // 右上の丸いボタンメニュー
-                Positioned(
-                  top: 16,
-                  right: 16,
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 8.0,
+                  ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 設定ボタン
-                      _buildCircleButton(
-                        icon: Icons.settings,
-                        tooltip: 'プロフィール設定',
-                        onPressed: isNotIdle
-                            ? null
-                            : () {
-                                SeService().play('button_buni.mp3');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChangeNotifierProvider.value(
-                                          value: viewModel,
-                                          child: const ProfileScreen(),
-                                        ),
-                                  ),
-                                );
-                              },
+                      // タイトルをより大きく（flex: 3）表示し、画面に収まるよう調整
+                      Flexible(
+                        flex: 3,
+                        child: Center(
+                          child: Image.asset(
+                            'assets/images/title.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
-                      // 通知ボタン
-                      _buildCircleButton(
-                        icon: Icons.notifications,
-                        tooltip: '招待',
+                      const SizedBox(height: 8),
+                      ElevatedButton(
                         onPressed: isNotIdle
                             ? null
                             : () {
+                                FocusScope.of(context).unfocus();
                                 SeService().play('button_buni.mp3');
-                                _showInvitationsBox(context, viewModel);
+                                viewModel.createRoom();
                               },
-                        badge: viewModel.invitations.isNotEmpty
-                            ? Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Text(
-                                  '${viewModel.invitations.length}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(12),
+                        ),
+                        child: (viewModel.state is LoadingState)
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
                                 ),
                               )
-                            : null,
+                            : const Text(
+                                'ルームを作成',
+                                style: TextStyle(fontSize: 18),
+                              ),
                       ),
-                      // フレンド管理ボタン
-                      _buildCircleButton(
-                        icon: Icons.people,
-                        tooltip: 'フレンド管理',
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
                         onPressed: isNotIdle
                             ? null
                             : () {
+                                FocusScope.of(context).unfocus();
                                 SeService().play('button_buni.mp3');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChangeNotifierProvider.value(
-                                          value: viewModel,
-                                          child: const FriendManagementScreen(),
-                                        ),
-                                  ),
-                                );
+                                viewModel.startRandomMatch();
                               },
+                        icon: const Icon(Icons.shuffle),
+                        label: const Text(
+                          'ランダムマッチ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(12),
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _roomCodeController,
+                        decoration: const InputDecoration(
+                          labelText: 'ルームコード',
+                          border: OutlineInputBorder(),
+                          hintText: '6桁のコードを入力',
+                          isDense: true, // 入力フィールドをコンパクトに
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        enabled: !isNotIdle,
+                        maxLength: 6,
+                      ),
+                      const SizedBox(height: 4),
+                      ElevatedButton(
+                        onPressed: isNotIdle
+                            ? null
+                            : () => _handleJoinRoom(context, viewModel),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(12),
+                        ),
+                        child: (viewModel.state is LoadingState)
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'ルームに参加',
+                                style: TextStyle(fontSize: 18),
+                              ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              // 右上の丸いボタンメニュー
+              Positioned(
+                top: 16,
+                right: 16,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 設定ボタン
+                    _buildCircleButton(
+                      icon: Icons.settings,
+                      tooltip: 'プロフィール設定',
+                      onPressed: isNotIdle
+                          ? null
+                          : () {
+                              SeService().play('button_buni.mp3');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ChangeNotifierProvider.value(
+                                        value: viewModel,
+                                        child: const ProfileScreen(),
+                                      ),
+                                ),
+                              );
+                            },
+                    ),
+                    // 通知ボタン
+                    _buildCircleButton(
+                      icon: Icons.notifications,
+                      tooltip: '招待',
+                      onPressed: isNotIdle
+                          ? null
+                          : () {
+                              SeService().play('button_buni.mp3');
+                              _showInvitationsBox(context, viewModel);
+                            },
+                      badge: viewModel.invitations.isNotEmpty
+                          ? Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                '${viewModel.invitations.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : null,
+                    ),
+                    // フレンド管理ボタン
+                    _buildCircleButton(
+                      icon: Icons.people,
+                      tooltip: 'フレンド管理',
+                      onPressed: isNotIdle
+                          ? null
+                          : () {
+                              SeService().play('button_buni.mp3');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ChangeNotifierProvider.value(
+                                        value: viewModel,
+                                        child: const FriendManagementScreen(),
+                                      ),
+                                ),
+                              );
+                            },
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

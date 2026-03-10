@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../widgets/paw_background.dart';
 import '../services/se_service.dart';
 import 'game/game_screen_view_model.dart';
 import 'game/game_screen_state.dart';
@@ -52,25 +53,28 @@ class _GameScreenContent extends StatelessWidget {
     final state = viewModel.uiState;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          _buildBody(context, state, viewModel),
-          // 左上の退出ボタン（待機画面、最終結果画面以外で表示）
-          if (state is! FinishedState && state is! WaitingState)
-            Positioned(
-              top: 16,
-              left: 16,
-              child: SafeArea(
-                child: _buildCircleButton(
-                  icon: Icons.exit_to_app,
-                  onPressed: () {
-                    SeService().play('button_buni.mp3');
-                    _showLeaveDialog(context, viewModel);
-                  },
+      backgroundColor: Colors.transparent,
+      body: PawBackground(
+        child: Stack(
+          children: [
+            _buildBody(context, state, viewModel),
+            // 左上の退出ボタン（待機画面、最終結果画面以外で表示）
+            if (state is! FinishedState && state is! WaitingState)
+              Positioned(
+                top: 16,
+                left: 16,
+                child: SafeArea(
+                  child: _buildCircleButton(
+                    icon: Icons.exit_to_app,
+                    onPressed: () {
+                      SeService().play('button_buni.mp3');
+                      _showLeaveDialog(context, viewModel);
+                    },
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

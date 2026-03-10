@@ -72,14 +72,15 @@ class _FinalResultViewState extends State<FinalResultView> {
               ),
               const SizedBox(height: 12),
               SizedBox(
-                height: 150,
+                height: 180,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     viewModel.lastRoundDisplayItems.length,
                     (index) {
                       final item = viewModel.lastRoundDisplayItems[index];
 
-                      return Flexible(
+                      return Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: Card(
@@ -92,11 +93,7 @@ class _FinalResultViewState extends State<FinalResultView> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.pets,
-                                    size: 20,
-                                    color: item.catIconColor,
-                                  ),
+                                  _buildCatAvatar(item, size: 50),
                                   const SizedBox(height: 4),
                                   Flexible(
                                     child: Text(
@@ -300,11 +297,7 @@ class _FinalResultViewState extends State<FinalResultView> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            card.icon,
-            size: 16,
-            color: card.isWinningCard ? card.color : Colors.grey.shade600,
-          ),
+          _buildCatAvatarFromCard(card, size: 16),
           const SizedBox(width: 6),
           Text(
             card.name,
@@ -322,6 +315,43 @@ class _FinalResultViewState extends State<FinalResultView> {
           ],
         ],
       ),
+    );
+  }
+
+  /// 猫のアバター（画像優先、なければアイコン）を構築する
+  Widget _buildCatAvatar(RoundDisplayItem item, {double size = 50}) {
+    if (item.imagePath != null) {
+      return Image.asset(
+        item.imagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) =>
+            Icon(Icons.pets, size: size, color: item.catIconColor),
+      );
+    }
+    return Icon(Icons.pets, size: size, color: item.catIconColor);
+  }
+
+  /// 猫のアバター（画像優先、なければアイコン）を構築する
+  Widget _buildCatAvatarFromCard(FinalResultCardInfo card, {double size = 18}) {
+    if (card.imagePath != null) {
+      return Image.asset(
+        card.imagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Icon(
+          card.icon,
+          size: size,
+          color: card.isWinningCard ? card.color : Colors.grey.shade600,
+        ),
+      );
+    }
+    return Icon(
+      card.icon,
+      size: size,
+      color: card.isWinningCard ? card.color : Colors.grey.shade600,
     );
   }
 }

@@ -25,6 +25,7 @@ class RoundDisplayItem {
   final Color winnerTextColor;
   final Color catIconColor;
   final IconData catIcon;
+  final String? imagePath;
   final int myBet;
   final int opponentBet;
   final ItemType? myItem;
@@ -38,6 +39,7 @@ class RoundDisplayItem {
     required this.winnerTextColor,
     required this.catIconColor,
     required this.catIcon,
+    this.imagePath,
     required this.myBet,
     required this.opponentBet,
     this.myItem,
@@ -50,12 +52,14 @@ class FinalResultCardInfo {
   final String name;
   final Color color;
   final IconData icon;
+  final String? imagePath;
   final bool isWinningCard;
 
   const FinalResultCardInfo({
     required this.name,
     required this.color,
     required this.icon,
+    this.imagePath,
     required this.isWinningCard,
   });
 }
@@ -158,6 +162,7 @@ class GameScreenViewModel extends ChangeNotifier {
         winnerTextColor: textColor,
         catIconColor: _getCatColor(cat.name),
         catIcon: _getCatIcon(cat.name),
+        imagePath: _getCatImagePath(cat.name),
         myBet: result.getBet(i, isHost ? 'host' : 'guest'),
         opponentBet: result.getBet(i, isHost ? 'guest' : 'host'),
         myItem: result.getItem(i, isHost ? 'host' : 'guest'),
@@ -202,6 +207,7 @@ class GameScreenViewModel extends ChangeNotifier {
         name: cat.name,
         color: _getCatColor(cat.name),
         icon: _getCatIcon(cat.name),
+        imagePath: _getCatImagePath(cat.name),
         isWinningCard: winningIndices.contains(i),
       );
     });
@@ -239,6 +245,20 @@ class GameScreenViewModel extends ChangeNotifier {
       return Icons.sailing;
     }
     return Icons.pets;
+  }
+
+  /// 猫の名前に応じて画像パスを返す（内部用ヘルパー）
+  String? _getCatImagePath(String catName) {
+    if (catName.contains(GameConstants.catOrange)) {
+      return 'assets/images/tyatoranekopng.png';
+    }
+    if (catName.contains(GameConstants.catWhite)) {
+      return 'assets/images/sironeko.png';
+    }
+    if (catName.contains(GameConstants.catBlack)) {
+      return 'assets/images/kuroneko.png';
+    }
+    return null;
   }
 
   /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
@@ -370,6 +390,9 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 猫のアイコン種類を取得（外部View用）
   IconData getCatIconData(String catName) => _getCatIcon(catName);
+
+  /// 猫の画像パスを取得（外部View用）
+  String? getCatImagePath(String catName) => _getCatImagePath(catName);
 
   /// アイテムのアイコンを取得（内部用ヘルパー）
   IconData _getItemIcon(ItemType? type) {
