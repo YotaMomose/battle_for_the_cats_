@@ -9,6 +9,7 @@ import '../../models/invitation.dart';
 import '../../models/match_result.dart';
 import '../../models/user_profile.dart';
 import '../../services/iap_service.dart';
+import '../../models/player.dart';
 import 'home_screen_state.dart';
 
 /// ホーム画面のViewModel
@@ -322,6 +323,34 @@ class HomeScreenViewModel extends ChangeNotifier {
       _handleJoinSuccess(validCode, playerId);
     } catch (e) {
       _updateState(HomeScreenState.idle(errorMessage: 'ルーム参加に失敗しました: $e'));
+    }
+  }
+
+  /// ルームを検索してホスト情報を取得する（参加前の確認用）
+  Future<Player?> findRoom(String roomCode) async {
+    final validCode = _validateRoomCode(roomCode);
+    if (validCode == null) return null;
+
+    _updateState(HomeScreenState.loading());
+
+    try {
+      final room = await _gameService.getRoom(validCode);
+      _updateState(HomeScreenState.idle());
+
+      if (room == null) {
+        _updateState(HomeScreenState.idle(errorMessage: 'ルームが見つかりませんでした'));
+        return null;
+      }
+
+      if (room.guest != null) {
+        _updateState(HomeScreenState.idle(errorMessage: 'ルームはすでに満員です'));
+        return null;
+      }
+
+      return room.host;
+    } catch (e) {
+      _updateState(HomeScreenState.idle(errorMessage: 'ルーム検索に失敗しました: $e'));
+      return null;
     }
   }
 

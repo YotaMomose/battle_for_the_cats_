@@ -4,8 +4,15 @@ import '../../models/game_room.dart';
 sealed class GameScreenState {
   final String? errorMessage;
   final bool isOpponentLeft;
+  final bool isKicked;
+  final bool isRoomClosed;
 
-  const GameScreenState({this.errorMessage, this.isOpponentLeft = false});
+  const GameScreenState({
+    this.errorMessage,
+    this.isOpponentLeft = false,
+    this.isKicked = false,
+    this.isRoomClosed = false,
+  });
 
   factory GameScreenState.loading() = LoadingState;
   factory GameScreenState.waiting() = WaitingState;
@@ -17,42 +24,120 @@ sealed class GameScreenState {
 
   GameScreenState copyWithError(String error);
   GameScreenState copyWithOpponentLeft();
+  GameScreenState copyWithKicked();
+  GameScreenState copyWithRoomClosed();
 }
 
 /// ローディング中
 class LoadingState extends GameScreenState {
-  const LoadingState({super.errorMessage, super.isOpponentLeft});
+  const LoadingState({
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
-    return LoadingState(errorMessage: error, isOpponentLeft: isOpponentLeft);
+    return LoadingState(
+      errorMessage: error,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
   }
 
   @override
   LoadingState copyWithOpponentLeft() {
-    return LoadingState(errorMessage: errorMessage, isOpponentLeft: true);
+    return LoadingState(
+      errorMessage: errorMessage,
+      isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  LoadingState copyWithKicked() {
+    return LoadingState(
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  LoadingState copyWithRoomClosed() {
+    return LoadingState(
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
+    );
   }
 }
 
 /// 対戦相手待ち
 class WaitingState extends GameScreenState {
-  const WaitingState({super.errorMessage, super.isOpponentLeft});
+  const WaitingState({
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
-    return WaitingState(errorMessage: error, isOpponentLeft: isOpponentLeft);
+    return WaitingState(
+      errorMessage: error,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
   }
 
   @override
   WaitingState copyWithOpponentLeft() {
-    return WaitingState(errorMessage: errorMessage, isOpponentLeft: true);
+    return WaitingState(
+      errorMessage: errorMessage,
+      isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  WaitingState copyWithKicked() {
+    return WaitingState(
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  WaitingState copyWithRoomClosed() {
+    return WaitingState(
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
+    );
   }
 }
 
 /// サイコロフェーズ
 class RollingState extends GameScreenState {
   final GameRoom room;
-  const RollingState(this.room, {super.errorMessage, super.isOpponentLeft});
+  const RollingState(
+    this.room, {
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
@@ -60,19 +145,55 @@ class RollingState extends GameScreenState {
       room,
       errorMessage: error,
       isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
     );
   }
 
   @override
   RollingState copyWithOpponentLeft() {
-    return RollingState(room, errorMessage: errorMessage, isOpponentLeft: true);
+    return RollingState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  RollingState copyWithKicked() {
+    return RollingState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  RollingState copyWithRoomClosed() {
+    return RollingState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
+    );
   }
 }
 
 /// 賭けフェーズ
 class PlayingState extends GameScreenState {
   final GameRoom room;
-  const PlayingState(this.room, {super.errorMessage, super.isOpponentLeft});
+  const PlayingState(
+    this.room, {
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
@@ -80,19 +201,55 @@ class PlayingState extends GameScreenState {
       room,
       errorMessage: error,
       isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
     );
   }
 
   @override
   PlayingState copyWithOpponentLeft() {
-    return PlayingState(room, errorMessage: errorMessage, isOpponentLeft: true);
+    return PlayingState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  PlayingState copyWithKicked() {
+    return PlayingState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  PlayingState copyWithRoomClosed() {
+    return PlayingState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
+    );
   }
 }
 
 /// ラウンド結果表示
 class RoundResultState extends GameScreenState {
   final GameRoom room;
-  const RoundResultState(this.room, {super.errorMessage, super.isOpponentLeft});
+  const RoundResultState(
+    this.room, {
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
@@ -100,6 +257,8 @@ class RoundResultState extends GameScreenState {
       room,
       errorMessage: error,
       isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
     );
   }
 
@@ -109,6 +268,30 @@ class RoundResultState extends GameScreenState {
       room,
       errorMessage: errorMessage,
       isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  RoundResultState copyWithKicked() {
+    return RoundResultState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  RoundResultState copyWithRoomClosed() {
+    return RoundResultState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
     );
   }
 }
@@ -116,7 +299,13 @@ class RoundResultState extends GameScreenState {
 /// ゲーム終了
 class FinishedState extends GameScreenState {
   final GameRoom room;
-  const FinishedState(this.room, {super.errorMessage, super.isOpponentLeft});
+  const FinishedState(
+    this.room, {
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
@@ -124,6 +313,8 @@ class FinishedState extends GameScreenState {
       room,
       errorMessage: error,
       isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
     );
   }
 
@@ -133,6 +324,30 @@ class FinishedState extends GameScreenState {
       room,
       errorMessage: errorMessage,
       isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  FinishedState copyWithKicked() {
+    return FinishedState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  FinishedState copyWithRoomClosed() {
+    return FinishedState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
     );
   }
 }
@@ -140,7 +355,13 @@ class FinishedState extends GameScreenState {
 /// 太っちょネコイベント
 class FatCatEventState extends GameScreenState {
   final GameRoom room;
-  const FatCatEventState(this.room, {super.errorMessage, super.isOpponentLeft});
+  const FatCatEventState(
+    this.room, {
+    super.errorMessage,
+    super.isOpponentLeft,
+    super.isKicked,
+    super.isRoomClosed,
+  });
 
   @override
   GameScreenState copyWithError(String error) {
@@ -148,6 +369,8 @@ class FatCatEventState extends GameScreenState {
       room,
       errorMessage: error,
       isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
     );
   }
 
@@ -157,6 +380,30 @@ class FatCatEventState extends GameScreenState {
       room,
       errorMessage: errorMessage,
       isOpponentLeft: true,
+      isKicked: isKicked,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  FatCatEventState copyWithKicked() {
+    return FatCatEventState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: true,
+      isRoomClosed: isRoomClosed,
+    );
+  }
+
+  @override
+  FatCatEventState copyWithRoomClosed() {
+    return FatCatEventState(
+      room,
+      errorMessage: errorMessage,
+      isOpponentLeft: isOpponentLeft,
+      isKicked: isKicked,
+      isRoomClosed: true,
     );
   }
 }

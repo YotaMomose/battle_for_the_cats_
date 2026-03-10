@@ -67,10 +67,38 @@ class RoomService {
         displayName: displayName ?? 'ゲスト',
         iconId: iconId ?? 'cat_orange',
       ).toMap(),
-      'status': GameStatus.rolling.value, // サイコロフェーズから開始
     });
 
     return true;
+  }
+
+  /// ゲームを開始する（ホストのみ）
+  Future<void> startGame(String roomCode, String hostId) async {
+    final room = await _repository.getRoom(roomCode);
+    if (room == null || room.hostId != hostId || room.guest == null) {
+      throw Exception(
+        'Cannot start game: room not found, not host, or no guest',
+      );
+    }
+
+    await _repository.updateRoom(roomCode, {
+      'status': GameStatus.rolling.value,
+    });
+  }
+
+  /// 参加者を拒否する（ホストのみ）
+  Future<void> rejectGuest(String roomCode, String hostId) async {
+    final room = await _repository.getRoom(roomCode);
+    if (room == null || room.hostId != hostId) {
+      throw Exception('Cannot reject guest: room not found or not host');
+    }
+
+    await _repository.updateRoom(roomCode, {'guest': null});
+  }
+
+  /// ルームを取得
+  Future<GameRoom?> getRoom(String roomCode) {
+    return _repository.getRoom(roomCode);
   }
 
   /// ルームを監視
@@ -89,14 +117,36 @@ class RoomService {
       );
       if (room == null) return;
 
-      final isHost = _repository.isHost(room, playerId);
+      final isHost = room.hostId == playerId;
+      final isGuest = room.guest?.id == playerId;
+
+      // すでに退出している（または拒否された）場合は何もしない
+      if (!isHost && !isGuest) return;
 
       if (_shouldDeleteRoom(room, isHost)) {
         _repository.deleteRoomInTransaction(transaction, roomCode);
+      } else if (room.status == GameStatus.waiting) {
+        // 待機中にゲストが退出した場合は単に削除（空き枠に戻す）
+        if (isGuest) {
+          _repository.updateRoomInTransaction(transaction, roomCode, {
+            'guest': null,
+          });
+        }
       } else {
-        _repository.updateRoomInTransaction(transaction, roomCode, {
+        // プレイ中なら退出フラグを立てる
+        final updates = <String, dynamic>{
           '${isHost ? 'host' : 'guest'}.abandoned': true,
-        });
+        };
+
+        // まだ終了していない場合は、退出した側を負けにする
+        if (room.status != GameStatus.finished) {
+          updates['status'] = GameStatus.finished.value;
+          updates['finalWinner'] = isHost
+              ? Winner.guest.value
+              : Winner.host.value;
+        }
+
+        _repository.updateRoomInTransaction(transaction, roomCode, updates);
       }
     });
   }
@@ -114,9 +164,13 @@ class RoomService {
 
     if (isHost) {
       // ホストが退出する場合
-      // - ゲストがいない（待機中）
+      // - 待機中（他の人を待っている、または承認前）なら削除
+      // - ゲストがいない
       // - ゲストが既に退出済み
-      final shouldDelete = room.guest == null || guestAbandoned;
+      final shouldDelete =
+          room.status == GameStatus.waiting ||
+          room.guest == null ||
+          guestAbandoned;
       return shouldDelete;
     } else {
       // ゲストが退出する場合

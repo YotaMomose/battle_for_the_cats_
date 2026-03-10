@@ -61,10 +61,15 @@ class GameService {
     displayName: displayName,
     iconId: iconId,
   );
+  Future<GameRoom?> getRoom(String roomCode) => _roomService.getRoom(roomCode);
   Stream<GameRoom?> watchRoom(String roomCode) =>
       _roomService.watchRoom(roomCode);
   Future<void> leaveRoom(String roomCode, String playerId) =>
       _roomService.leaveRoom(roomCode, playerId);
+  Future<void> startGame(String roomCode, String hostId) =>
+      _roomService.startGame(roomCode, hostId);
+  Future<void> rejectGuest(String roomCode, String hostId) =>
+      _roomService.rejectGuest(roomCode, hostId);
   Future<void> deleteRoom(String roomCode) => _roomService.deleteRoom(roomCode);
 
   // マッチング

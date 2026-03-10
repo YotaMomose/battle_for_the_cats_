@@ -256,10 +256,18 @@ class GameScreenViewModel extends ChangeNotifier {
     if (room == null || room.status != GameStatus.finished) return '';
 
     final myRole = isHost ? Winner.host : Winner.guest;
+    final opponent = isHost ? room.guest : room.host;
+    final opponentAbandoned = opponent?.abandoned ?? false;
+
     if (room.finalWinner == Winner.draw) return '引き分け';
     final winnerName = room.finalWinner == myRole
         ? myDisplayName
         : opponentDisplayName;
+
+    if (opponentAbandoned && room.finalWinner == myRole) {
+      return '👑 $winnerName の不戦勝！\n(相手の退出)';
+    }
+
     return room.finalWinner == myRole
         ? '👑 $winnerName の勝利！'
         : '$winnerName の勝利...';
@@ -415,9 +423,12 @@ class GameScreenViewModel extends ChangeNotifier {
           (room) {
             if (room == null) {
               // ルームが削除された場合
-              // 自己退出の場合は何もしない
               if (!_isExiting) {
-                _handleOpponentLeft();
+                if (_uiState is WaitingState && !isHost) {
+                  _handleHostClosed();
+                } else {
+                  _handleOpponentLeft();
+                }
               }
               return;
             }
@@ -433,10 +444,21 @@ class GameScreenViewModel extends ChangeNotifier {
         );
   }
 
-  // ===== 状態更新ロジック =====
   void _updateUiState(GameRoom room) {
     final host = room.host;
     final guest = room.guest;
+
+    // --- 自分が追い出された場合（拒否されたなど）のチェック ---
+    if (!isHost && guest == null) {
+      if (!_isExiting) {
+        if (room.status == GameStatus.waiting) {
+          _handleKicked();
+        } else {
+          _handleOpponentLeft();
+        }
+      }
+      return;
+    }
 
     // --- 個別遷移の整合性チェック ---
     final myConfirmedRound = isHost
@@ -456,15 +478,19 @@ class GameScreenViewModel extends ChangeNotifier {
     }
 
     // --- 相手の退出チェック ---
-    final opponentAbandoned = isHost
-        ? (guest?.abandoned ?? false)
-        : host.abandoned;
-    if (opponentAbandoned) {
-      // 自己退出中なら処理をスキップ
-      if (!_isExiting) {
-        _handleOpponentLeft();
+    // 待機中やゲーム終了後はチェックをスキップ（終了後はリザルト画面を見せるため）
+    if (room.status != GameStatus.waiting &&
+        room.status != GameStatus.finished) {
+      final opponentAbandoned = isHost
+          ? (guest?.abandoned ?? false)
+          : host.abandoned;
+      if (opponentAbandoned) {
+        // 自己退出中なら処理をスキップ
+        if (!_isExiting) {
+          _handleOpponentLeft();
+        }
+        return;
       }
-      return;
     }
 
     switch (room.status) {
@@ -499,6 +525,16 @@ class GameScreenViewModel extends ChangeNotifier {
 
   void _handleOpponentLeft() {
     _uiState = _uiState.copyWithOpponentLeft();
+    notifyListeners();
+  }
+
+  void _handleKicked() {
+    _uiState = _uiState.copyWithKicked();
+    notifyListeners();
+  }
+
+  void _handleHostClosed() {
+    _uiState = _uiState.copyWithRoomClosed();
     notifyListeners();
   }
 
@@ -645,6 +681,25 @@ class GameScreenViewModel extends ChangeNotifier {
   Future<void> leaveRoom() async {
     try {
       _isExiting = true; // 退出フラグを立てる
+
+      // バトル中（待機画面以外かつ未終了）に自分から退出した場合は、負けとして記録
+      final room = _currentRoom;
+      if (room != null &&
+          room.status != GameStatus.waiting &&
+          room.status != GameStatus.finished &&
+          !_hasRecordedFinalResult) {
+        final opponentId = isHost ? room.guestId : room.hostId;
+        if (opponentId != null) {
+          _hasRecordedFinalResult = true; // 早期マーク
+          await _friendRepository.recordMatchResult(
+            userId: playerId,
+            friendId: opponentId,
+            isWin: false,
+          );
+          debugPrint('[GameScreenViewModel] 途中退出による敗北を記録しました');
+        }
+      }
+
       await _gameService.leaveRoom(roomCode, playerId);
       onOpponentLeft?.call();
     } catch (e) {
@@ -653,6 +708,31 @@ class GameScreenViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// ゲームを開始する（ホストが参加者を承認した際）
+  Future<void> startGame() async {
+    if (!isHost) return;
+    try {
+      await _gameService.startGame(roomCode, playerId);
+    } catch (e) {
+      _uiState = _uiState.copyWithError('ゲームの開始に失敗しました: $e');
+      notifyListeners();
+    }
+  }
+
+  /// 参加者を拒否する
+  Future<void> rejectGuest() async {
+    if (!isHost) return;
+    try {
+      await _gameService.rejectGuest(roomCode, playerId);
+    } catch (e) {
+      _uiState = _uiState.copyWithError('不参加処理に失敗しました: $e');
+      notifyListeners();
+    }
+  }
+
+  /// 参加者がいるかどうか
+  bool get hasGuest => _currentRoom?.guest != null;
 
   /// フレンド一覧を読み込む
   Future<void> loadFriends() async {

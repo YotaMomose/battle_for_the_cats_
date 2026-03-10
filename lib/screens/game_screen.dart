@@ -55,8 +55,8 @@ class _GameScreenContent extends StatelessWidget {
       body: Stack(
         children: [
           _buildBody(context, state, viewModel),
-          // 左上の退出ボタン（最終結果画面以外で表示）
-          if (state is! FinishedState)
+          // 左上の退出ボタン（待機画面、最終結果画面以外で表示）
+          if (state is! FinishedState && state is! WaitingState)
             Positioned(
               top: 16,
               left: 16,
@@ -147,6 +147,20 @@ class _GameScreenContent extends StatelessWidget {
       });
     }
 
+    // ホストに拒否された場合のポップアップ表示
+    if (state.isKicked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showKickedDialog(context, vm);
+      });
+    }
+
+    // ホストがルームを閉じた場合のポップアップ表示
+    if (state.isRoomClosed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showRoomClosedDialog(context, vm);
+      });
+    }
+
     // 状態別View
     return switch (state) {
       LoadingState() => const Center(child: CircularProgressIndicator()),
@@ -177,6 +191,44 @@ class _GameScreenContent extends StatelessWidget {
               if (context.mounted) {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               }
+            },
+            child: const Text('ホームに戻る'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showKickedDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('ルームから退出しました'),
+        content: const Text('ホストによりルームから退出させられました。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+            child: const Text('ホームに戻る'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRoomClosedDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('ルームが閉じられました'),
+        content: const Text('ホストがルームを閉じたため、ホームに戻ります。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
             child: const Text('ホームに戻る'),
           ),

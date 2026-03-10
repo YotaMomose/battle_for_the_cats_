@@ -16,86 +16,192 @@ class WaitingView extends StatelessWidget {
     final viewModel = context.watch<GameScreenViewModel>();
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 24),
-          const Text('対戦相手を待っています...', style: TextStyle(fontSize: 20)),
-          const SizedBox(height: 16),
-          Text(
-            'ルームコード: $roomCode',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text('このコードを相手に共有してください'),
-          const SizedBox(height: 48),
-
-          const SizedBox(height: 48),
-
-          // ボタン群を縦に配置
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ルームコードコピーボタン
-              SizedBox(
-                width: 200,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    SeService().play('button_buni.mp3');
-                    Clipboard.setData(ClipboardData(text: roomCode));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('ルームコードをコピーしました')),
-                    );
-                  },
-                  icon: const Icon(Icons.copy),
-                  label: const Text('コードをコピー'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!viewModel.hasGuest) ...[
+              const CircularProgressIndicator(),
+              const SizedBox(height: 24),
+              const Text('対戦相手を待っています...', style: TextStyle(fontSize: 20)),
+              const SizedBox(height: 16),
+              Text(
+                'ルームコード: $roomCode',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 4,
                 ),
               ),
-              const SizedBox(height: 16),
-              // フレンド招待ボタン
-              SizedBox(
-                width: 200,
-                child: ElevatedButton.icon(
+              const SizedBox(height: 8),
+              const Text('このコードを相手に共有してください'),
+            ] else ...[
+              // 参加者がいる場合
+              Text(
+                viewModel.isHost ? '参加希望者がいます！' : '参加しました！',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+              // 相手のプロフィール表示（ホストならゲストを表示、ゲストならホストを表示）
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.pink.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.pink.shade100),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      viewModel.opponentIconEmoji,
+                      style: const TextStyle(fontSize: 64),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${viewModel.opponentDisplayName} さん',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              if (viewModel.isHost) ...[
+                const Text('このユーザーと対戦しますか？'),
+                const SizedBox(height: 24),
+                ElevatedButton(
                   onPressed: () {
                     SeService().play('button_buni.mp3');
-                    _showInviteFriendDialog(context, viewModel);
+                    viewModel.startGame();
                   },
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('フレンドを招待'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.pink,
                     foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 48,
+                      vertical: 16,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  child: const Text('バトル開始！'),
                 ),
-              ),
-              const SizedBox(height: 16),
-              // 退出ボタン
-              SizedBox(
-                width: 200,
-                child: ElevatedButton.icon(
+                const SizedBox(height: 12),
+                TextButton(
                   onPressed: () {
                     SeService().play('button_buni.mp3');
-                    _showLeaveDialog(context, viewModel);
+                    _showRejectConfirmDialog(context, viewModel);
                   },
-                  icon: const Icon(Icons.exit_to_app),
-                  label: const Text('退出する'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.grey.shade700,
+                  child: const Text(
+                    'お断りする',
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ),
-              ),
+              ] else ...[
+                const CircularProgressIndicator(),
+                const SizedBox(height: 24),
+                const Text(
+                  'ホストが開始するのを待っています...',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ],
             ],
+
+            const SizedBox(height: 48),
+
+            // ボタン群を縦に配置
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!viewModel.hasGuest) ...[
+                  // ルームコードコピーボタン
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        Clipboard.setData(ClipboardData(text: roomCode));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('ルームコードをコピーしました')),
+                        );
+                      },
+                      icon: const Icon(Icons.copy),
+                      label: const Text('コードをコピー'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // フレンド招待ボタン
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        _showInviteFriendDialog(context, viewModel);
+                      },
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('フレンドを招待'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                // 退出ボタン
+                SizedBox(
+                  width: 200,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      SeService().play('button_buni.mp3');
+                      _showLeaveDialog(context, viewModel);
+                    },
+                    icon: const Icon(Icons.exit_to_app),
+                    label: const Text('ルームを閉じる'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.grey.shade700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRejectConfirmDialog(BuildContext context, GameScreenViewModel vm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('お断りしますか？'),
+        content: const Text('このユーザーはこのルームから退出させられます。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              vm.rejectGuest();
+            },
+            child: const Text('お断りする', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
