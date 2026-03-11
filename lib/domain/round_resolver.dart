@@ -58,7 +58,7 @@ class RoundResolver {
 
     // 太っちょネコイベント発生
     if (_random.nextDouble() < GameConstants.fatCatEventProbability) {
-      room.triggerFatCatEvent();
+      room.triggerFatCatEvent(RoundCards.random());
     } else {
       // 通常通り次へ
       room.prepareNextTurn(RoundCards.random());
@@ -70,7 +70,7 @@ class RoundResolver {
     if (!room.bothConfirmedFatCatEvent) return;
     if (room.status != GameStatus.fatCatEvent) return;
 
-    // 確認後に次のターンへ
-    room.prepareNextTurn(RoundCards.random());
+    // すでに triggerFatCatEvent でターン情報はセット済みなので、ステータスのみ遷移
+    room.status = GameStatus.rolling;
   }
 }

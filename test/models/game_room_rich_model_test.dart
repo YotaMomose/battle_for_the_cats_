@@ -75,7 +75,7 @@ void main() {
       room.host.fishCount = 5;
       room.guest?.fishCount = 10;
 
-      room.triggerFatCatEvent();
+      room.triggerFatCatEvent(RoundCards.random());
 
       expect(room.status, GameStatus.fatCatEvent);
       expect(room.host.fishCount, 0);

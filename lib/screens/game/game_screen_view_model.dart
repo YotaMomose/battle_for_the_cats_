@@ -551,7 +551,15 @@ class GameScreenViewModel extends ChangeNotifier {
         _recordMatchResultIfFinished(room);
         break;
       case GameStatus.fatCatEvent:
-        _uiState = GameScreenState.fatCatEvent(room);
+        final myConfirmedFatCat = isHost
+            ? host.confirmedFatCatEvent
+            : (guest?.confirmedFatCatEvent ?? false);
+        if (myConfirmedFatCat) {
+          // 自分が確認済みならサイコロフェーズ（次のターン）を表示
+          _uiState = GameScreenState.rolling(room);
+        } else {
+          _uiState = GameScreenState.fatCatEvent(room);
+        }
         break;
     }
   }

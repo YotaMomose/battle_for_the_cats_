@@ -207,11 +207,20 @@ class GameRoom {
   }
 
   /// 太っちょネコイベントを発生させる
-  void triggerFatCatEvent() {
+  void triggerFatCatEvent(RoundCards nextRoundCards) {
     status = GameStatus.fatCatEvent;
-    // 両者の魚を没収
+    currentTurn++;
+
+    host.resetRoundState();
+    guest?.resetRoundState();
+
+    // 魚を没収
     host.fishCount = 0;
     guest?.fishCount = 0;
+
+    currentRound = nextRoundCards;
+    winners = null;
+    chasedCards.clear();
   }
 
   /// 次のターンの準備をする
