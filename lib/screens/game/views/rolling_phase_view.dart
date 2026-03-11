@@ -270,9 +270,24 @@ class RollingPhaseView extends StatelessWidget {
       children: cards.map((card) {
         return Tooltip(
           message: card.name,
-          child: Icon(card.icon, size: 18, color: card.color),
+          child: _buildCatAvatarFromCard(card, size: 18),
         );
       }).toList(),
     );
+  }
+
+  /// 猫のアバター（画像優先、なければアイコン）を構築する
+  Widget _buildCatAvatarFromCard(FinalResultCardInfo card, {double size = 18}) {
+    if (card.imagePath != null) {
+      return Image.asset(
+        card.imagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) =>
+            Icon(card.icon, size: size, color: card.color),
+      );
+    }
+    return Icon(card.icon, size: size, color: card.color);
   }
 }

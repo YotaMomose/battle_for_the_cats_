@@ -355,7 +355,7 @@ class BettingPhaseView extends StatelessWidget {
                                   viewModel,
                                 ),
                                 _buildDraggableItem(
-                                  ItemType.luckyCat,
+                                  ItemType.matatabi,
                                   viewModel,
                                 ),
                               ],
@@ -428,7 +428,6 @@ class BettingPhaseView extends StatelessWidget {
     bool isFeedback = false,
     bool isPlaced = false,
   }) {
-    final iconData = _getItemIcon(type);
     final color = isPlaced ? Colors.grey : _getItemColor(type);
 
     return Container(
@@ -456,9 +455,9 @@ class BettingPhaseView extends StatelessWidget {
                 ),
               ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [Icon(iconData, color: color, size: 24)],
+      child: Opacity(
+        opacity: isPlaced ? 0.4 : 1.0,
+        child: _buildItemImage(type, size: 24),
       ),
     );
   }
@@ -514,25 +513,13 @@ class BettingPhaseView extends StatelessWidget {
                     data: catIndex,
                     feedback: Material(
                       color: Colors.transparent,
-                      child: Icon(
-                        _getItemIcon(placedItem),
-                        color: _getItemColor(placedItem),
-                        size: 28,
-                      ),
+                      child: _buildItemImage(placedItem, size: 28),
                     ),
                     childWhenDragging: Opacity(
                       opacity: 0.3,
-                      child: Icon(
-                        _getItemIcon(placedItem),
-                        color: _getItemColor(placedItem),
-                        size: 24,
-                      ),
+                      child: _buildItemImage(placedItem, size: 24),
                     ),
-                    child: Icon(
-                      _getItemIcon(placedItem),
-                      color: _getItemColor(placedItem),
-                      size: 24,
-                    ),
+                    child: _buildItemImage(placedItem, size: 24),
                   )
                 : Icon(Icons.add, color: Colors.grey.shade400, size: 16),
           ),
@@ -541,13 +528,28 @@ class BettingPhaseView extends StatelessWidget {
     );
   }
 
+  /// アイテムの画像（あればアイコンフォールバック）を返す
+  Widget _buildItemImage(ItemType type, {double size = 24}) {
+    if (type.imagePath != null) {
+      return Image.asset(
+        type.imagePath!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) =>
+            Icon(_getItemIcon(type), size: size, color: _getItemColor(type)),
+      );
+    }
+    return Icon(_getItemIcon(type), size: size, color: _getItemColor(type));
+  }
+
   IconData _getItemIcon(ItemType type) {
     switch (type) {
       case ItemType.catTeaser:
         return Icons.auto_awesome;
       case ItemType.surpriseHorn:
         return Icons.campaign;
-      case ItemType.luckyCat:
+      case ItemType.matatabi:
         return Icons.savings;
       default:
         return Icons.help_outline;
@@ -560,7 +562,7 @@ class BettingPhaseView extends StatelessWidget {
         return Colors.purple.shade400;
       case ItemType.surpriseHorn:
         return Colors.orange.shade600;
-      case ItemType.luckyCat:
+      case ItemType.matatabi:
         return Colors.amber.shade600;
       default:
         return Colors.grey;

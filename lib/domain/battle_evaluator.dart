@@ -63,14 +63,14 @@ class BattleEvaluator {
     return _determineWinner(effectiveCost, hostBet, guestBet);
   }
 
-  /// まねきねこの効果を適用したコストを計算
+  /// またたびの効果を適用したコストを計算
   int _calculateEffectiveCost(
     int cost,
     ItemType? hostItem,
     ItemType? guestItem,
   ) {
     final isLuckyCatActive =
-        hostItem == ItemType.luckyCat || guestItem == ItemType.luckyCat;
+        hostItem == ItemType.matatabi || guestItem == ItemType.matatabi;
     return isLuckyCatActive ? cost * 2 : cost;
   }
 

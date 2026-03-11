@@ -11,7 +11,7 @@ class ItemInventory {
     return ItemInventory({
       ItemType.catTeaser: 1,
       ItemType.surpriseHorn: 1,
-      ItemType.luckyCat: 1,
+      ItemType.matatabi: 1,
     });
   }
 

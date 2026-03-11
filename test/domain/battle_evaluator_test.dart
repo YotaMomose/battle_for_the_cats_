@@ -80,7 +80,7 @@ void main() {
       final host = createPlayer(
         'host',
         {'0': 3, '1': 0, '2': 0},
-        {'0': ItemType.luckyCat},
+        {'0': ItemType.matatabi},
       );
       final guest = createPlayer('guest', {'0': 0, '1': 0, '2': 0});
 

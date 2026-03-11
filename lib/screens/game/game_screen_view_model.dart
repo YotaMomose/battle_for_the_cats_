@@ -258,6 +258,15 @@ class GameScreenViewModel extends ChangeNotifier {
     if (catName.contains(GameConstants.catBlack)) {
       return 'assets/images/kuroneko.png';
     }
+    if (catName == GameConstants.dog) {
+      return 'assets/images/inu.png';
+    }
+    if (catName == GameConstants.fisherman) {
+      return 'assets/images/ryousi.png';
+    }
+    if (catName == GameConstants.itemShop) {
+      return 'assets/images/shop.png';
+    }
     return null;
   }
 
@@ -402,7 +411,7 @@ class GameScreenViewModel extends ChangeNotifier {
         return Icons.auto_awesome;
       case ItemType.surpriseHorn:
         return Icons.campaign;
-      case ItemType.luckyCat:
+      case ItemType.matatabi:
         return Icons.monetization_on;
       case ItemType.unknown:
         return Icons.help_outline;
@@ -457,6 +466,7 @@ class GameScreenViewModel extends ChangeNotifier {
             }
             _currentRoom = room;
             _updateUiState(room);
+            _syncWithServerState(room);
             _checkTurnChange(room);
             notifyListeners();
           },
@@ -605,6 +615,30 @@ class GameScreenViewModel extends ChangeNotifier {
     _hasRolled = false;
     _hasPlacedBet = false;
     _bets = Bets.empty();
+  }
+
+  /// サーバーの状態とローカルの操作状態を同期する
+  void _syncWithServerState(GameRoom room) {
+    final my = isHost ? room.host : room.guest;
+    if (my == null) return;
+
+    // サーバー側で「まだ」の状態なのにローカルで「完了」になっていれば、
+    // 書き込みの失敗や上書きが発生した可能性があるため、ボタンを再活性化する
+    if (room.status == GameStatus.rolling) {
+      if (!my.rolled && _hasRolled) {
+        debugPrint(
+          '[GameScreenViewModel] Roll state synced: server says not rolled',
+        );
+        _hasRolled = false;
+      }
+    } else if (room.status == GameStatus.playing) {
+      if (!my.ready && _hasPlacedBet) {
+        debugPrint(
+          '[GameScreenViewModel] Bet state synced: server says not ready',
+        );
+        _hasPlacedBet = false;
+      }
+    }
   }
 
   Future<void> confirmRoll() async {

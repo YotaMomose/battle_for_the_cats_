@@ -329,11 +329,23 @@ class RoundResultView extends StatelessWidget {
         if (item != null && item != ItemType.unknown)
           Tooltip(
             message: item.displayName,
-            child: Icon(
-              viewModel.getItemIconData(item),
-              size: 14,
-              color: Colors.blueAccent,
-            ),
+            child: item.imagePath != null
+                ? Image.asset(
+                    item.imagePath!,
+                    width: 14,
+                    height: 14,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      viewModel.getItemIconData(item),
+                      size: 14,
+                      color: Colors.blueAccent,
+                    ),
+                  )
+                : Icon(
+                    viewModel.getItemIconData(item),
+                    size: 14,
+                    color: Colors.blueAccent,
+                  ),
           ),
       ],
     );

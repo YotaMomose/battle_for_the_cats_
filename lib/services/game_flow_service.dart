@@ -22,35 +22,45 @@ class GameFlowService {
 
   /// サイコロを振る
   Future<void> rollDice(String roomCode, String playerId) async {
-    final room = await _repository.getRoom(roomCode);
-    if (room == null) return;
+    await _repository.runTransaction((Transaction transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) return;
 
-    final isHost = room.isHost(playerId);
-    final player = isHost ? room.host : room.guest;
-    if (player == null) return;
+      final isHost = room.isHost(playerId);
+      final player = isHost ? room.host : room.guest;
+      if (player == null) return;
 
-    player.roll(_dice);
+      player.roll(_dice);
 
-    await _repository.updateRoom(roomCode, room.toMap());
+      _repository.updateRoomInTransaction(transaction, roomCode, room.toMap());
+    });
   }
 
   /// サイコロ結果を確認し、フェーズを進める準備をする
   Future<void> confirmRoll(String roomCode, String playerId) async {
-    final room = await _repository.getRoom(roomCode);
-    if (room == null) return;
+    await _repository.runTransaction((Transaction transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) return;
 
-    final isHost = room.isHost(playerId);
-    final player = isHost ? room.host : room.guest;
-    if (player == null) return;
+      final isHost = room.isHost(playerId);
+      final player = isHost ? room.host : room.guest;
+      if (player == null) return;
 
-    player.confirmedRoll = true;
+      player.confirmedRoll = true;
 
-    // 両者が確認済みになったら、ステータスを playing に変更
-    if (room.bothConfirmedRoll) {
-      room.status = GameStatus.playing;
-    }
+      // 両者が確認済みになったら、ステータスを playing に変更
+      if (room.bothConfirmedRoll) {
+        room.status = GameStatus.playing;
+      }
 
-    await _repository.updateRoom(roomCode, room.toMap());
+      _repository.updateRoomInTransaction(transaction, roomCode, room.toMap());
+    });
   }
 
   /// 魚を賭ける
@@ -60,32 +70,30 @@ class GameFlowService {
     Map<String, int> bets,
     Map<String, String?> itemPlacements,
   ) async {
-    final room = await _repository.getRoom(roomCode);
-    if (room == null) return;
+    await _repository.runTransaction((Transaction transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) return;
 
-    final player = room.isHost(playerId) ? room.host : room.guest;
-    if (player == null) return;
+      final player = room.isHost(playerId) ? room.host : room.guest;
+      if (player == null) return;
 
-    final convertedItems = itemPlacements.map((key, value) {
-      if (value == null) return MapEntry(key, null);
-      return MapEntry(key, ItemType.fromString(value));
+      final convertedItems = itemPlacements.map((key, value) {
+        if (value == null) return MapEntry(key, null);
+        return MapEntry(key, ItemType.fromString(value));
+      });
+
+      player.placeBetsWithItems(bets, convertedItems);
+
+      // 両者が準備完了したか確認
+      if (room.canStartRound) {
+        _roundResolver.resolve(room);
+      }
+
+      _repository.updateRoomInTransaction(transaction, roomCode, room.toMap());
     });
-
-    player.placeBetsWithItems(bets, convertedItems);
-
-    // 両者が準備完了したか確認
-    if (room.canStartRound) {
-      await _resolveRound(roomCode, room);
-    } else {
-      await _repository.updateRoom(roomCode, room.toMap());
-    }
-  }
-
-  /// ラウンド結果を判定
-  Future<void> _resolveRound(String roomCode, GameRoom room) async {
-    _roundResolver.resolve(room);
-
-    await _repository.updateRoom(roomCode, room.toMap());
   }
 
   /// 次のターンへ進む（個別アクション）
