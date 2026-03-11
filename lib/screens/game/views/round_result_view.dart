@@ -327,25 +327,37 @@ class RoundResultView extends StatelessWidget {
           ),
         ),
         if (item != null && item != ItemType.unknown)
-          Tooltip(
-            message: item.displayName,
-            child: item.imagePath != null
-                ? Image.asset(
-                    item.imagePath!,
-                    width: 14,
-                    height: 14,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Icon(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(width: 4),
+              item.imagePath != null
+                  ? Image.asset(
+                      item.imagePath!,
+                      width: 21,
+                      height: 21,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        viewModel.getItemIconData(item),
+                        size: 21,
+                        color: Colors.blueAccent,
+                      ),
+                    )
+                  : Icon(
                       viewModel.getItemIconData(item),
-                      size: 14,
+                      size: 21,
                       color: Colors.blueAccent,
                     ),
-                  )
-                : Icon(
-                    viewModel.getItemIconData(item),
-                    size: 14,
-                    color: Colors.blueAccent,
-                  ),
+              const SizedBox(width: 2),
+              Text(
+                item.displayName,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+            ],
           ),
       ],
     );

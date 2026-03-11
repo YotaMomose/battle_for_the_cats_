@@ -328,7 +328,7 @@ class BettingPhaseView extends StatelessWidget {
                         },
                         builder: (context, candidateData, rejectedData) {
                           return Container(
-                            height: 60,
+                            height: 80,
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: candidateData.isNotEmpty
@@ -457,7 +457,21 @@ class BettingPhaseView extends StatelessWidget {
       ),
       child: Opacity(
         opacity: isPlaced ? 0.4 : 1.0,
-        child: _buildItemImage(type, size: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildItemImage(type, size: 36),
+            const SizedBox(height: 2),
+            Text(
+              type.displayName,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isPlaced ? Colors.grey : color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -488,8 +502,8 @@ class BettingPhaseView extends StatelessWidget {
       },
       builder: (context, candidateData, rejectedData) {
         return Container(
-          width: 40,
-          height: 40,
+          width: 54,
+          height: 54,
           decoration: BoxDecoration(
             color: candidateData.isNotEmpty
                 ? Colors.yellow.shade100
@@ -513,13 +527,13 @@ class BettingPhaseView extends StatelessWidget {
                     data: catIndex,
                     feedback: Material(
                       color: Colors.transparent,
-                      child: _buildItemImage(placedItem, size: 28),
+                      child: _buildItemImage(placedItem, size: 42),
                     ),
                     childWhenDragging: Opacity(
                       opacity: 0.3,
-                      child: _buildItemImage(placedItem, size: 24),
+                      child: _buildItemImage(placedItem, size: 36),
                     ),
-                    child: _buildItemImage(placedItem, size: 24),
+                    child: _buildItemImage(placedItem, size: 36),
                   )
                 : Icon(Icons.add, color: Colors.grey.shade400, size: 16),
           ),
@@ -529,7 +543,7 @@ class BettingPhaseView extends StatelessWidget {
   }
 
   /// アイテムの画像（あればアイコンフォールバック）を返す
-  Widget _buildItemImage(ItemType type, {double size = 24}) {
+  Widget _buildItemImage(ItemType type, {double size = 36}) {
     if (type.imagePath != null) {
       return Image.asset(
         type.imagePath!,
