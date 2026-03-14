@@ -11,6 +11,8 @@ import 'repositories/firestore_repository.dart';
 import 'repositories/user_repository.dart';
 import 'repositories/friend_repository.dart';
 import 'services/ad_service.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,20 +39,23 @@ void main() async {
   await adService.initialize();
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: settingsService),
-        Provider(create: (_) => AuthService()),
-        Provider(create: (_) => BgmService()),
-        Provider(create: (_) => FirestoreRepository()),
-        ProxyProvider<FirestoreRepository, UserRepository>(
-          update: (_, firestore, __) => UserRepository(repository: firestore),
-        ),
-        ProxyProvider<FirestoreRepository, FriendRepository>(
-          update: (_, firestore, __) => FriendRepository(repository: firestore),
-        ),
-      ],
-      child: const MyApp(),
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: settingsService),
+          Provider(create: (_) => AuthService()),
+          Provider(create: (_) => BgmService()),
+          Provider(create: (_) => FirestoreRepository()),
+          ProxyProvider<FirestoreRepository, UserRepository>(
+            update: (_, firestore, __) => UserRepository(repository: firestore),
+          ),
+          ProxyProvider<FirestoreRepository, FriendRepository>(
+            update: (_, firestore, __) => FriendRepository(repository: firestore),
+          ),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }
@@ -61,6 +66,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: DevicePreview.locale(context), // デバイスプレビュー用
+      builder: DevicePreview.appBuilder, // デバイスプレビュー用
       title: 'Battle for the Cats',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),

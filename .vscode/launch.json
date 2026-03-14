@@ -2,45 +2,30 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "battle_for_the_cats",
+            "name": "battle_for_the_cats (自動選択)",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "battle_for_the_cats (Flutter Pixel 9)",
+            "name": "battle_for_the_cats (Resizable-1)",
             "request": "launch",
             "type": "dart",
             "deviceId": "emulator-5554"
         },
         {
-            "name": "battle_for_the_cats (Flutter Pixel 9-2)",
+            "name": "battle_for_the_cats (Resizable-2)",
             "request": "launch",
             "type": "dart",
             "deviceId": "emulator-5556"
-        },
+        }
+    ],
+    "compounds": [
         {
-            "name": "battle_for_the_cats (SmallPhone)",
-            "request": "launch",
-            "type": "dart",
-            "deviceId": "emulator-5558"
-        },
-        {
-            "name": "battle_for_the_cats (Resizable_Experimental)",
-            "request": "launch",
-            "type": "dart",
-            "deviceId": "emulator-5560"
-        },
-        {
-            "name": "battle_for_the_cats (Profile)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "battle_for_the_cats (Release)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
+            "name": "Resizable 2台同時起動",
+            "configurations": [
+                "battle_for_the_cats (Resizable-1)",
+                "battle_for_the_cats (Resizable-2)"
+            ]
         }
     ]
 }
