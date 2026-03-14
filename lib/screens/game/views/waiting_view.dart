@@ -17,7 +17,7 @@ class WaitingView extends StatelessWidget {
 
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

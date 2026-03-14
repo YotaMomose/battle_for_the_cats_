@@ -55,15 +55,15 @@ class _GameScreenContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: PawBackground(
-        child: Stack(
-          children: [
-            _buildBody(context, state, viewModel),
-            // 左上の退出ボタン（待機画面、最終結果画面以外で表示）
-            if (state is! FinishedState && state is! WaitingState)
-              Positioned(
-                top: 16,
-                left: 16,
-                child: SafeArea(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              _buildBody(context, state, viewModel),
+              // 左上の退出ボタン（待機画面、最終結果画面以外で表示）
+              if (state is! FinishedState && state is! WaitingState)
+                Positioned(
+                  top: 16,
+                  left: 16,
                   child: _buildCircleButton(
                     icon: Icons.exit_to_app,
                     onPressed: () {
@@ -72,8 +72,8 @@ class _GameScreenContent extends StatelessWidget {
                     },
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

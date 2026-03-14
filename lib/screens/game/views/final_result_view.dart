@@ -50,7 +50,7 @@ class _FinalResultViewState extends State<FinalResultView> {
 
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
