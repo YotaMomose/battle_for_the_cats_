@@ -113,7 +113,50 @@ class BettingPhaseView extends StatelessWidget {
                       ? null
                       : () {
                           SeService().play('button_buni.mp3');
-                          viewModel.placeBets();
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              alignment: Alignment.bottomCenter,
+                              title: const Text(
+                                '確定しますか？',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              content: const Text(
+                                'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text(
+                                    'キャンセル',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.pink.shade400,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    SeService().play('button_buni.mp3');
+                                    Navigator.of(context).pop();
+                                    viewModel.placeBets();
+                                  },
+                                  child: const Text(
+                                    '確定する',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pink.shade400,
@@ -156,17 +199,37 @@ class BettingPhaseView extends StatelessWidget {
     final iconAndCardsRow = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // アイコン
-        Container(
-          width: 50,
-          height: 50,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(iconEmoji, style: const TextStyle(fontSize: 28)),
+        // アイコンとユーザー名
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(iconEmoji, style: const TextStyle(fontSize: 28)),
+            ),
+            const SizedBox(height: 4),
+            SizedBox(
+              width: 60,
+              child: Text(
+                displayName,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: 12),
         // 獲得カード一覧
