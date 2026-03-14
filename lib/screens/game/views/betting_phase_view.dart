@@ -21,19 +21,28 @@ class BettingPhaseView extends StatelessWidget {
     final viewModel = context.watch<GameScreenViewModel>();
     final playerData = viewModel.playerData!;
 
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 680;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: 12.0,
+        vertical: isSmallScreen ? 2.0 : 4.0,
+      ),
       child: Column(
         children: [
           // ターン情報 (最上部)
           Text(
             'ターン ${room.currentTurn}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: isSmallScreen ? 12 : 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
 
           // 対戦相手セクション
           Expanded(
-            flex: 4,
+            flex: isSmallScreen ? 4 : 4,
             child: _buildPlayerSection(
               context,
               isOpponent: true,
@@ -44,12 +53,13 @@ class BettingPhaseView extends StatelessWidget {
               viewModel: viewModel,
               statusLabel: viewModel.opponentReadyStatusLabel,
               statusColor: viewModel.opponentReadyStatusColor,
+              isSmallScreen: isSmallScreen,
             ),
           ),
 
           // 3匹の猫カードとお皿のエリア (中央)
           Expanded(
-            flex: 5,
+            flex: isSmallScreen ? 6 : 5,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,8 +77,8 @@ class BettingPhaseView extends StatelessWidget {
                 return Expanded(
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
+                    padding: EdgeInsets.symmetric(
+                      vertical: isSmallScreen ? 4.0 : 8.0,
                       horizontal: 4.0,
                     ),
                     decoration: BoxDecoration(
@@ -81,18 +91,23 @@ class BettingPhaseView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildCatCard(viewModel, card),
-                        const SizedBox(height: 8),
-                        _buildDishArea(
-                          viewModel: viewModel,
-                          catIndex: catIndex,
-                          currentBet: currentBet,
-                          placedItem: placedItem,
-                        ),
-                      ],
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildCatCard(viewModel, card, isSmallScreen),
+                          SizedBox(height: isSmallScreen ? 2 : 8),
+                          _buildDishArea(
+                            viewModel: viewModel,
+                            catIndex: catIndex,
+                            currentBet: currentBet,
+                            placedItem: placedItem,
+                            isSmallScreen: isSmallScreen,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -102,7 +117,7 @@ class BettingPhaseView extends StatelessWidget {
 
           // 自分セクション
           Expanded(
-            flex: 4,
+            flex: isSmallScreen ? 4 : 4,
             child: _buildPlayerSection(
               context,
               isOpponent: false,
@@ -112,16 +127,20 @@ class BettingPhaseView extends StatelessWidget {
               inventory: playerData.myCatsWon,
               viewModel: viewModel,
               isReady: viewModel.isMyReady,
+              isSmallScreen: isSmallScreen,
             ),
           ),
 
           // 確定ボタン
           if (!viewModel.isMyReady)
             Padding(
-              padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+              padding: EdgeInsets.only(
+                top: isSmallScreen ? 2.0 : 4.0,
+                bottom: isSmallScreen ? 2.0 : 4.0,
+              ),
               child: SizedBox(
-                height: 44,
-                width: 160,
+                height: isSmallScreen ? 36 : 44,
+                width: isSmallScreen ? 140 : 160,
                 child: ElevatedButton(
                   onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
                       ? null
@@ -182,8 +201,8 @@ class BettingPhaseView extends StatelessWidget {
                   ),
                   child: Text(
                     viewModel.confirmBetsButtonLabel,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 14 : 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -207,34 +226,39 @@ class BettingPhaseView extends StatelessWidget {
     String? statusLabel,
     Color? statusColor,
     bool isReady = false,
+    bool isSmallScreen = false,
   }) {
     final bgColor = isOpponent ? Colors.red.shade50 : Colors.blue.shade50;
+    final iconSize = isSmallScreen ? 28.0 : 50.0;
+    final fishIconSize = isSmallScreen ? 28.0 : 48.0;
 
     final iconAndCardsRow = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // アイコンとユーザー名
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: iconSize,
+              height: iconSize,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(iconEmoji, style: const TextStyle(fontSize: 28)),
+              child: Text(
+                iconEmoji,
+                style: TextStyle(fontSize: isSmallScreen ? 16 : 28),
+              ),
             ),
-            const SizedBox(height: 4),
+            if (!isSmallScreen) const SizedBox(height: 4),
             SizedBox(
-              width: 60,
+              width: isSmallScreen ? 40 : 60,
               child: Text(
                 displayName,
-                style: const TextStyle(
-                  fontSize: 10,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 8 : 10,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -245,75 +269,86 @@ class BettingPhaseView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isSmallScreen ? 4 : 12),
         // 獲得カード一覧
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '合計コスト：${inventory.totalCost}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+        Container(
+          width: isSmallScreen ? 180 : 240,
+          padding: EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: isSmallScreen ? 2 : 4,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '合計コスト：${inventory.totalCost}',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 10 : 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
                 ),
-                const SizedBox(height: 2),
-                SizedBox(
-                  height: 60,
-                  child: _buildWonCatsList(
-                    inventory,
-                    viewModel,
-                    isCompact: true,
-                  ),
+              ),
+              if (!isSmallScreen) const SizedBox(height: 2),
+              SizedBox(
+                height: isSmallScreen ? 30 : 60,
+                child: _buildWonCatsList(
+                  inventory,
+                  viewModel,
+                  isCompact: true,
+                  isSmallScreen: isSmallScreen,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
     );
 
     final fishAndItemsRow = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(width: 4),
         // 魚の数 (自分ならドラッグ＆ドロップ用)
         if (!isOpponent)
-          _buildMyFishDraggableArea(fishCount, viewModel)
+          _buildMyFishDraggableArea(fishCount, viewModel, isSmallScreen)
         else
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: isSmallScreen ? 2 : 4,
+            ),
             decoration: BoxDecoration(
               color: Colors.red.shade50,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Colors.red.shade200),
             ),
-            child: _buildFishWithNumber('$fishCount', size: 48),
+            child: _buildFishWithNumber('$fishCount', size: fishIconSize),
           ),
-        const SizedBox(width: 16),
+        SizedBox(width: isSmallScreen ? 4 : 16),
         // 所持アイテム一覧
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isOpponent ? Colors.red.shade100 : Colors.blue.shade100,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isOpponent ? Colors.red.shade200 : Colors.blue.shade200,
-              ),
+        Container(
+          width: isSmallScreen ? 160 : 200,
+          padding: EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: isSmallScreen ? 1 : 4,
+          ),
+          decoration: BoxDecoration(
+            color: isOpponent ? Colors.red.shade100 : Colors.blue.shade100,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isOpponent ? Colors.red.shade200 : Colors.blue.shade200,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isSmallScreen)
                 const Text(
                   '所持アイテム',
                   style: TextStyle(
@@ -322,60 +357,71 @@ class BettingPhaseView extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 4),
-                isOpponent
-                    ? _buildOpponentItems(viewModel)
-                    : _buildMyItemsList(viewModel),
-              ],
-            ),
+              isOpponent
+                  ? _buildOpponentItems(
+                      viewModel,
+                      iconSize: isSmallScreen ? 22 : 32,
+                    )
+                  : _buildMyItemsList(
+                      viewModel,
+                      isSmallScreen: isSmallScreen,
+                    ),
+            ],
           ),
         ),
       ],
     );
 
     final content = Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: 8.0,
+        vertical: isSmallScreen ? 2.0 : 8.0,
+      ),
       decoration: BoxDecoration(
         color: bgColor.withOpacity(0.7),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (isOpponent) ...[
-            iconAndCardsRow,
-            const SizedBox(height: 6),
-            fishAndItemsRow,
-          ] else ...[
-            fishAndItemsRow,
-            const SizedBox(height: 6),
-            iconAndCardsRow,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isOpponent) ...[
+              iconAndCardsRow,
+              SizedBox(height: isSmallScreen ? 2 : 6),
+              fishAndItemsRow,
+            ] else ...[
+              fishAndItemsRow,
+              SizedBox(height: isSmallScreen ? 2 : 6),
+              iconAndCardsRow,
+            ],
+            if (statusLabel != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2.0),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            if (isReady && !isOpponent)
+              const Padding(
+                padding: EdgeInsets.only(top: 2.0),
+                child: Text(
+                  '準備完了：結果を待っています...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
-          if (statusLabel != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0),
-              child: Text(
-                statusLabel,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          if (isReady && !isOpponent)
-            const Padding(
-              padding: EdgeInsets.only(top: 2.0),
-              child: Text(
-                '準備完了：結果を待っています...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
 
@@ -425,9 +471,11 @@ class BettingPhaseView extends StatelessWidget {
   Widget _buildMyFishDraggableArea(
     int totalFish,
     GameScreenViewModel viewModel,
+    bool isSmallScreen,
   ) {
     final remaining = totalFish - viewModel.totalBet;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
+    final fishSize = isSmallScreen ? 36.0 : 48.0;
 
     // 魚エリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
@@ -444,24 +492,29 @@ class BettingPhaseView extends StatelessWidget {
               data: 'fish_from_hand',
               feedback: Material(
                 color: Colors.transparent,
-                child: _buildFishWithNumber('$remaining', size: 64),
+                child: _buildFishWithNumber('$remaining', size: fishSize * 1.3),
               ),
               childWhenDragging: Opacity(
                 opacity: 0.3,
-                child: _buildFishWithNumber('$remaining', size: 48),
+                child: _buildFishWithNumber('$remaining', size: fishSize),
               ),
-              child: _buildFishWithNumber('$remaining', size: 48),
+              child: _buildFishWithNumber('$remaining', size: fishSize),
             )
           : Opacity(
               opacity: 0.5,
-              child: _buildFishWithNumber('$remaining', size: 48),
+              child: _buildFishWithNumber('$remaining', size: fishSize),
             ),
     );
   }
 }
 
 /// 猫カード
-Widget _buildCatCard(GameScreenViewModel viewModel, GameCard card) {
+Widget _buildCatCard(
+  GameScreenViewModel viewModel,
+  GameCard card,
+  bool isSmallScreen,
+) {
+  final avatarSize = isSmallScreen ? 50.0 : 100.0;
   return Container(
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
@@ -474,19 +527,23 @@ Widget _buildCatCard(GameScreenViewModel viewModel, GameCard card) {
       children: [
         Text(
           card.displayName,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: isSmallScreen ? 10 : 12,
+            fontWeight: FontWeight.bold,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        _buildCatAvatar(viewModel, card.displayName, size: 100),
-        const SizedBox(height: 2),
+        _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
+        SizedBox(height: isSmallScreen ? 1 : 2),
         // 魚アイコンによるコスト表示
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 1,
           children: List.generate(
             card.baseCost,
-            (_) => const Text('🐟', style: TextStyle(fontSize: 16)),
+            (_) =>
+                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 12 : 16)),
           ),
         ),
       ],
@@ -500,6 +557,7 @@ Widget _buildDishArea({
   required String catIndex,
   required int currentBet,
   required ItemType? placedItem,
+  bool isSmallScreen = false,
 }) {
   return DragTarget<Object>(
     onWillAccept: (data) => !viewModel.hasPlacedBet,
@@ -542,6 +600,8 @@ Widget _buildDishArea({
     builder: (context, candidateData, rejectedData) {
       final isTarget = candidateData.isNotEmpty;
       Offset tapPosition = Offset.zero;
+      final dishWidth = isSmallScreen ? 55.0 : 100.0;
+      final fishSize = isSmallScreen ? 32.0 : 48.0;
 
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -565,13 +625,13 @@ Widget _buildDishArea({
                     : null,
                 child: Image.asset(
                   'assets/images/dish.png',
-                  width: 100,
+                  width: dishWidth,
                   fit: BoxFit.contain,
                 ),
               ),
               // 魚の賭け数表示
               Transform.translate(
-                offset: const Offset(0, -15),
+                offset: Offset(0, isSmallScreen ? -10 : -15),
                 child: (!viewModel.isMyReady)
                     ? (currentBet > 0 && !viewModel.hasPlacedBet
                           ? Draggable<String>(
@@ -580,14 +640,14 @@ Widget _buildDishArea({
                                 color: const Color.fromARGB(0, 141, 43, 43),
                                 child: _buildFishWithNumber(
                                   '$currentBet',
-                                  size: 64,
+                                  size: fishSize * 1.3,
                                 ),
                               ),
                               childWhenDragging: Opacity(
                                 opacity: 0.3,
                                 child: _buildFishWithNumber(
                                   '$currentBet',
-                                  size: 48,
+                                  size: fishSize,
                                 ),
                               ),
                               child: GestureDetector(
@@ -612,18 +672,23 @@ Widget _buildDishArea({
                                 },
                                 child: _buildFishWithNumber(
                                   '$currentBet',
-                                  size: 48,
+                                  size: fishSize,
                                 ),
                               ),
                             )
-                          : _buildFishWithNumber('$currentBet', size: 48))
-                    : _buildFishWithNumber('$currentBet', size: 48),
+                          : _buildFishWithNumber('$currentBet', size: fishSize))
+                    : _buildFishWithNumber('$currentBet', size: fishSize),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 4 : 8),
           // アイテムスロット（お皿と被らないように下に配置）
-          _buildItemSlot(catIndex, placedItem, viewModel),
+          _buildItemSlot(
+            catIndex,
+            placedItem,
+            viewModel,
+            isSmallScreen: isSmallScreen,
+          ),
         ],
       );
     },
@@ -631,21 +696,39 @@ Widget _buildDishArea({
 }
 
 /// 自分のアイテムリスト
-Widget _buildMyItemsList(GameScreenViewModel viewModel) {
+Widget _buildMyItemsList(
+  GameScreenViewModel viewModel, {
+  bool isSmallScreen = false,
+}) {
   // 個別のDragTargetは廃止し、上位のPlayerSectionで受ける
   return Row(
     key: _myItemsKey,
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     children: [
-      _buildDraggableItem(ItemType.catTeaser, viewModel),
-      _buildDraggableItem(ItemType.surpriseHorn, viewModel),
-      _buildDraggableItem(ItemType.matatabi, viewModel),
+      _buildDraggableItem(
+        ItemType.catTeaser,
+        viewModel,
+        isSmallScreen: isSmallScreen,
+      ),
+      _buildDraggableItem(
+        ItemType.surpriseHorn,
+        viewModel,
+        isSmallScreen: isSmallScreen,
+      ),
+      _buildDraggableItem(
+        ItemType.matatabi,
+        viewModel,
+        isSmallScreen: isSmallScreen,
+      ),
     ],
   );
 }
 
 /// 相手のアイテム表示
-Widget _buildOpponentItems(GameScreenViewModel viewModel) {
+Widget _buildOpponentItems(
+  GameScreenViewModel viewModel, {
+  double iconSize = 32,
+}) {
   final inventory = viewModel.playerData?.opponentInventory;
   if (inventory == null) return const SizedBox();
 
@@ -659,7 +742,7 @@ Widget _buildOpponentItems(GameScreenViewModel viewModel) {
             opacity: isUsed ? 0.3 : 1.0,
             child: _buildItemIcon(
               type,
-              size: 32,
+              size: iconSize,
               showLabel: false,
               isPlaced: isUsed,
             ),
@@ -669,7 +752,11 @@ Widget _buildOpponentItems(GameScreenViewModel viewModel) {
   );
 }
 
-Widget _buildDraggableItem(ItemType type, GameScreenViewModel viewModel) {
+Widget _buildDraggableItem(
+  ItemType type,
+  GameScreenViewModel viewModel, {
+  bool isSmallScreen = false,
+}) {
   final count = viewModel.playerData?.myInventory.count(type) ?? 0;
   bool isPlaced = false;
   for (int i = 0; i < 3; i++) {
@@ -679,23 +766,24 @@ Widget _buildDraggableItem(ItemType type, GameScreenViewModel viewModel) {
     }
   }
   final bool isUnavailable = count <= 0 || isPlaced;
+  final itemSize = isSmallScreen ? 28.0 : 40.0;
 
   return isUnavailable
       ? Opacity(
           opacity: 0.3,
-          child: _buildItemIcon(type, isPlaced: true, size: 40),
+          child: _buildItemIcon(type, isPlaced: true, size: itemSize),
         )
       : Draggable<ItemType>(
           data: type,
           feedback: Material(
             color: Colors.transparent,
-            child: _buildItemIcon(type, isFeedback: true, size: 48),
+            child: _buildItemIcon(type, isFeedback: true, size: itemSize * 1.2),
           ),
           childWhenDragging: Opacity(
             opacity: 0.5,
-            child: _buildItemIcon(type, size: 40),
+            child: _buildItemIcon(type, size: itemSize),
           ),
-          child: _buildItemIcon(type, size: 40),
+          child: _buildItemIcon(type, size: itemSize),
         );
 }
 
@@ -738,11 +826,15 @@ Widget _buildItemIcon(
 Widget _buildItemSlot(
   String catIndex,
   ItemType? placedItem,
-  GameScreenViewModel viewModel,
-) {
+  GameScreenViewModel viewModel, {
+  bool isSmallScreen = false,
+}) {
+  final slotSize = isSmallScreen ? 32.0 : 40.0;
+  final itemIconSize = isSmallScreen ? 26.0 : 32.0;
+
   return Container(
-    width: 40,
-    height: 40,
+    width: slotSize,
+    height: slotSize,
     decoration: BoxDecoration(
       color: Colors.white.withOpacity(0.5),
       shape: BoxShape.circle,
@@ -761,11 +853,17 @@ Widget _buildItemSlot(
                         data: 'item_from_$catIndex',
                         feedback: Material(
                           color: Colors.transparent,
-                          child: _buildItemImage(placedItem, size: 36),
+                          child: _buildItemImage(
+                            placedItem,
+                            size: itemIconSize * 1.2,
+                          ),
                         ),
                         childWhenDragging: Opacity(
                           opacity: 0.3,
-                          child: _buildItemImage(placedItem, size: 32),
+                          child: _buildItemImage(
+                            placedItem,
+                            size: itemIconSize,
+                          ),
                         ),
                         child: GestureDetector(
                           onTapDown: (details) {
@@ -782,13 +880,20 @@ Widget _buildItemSlot(
                             viewModel.updateItemPlacement(catIndex, null);
                             SeService().play('button_buni.mp3');
                           },
-                          child: _buildItemImage(placedItem, size: 32),
+                          child: _buildItemImage(
+                            placedItem,
+                            size: itemIconSize,
+                          ),
                         ),
                       );
                     },
                   )
-                : _buildItemImage(placedItem, size: 32))
-          : Icon(Icons.add, color: Colors.grey.shade400, size: 14),
+                : _buildItemImage(placedItem, size: itemIconSize))
+          : Icon(
+              Icons.add,
+              color: Colors.grey.shade400,
+              size: isSmallScreen ? 12 : 14,
+            ),
     ),
   );
 }
@@ -837,6 +942,7 @@ Widget _buildWonCatsList(
   CatInventory inventory,
   GameScreenViewModel viewModel, {
   bool isCompact = false,
+  bool isSmallScreen = false,
 }) {
   final cats = inventory.all;
   if (cats.isEmpty) {
@@ -861,11 +967,11 @@ Widget _buildWonCatsList(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildCatAvatar(viewModel, cat.name, size: 36),
+            _buildCatAvatar(viewModel, cat.name, size: isSmallScreen ? 24 : 36),
             Text(
               '🐟${cat.cost}',
-              style: const TextStyle(
-                fontSize: 12,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 10 : 12,
                 color: Colors.blue,
                 fontWeight: FontWeight.bold,
               ),

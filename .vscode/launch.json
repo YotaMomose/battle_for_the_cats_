@@ -25,6 +25,12 @@
             "deviceId": "emulator-5558"
         },
         {
+            "name": "battle_for_the_cats (Resizable_Experimental)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "emulator-5560"
+        },
+        {
             "name": "battle_for_the_cats (Profile)",
             "request": "launch",
             "type": "dart",
