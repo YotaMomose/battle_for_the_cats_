@@ -65,13 +65,27 @@ class BettingPhaseView extends StatelessWidget {
                 final placedItem = viewModel.getPlacedItem(catIndex);
 
                 return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 4.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(
+                        255,
+                        228,
+                        9,
+                        9,
+                      ).withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildCatCard(viewModel, card),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         _buildDishArea(
                           viewModel: viewModel,
                           catIndex: catIndex,
@@ -235,13 +249,34 @@ class BettingPhaseView extends StatelessWidget {
         // 獲得カード一覧
         Expanded(
           child: Container(
-            height: 80,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.5),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: _buildWonCatsList(inventory, viewModel, isCompact: true),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '合計コスト：${inventory.totalCost}',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                SizedBox(
+                  height: 60,
+                  child: _buildWonCatsList(
+                    inventory,
+                    viewModel,
+                    isCompact: true,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
