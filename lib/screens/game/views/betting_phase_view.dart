@@ -261,7 +261,7 @@ class BettingPhaseView extends StatelessWidget {
                 Text(
                   '合計コスト：${inventory.totalCost}',
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -543,70 +543,87 @@ Widget _buildDishArea({
       final isTarget = candidateData.isNotEmpty;
       Offset tapPosition = Offset.zero;
 
-      return Stack(
-        alignment: Alignment.center,
+      return Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // お皿画像
-          Container(
-            decoration: isTarget
-                ? BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.yellow.withOpacity(0.6),
-                        blurRadius: 12,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  )
-                : null,
-            child: Image.asset(
-              'assets/images/dish.png',
-              width: 100,
-              fit: BoxFit.contain,
-            ),
-          ),
-          // コンテンツ
-          Column(
-            mainAxisSize: MainAxisSize.min,
+          Stack(
+            alignment: Alignment.center,
             children: [
-              // 賭け数表示 (自分はドラッグ可能)
-              if (!viewModel.isMyReady)
-                currentBet > 0 && !viewModel.hasPlacedBet
-                    ? Draggable<String>(
-                        data: 'fish_from_$catIndex',
-                        feedback: Material(
-                          color: Colors.transparent,
-                          child: _buildFishWithNumber('$currentBet', size: 64),
-                        ),
-                        childWhenDragging: Opacity(
-                          opacity: 0.3,
-                          child: _buildFishWithNumber('$currentBet', size: 48),
-                        ),
-                        child: GestureDetector(
-                          onTapDown: (details) {
-                            tapPosition = details.globalPosition;
-                          },
-                          onTap: () {
-                            if (currentBet > 0) {
-                              if (tapPosition != Offset.zero) {
-                                _flyFishAnimation(context, tapPosition, '1');
-                              }
-                              viewModel.updateBet(catIndex, currentBet - 1);
-                              SeService().play('button_buni.mp3');
-                            }
-                          },
-                          child: _buildFishWithNumber('$currentBet', size: 48),
-                        ),
+              // お皿画像
+              Container(
+                decoration: isTarget
+                    ? BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.yellow.withOpacity(0.6),
+                            blurRadius: 12,
+                            spreadRadius: 4,
+                          ),
+                        ],
                       )
-                    : _buildFishWithNumber('$currentBet', size: 48)
-              else
-                _buildFishWithNumber('$currentBet', size: 48),
-              const SizedBox(height: 2),
-              // アイテムスロット
-              _buildItemSlot(catIndex, placedItem, viewModel),
+                    : null,
+                child: Image.asset(
+                  'assets/images/dish.png',
+                  width: 100,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              // 魚の賭け数表示
+              Transform.translate(
+                offset: const Offset(0, -15),
+                child: (!viewModel.isMyReady)
+                    ? (currentBet > 0 && !viewModel.hasPlacedBet
+                          ? Draggable<String>(
+                              data: 'fish_from_$catIndex',
+                              feedback: Material(
+                                color: const Color.fromARGB(0, 141, 43, 43),
+                                child: _buildFishWithNumber(
+                                  '$currentBet',
+                                  size: 64,
+                                ),
+                              ),
+                              childWhenDragging: Opacity(
+                                opacity: 0.3,
+                                child: _buildFishWithNumber(
+                                  '$currentBet',
+                                  size: 48,
+                                ),
+                              ),
+                              child: GestureDetector(
+                                onTapDown: (details) {
+                                  tapPosition = details.globalPosition;
+                                },
+                                onTap: () {
+                                  if (currentBet > 0) {
+                                    if (tapPosition != Offset.zero) {
+                                      _flyFishAnimation(
+                                        context,
+                                        tapPosition,
+                                        '1',
+                                      );
+                                    }
+                                    viewModel.updateBet(
+                                      catIndex,
+                                      currentBet - 1,
+                                    );
+                                    SeService().play('button_buni.mp3');
+                                  }
+                                },
+                                child: _buildFishWithNumber(
+                                  '$currentBet',
+                                  size: 48,
+                                ),
+                              ),
+                            )
+                          : _buildFishWithNumber('$currentBet', size: 48))
+                    : _buildFishWithNumber('$currentBet', size: 48),
+              ),
             ],
           ),
+          const SizedBox(height: 8),
+          // アイテムスロット（お皿と被らないように下に配置）
+          _buildItemSlot(catIndex, placedItem, viewModel),
         ],
       );
     },
