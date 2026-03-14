@@ -62,7 +62,7 @@ class BettingPhaseView extends StatelessWidget {
             flex: isSmallScreen ? 6 : 5,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: List.generate(3, (index) {
                 final catIndex = index.toString();
                 final cards = room.currentRound?.toList() ?? [];
@@ -91,22 +91,27 @@ class BettingPhaseView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildCatCard(viewModel, card, isSmallScreen),
-                          SizedBox(height: isSmallScreen ? 2 : 8),
-                          _buildDishArea(
-                            viewModel: viewModel,
-                            catIndex: catIndex,
-                            currentBet: currentBet,
-                            placedItem: placedItem,
-                            isSmallScreen: isSmallScreen,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildCatCard(viewModel, card, isSmallScreen),
+                              SizedBox(height: isSmallScreen ? 4 : 8),
+                              _buildDishArea(
+                                viewModel: viewModel,
+                                catIndex: catIndex,
+                                currentBet: currentBet,
+                                placedItem: placedItem,
+                                isSmallScreen: isSmallScreen,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -524,8 +529,9 @@ Widget _buildCatCard(
   GameCard card,
   bool isSmallScreen,
 ) {
-  final avatarSize = isSmallScreen ? 50.0 : 100.0;
+  final avatarSize = isSmallScreen ? 60.0 : 100.0;
   return Container(
+    width: isSmallScreen ? 80 : 110,
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
       color: Colors.lightGreen.shade200,
@@ -553,7 +559,7 @@ Widget _buildCatCard(
           children: List.generate(
             card.baseCost,
             (_) =>
-                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 12 : 16)),
+                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 8 : 14)),
           ),
         ),
       ],
@@ -610,8 +616,8 @@ Widget _buildDishArea({
     builder: (context, candidateData, rejectedData) {
       final isTarget = candidateData.isNotEmpty;
       Offset tapPosition = Offset.zero;
-      final dishWidth = isSmallScreen ? 55.0 : 100.0;
-      final fishSize = isSmallScreen ? 32.0 : 48.0;
+      final dishWidth = isSmallScreen ? 60.0 : 100.0;
+      final fishSize = isSmallScreen ? 35.0 : 50.0;
 
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -839,17 +845,18 @@ Widget _buildItemSlot(
   GameScreenViewModel viewModel, {
   bool isSmallScreen = false,
 }) {
-  final slotSize = isSmallScreen ? 32.0 : 40.0;
-  final itemIconSize = isSmallScreen ? 26.0 : 32.0;
+  final slotSize = isSmallScreen ? 26.0 : 40.0;
+  final itemIconSize = isSmallScreen ? 20.0 : 32.0;
 
   return Container(
     width: slotSize,
     height: slotSize,
     decoration: BoxDecoration(
       color: Colors.white.withOpacity(0.5),
-      shape: BoxShape.circle,
+      shape: BoxShape.rectangle,
+      borderRadius: BorderRadius.circular(8),
       border: Border.all(
-        color: Colors.grey.shade400,
+        color: Colors.grey.shade400.withOpacity(0.5),
         style: placedItem == null ? BorderStyle.none : BorderStyle.solid,
       ),
     ),
