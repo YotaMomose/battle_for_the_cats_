@@ -232,144 +232,154 @@ class BettingPhaseView extends StatelessWidget {
     final iconSize = isSmallScreen ? 28.0 : 50.0;
     final fishIconSize = isSmallScreen ? 28.0 : 48.0;
 
-    final iconAndCardsRow = Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: iconSize,
-              height: iconSize,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                iconEmoji,
-                style: TextStyle(fontSize: isSmallScreen ? 16 : 28),
-              ),
-            ),
-            if (!isSmallScreen) const SizedBox(height: 4),
-            SizedBox(
-              width: isSmallScreen ? 40 : 60,
-              child: Text(
-                displayName,
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 8 : 10,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(width: isSmallScreen ? 4 : 12),
-        // 獲得カード一覧
-        Container(
-          width: isSmallScreen ? 180 : 240,
-          padding: EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: isSmallScreen ? 2 : 4,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final iconAndCardsRow = SizedBox(
+      width: isSmallScreen ? 280 : 380,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // アイコンとユーザー名
+          Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                '合計コスト：${inventory.totalCost}',
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 10 : 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
+              Container(
+                width: iconSize,
+                height: iconSize,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  iconEmoji,
+                  style: TextStyle(fontSize: isSmallScreen ? 16 : 28),
                 ),
               ),
-              if (!isSmallScreen) const SizedBox(height: 2),
+              if (!isSmallScreen) const SizedBox(height: 4),
               SizedBox(
-                height: isSmallScreen ? 30 : 60,
-                child: _buildWonCatsList(
-                  inventory,
-                  viewModel,
-                  isCompact: true,
-                  isSmallScreen: isSmallScreen,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-
-    final fishAndItemsRow = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(width: 4),
-        // 魚の数 (自分ならドラッグ＆ドロップ用)
-        if (!isOpponent)
-          _buildMyFishDraggableArea(fishCount, viewModel, isSmallScreen)
-        else
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: isSmallScreen ? 2 : 4,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.red.shade50,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.red.shade200),
-            ),
-            child: _buildFishWithNumber('$fishCount', size: fishIconSize),
-          ),
-        SizedBox(width: isSmallScreen ? 4 : 16),
-        // 所持アイテム一覧
-        Container(
-          width: isSmallScreen ? 160 : 200,
-          padding: EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: isSmallScreen ? 1 : 4,
-          ),
-          decoration: BoxDecoration(
-            color: isOpponent ? Colors.red.shade100 : Colors.blue.shade100,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isOpponent ? Colors.red.shade200 : Colors.blue.shade200,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (!isSmallScreen)
-                const Text(
-                  '所持アイテム',
+                width: isSmallScreen ? 40 : 60,
+                child: Text(
+                  displayName,
                   style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
+                    fontSize: isSmallScreen ? 8 : 10,
+                    fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-              isOpponent
-                  ? _buildOpponentItems(
-                      viewModel,
-                      iconSize: isSmallScreen ? 22 : 32,
-                    )
-                  : _buildMyItemsList(
-                      viewModel,
-                      isSmallScreen: isSmallScreen,
-                    ),
+              ),
             ],
           ),
-        ),
-      ],
+          SizedBox(width: isSmallScreen ? 4 : 12),
+          // 獲得カード一覧
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: isSmallScreen ? 2 : 4,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '合計コスト：${inventory.totalCost}',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 10 : 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  if (!isSmallScreen) const SizedBox(height: 2),
+                  SizedBox(
+                    height: isSmallScreen ? 45 : 60,
+                    child: _buildWonCatsList(
+                      inventory,
+                      viewModel,
+                      isCompact: true,
+                      isSmallScreen: isSmallScreen,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final fishAndItemsRow = SizedBox(
+      width: isSmallScreen ? 280 : 380,
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+          // 魚の数 (自分ならドラッグ＆ドロップ用)
+          if (!isOpponent)
+            _buildMyFishDraggableArea(fishCount, viewModel, isSmallScreen)
+          else
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: isSmallScreen ? 2 : 4,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: _buildFishWithNumber('$fishCount', size: fishIconSize),
+            ),
+          SizedBox(width: isSmallScreen ? 4 : 16),
+          // 所持アイテム一覧
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: isSmallScreen ? 1 : 4,
+              ),
+              decoration: BoxDecoration(
+                color: isOpponent ? Colors.red.shade100 : Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isOpponent
+                      ? Colors.red.shade200
+                      : Colors.blue.shade200,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isSmallScreen)
+                    const Text(
+                      '所持アイテム',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  isOpponent
+                      ? _buildOpponentItems(
+                          viewModel,
+                          iconSize: isSmallScreen ? 22 : 32,
+                        )
+                      : _buildMyItemsList(
+                          viewModel,
+                          isSmallScreen: isSmallScreen,
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
 
     final content = Container(

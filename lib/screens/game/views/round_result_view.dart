@@ -319,7 +319,7 @@ class RoundResultView extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
+        Flexible(
           child: Text(
             '$label: $bet',
             style: const TextStyle(fontSize: 10),
