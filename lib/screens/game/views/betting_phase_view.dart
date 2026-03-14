@@ -26,8 +26,8 @@ class BettingPhaseView extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: 12.0,
-        vertical: isSmallScreen ? 2.0 : 4.0,
+        horizontal: 8.0,
+        vertical: 0.0,
       ),
       child: Column(
         children: [
@@ -78,8 +78,8 @@ class BettingPhaseView extends StatelessWidget {
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4.0),
                     padding: EdgeInsets.symmetric(
-                      vertical: isSmallScreen ? 4.0 : 8.0,
-                      horizontal: 4.0,
+                      vertical: isSmallScreen ? 2.0 : 8.0,
+                      horizontal: 2.0,
                     ),
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(
@@ -389,8 +389,8 @@ class BettingPhaseView extends StatelessWidget {
 
     final content = Container(
       padding: EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: isSmallScreen ? 2.0 : 8.0,
+        horizontal: 6.0,
+        vertical: isSmallScreen ? 1.0 : 8.0,
       ),
       decoration: BoxDecoration(
         color: bgColor.withOpacity(0.7),
@@ -404,11 +404,11 @@ class BettingPhaseView extends StatelessWidget {
           children: [
             if (isOpponent) ...[
               iconAndCardsRow,
-              SizedBox(height: isSmallScreen ? 2 : 6),
+              SizedBox(height: isSmallScreen ? 1 : 6),
               fishAndItemsRow,
             ] else ...[
               fishAndItemsRow,
-              SizedBox(height: isSmallScreen ? 2 : 6),
+              SizedBox(height: isSmallScreen ? 1 : 6),
               iconAndCardsRow,
             ],
             if (statusLabel != null)

@@ -51,6 +51,8 @@ class _GameScreenContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
     final state = viewModel.uiState;
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 680;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -59,13 +61,14 @@ class _GameScreenContent extends StatelessWidget {
           child: Stack(
             children: [
               _buildBody(context, state, viewModel),
-              // 左上の退出ボタン（待機画面、最終結果画面以外で表示）
+              // 退出ボタン（待機画面、最終結果画面以外で表示）
               if (state is! FinishedState && state is! WaitingState)
                 Positioned(
-                  top: 16,
-                  left: 16,
+                  bottom: isSmallScreen ? 8 : 12,
+                  left: isSmallScreen ? 8 : 12,
                   child: _buildCircleButton(
                     icon: Icons.exit_to_app,
+                    isSmallScreen: isSmallScreen,
                     onPressed: () {
                       SeService().play('button_buni.mp3');
                       _showLeaveDialog(context, viewModel);
@@ -82,6 +85,7 @@ class _GameScreenContent extends StatelessWidget {
   Widget _buildCircleButton({
     required IconData icon,
     required VoidCallback onPressed,
+    bool isSmallScreen = false,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -96,6 +100,9 @@ class _GameScreenContent extends StatelessWidget {
         ],
       ),
       child: IconButton(
+        iconSize: isSmallScreen ? 20 : 24,
+        padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+        constraints: const BoxConstraints(),
         icon: Icon(icon, color: Colors.grey.shade700),
         onPressed: onPressed,
       ),
