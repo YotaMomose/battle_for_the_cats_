@@ -9,6 +9,11 @@ import '../game_screen_view_model.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
+final Map<ItemType, GlobalKey> _itemTypeKeys = {
+  ItemType.catTeaser: GlobalKey(),
+  ItemType.surpriseHorn: GlobalKey(),
+  ItemType.matatabi: GlobalKey(),
+};
 
 /// 賭けフェーズ画面
 class BettingPhaseView extends StatelessWidget {
@@ -25,10 +30,7 @@ class BettingPhaseView extends StatelessWidget {
     final isSmallScreen = screenSize.height < 680;
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: 0.0,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
       child: Column(
         children: [
           // ターン情報 (最上部)
@@ -75,45 +77,63 @@ class BettingPhaseView extends StatelessWidget {
                 final placedItem = viewModel.getPlacedItem(catIndex);
 
                 return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                    padding: EdgeInsets.symmetric(
-                      vertical: isSmallScreen ? 2.0 : 8.0,
-                      horizontal: 2.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(
-                        255,
-                        228,
-                        9,
-                        9,
-                      ).withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                        child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildCatCard(viewModel, card, isSmallScreen),
-                              SizedBox(height: isSmallScreen ? 4 : 8),
-                              _buildDishArea(
-                                viewModel: viewModel,
-                                catIndex: catIndex,
-                                currentBet: currentBet,
-                                placedItem: placedItem,
-                                isSmallScreen: isSmallScreen,
-                              ),
-                            ],
+                  child: DragTarget<Object>(
+                    onWillAccept: (data) => !viewModel.hasPlacedBet,
+                    onAccept: (data) {
+                      _handleDrop(viewModel, catIndex, data, currentBet);
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      final isTarget = candidateData.isNotEmpty;
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                        padding: EdgeInsets.symmetric(
+                          vertical: isSmallScreen ? 2.0 : 8.0,
+                          horizontal: 2.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(
+                            255,
+                            221,
+                            153,
+                            5,
+                          ).withOpacity(isTarget ? 0.9 : 0.7),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isTarget
+                                ? Colors.yellow
+                                : Colors.grey.shade300,
+                            width: isTarget ? 3 : 1,
                           ),
                         ),
-                      ),
-                    ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2.0,
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildCatCard(viewModel, card, isSmallScreen),
+                                  SizedBox(height: isSmallScreen ? 4 : 8),
+                                  _buildDishArea(
+                                    context,
+                                    viewModel: viewModel,
+                                    catIndex: catIndex,
+                                    currentBet: currentBet,
+                                    placedItem: placedItem,
+                                    isSmallScreen: isSmallScreen,
+                                    isTarget: isTarget,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               }),
@@ -233,7 +253,9 @@ class BettingPhaseView extends StatelessWidget {
     bool isReady = false,
     bool isSmallScreen = false,
   }) {
-    final bgColor = isOpponent ? Colors.red.shade50 : Colors.blue.shade50;
+    final bgColor = isOpponent
+        ? const Color.fromARGB(255, 245, 143, 158)
+        : const Color.fromARGB(255, 143, 208, 245);
     final iconSize = isSmallScreen ? 28.0 : 50.0;
     final fishIconSize = isSmallScreen ? 28.0 : 48.0;
 
@@ -559,7 +581,7 @@ Widget _buildCatCard(
           children: List.generate(
             card.baseCost,
             (_) =>
-                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 8 : 14)),
+                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 12 : 16)),
           ),
         ),
       ],
@@ -568,147 +590,142 @@ Widget _buildCatCard(
 }
 
 /// お皿エリア
-Widget _buildDishArea({
+Widget _buildDishArea(
+  BuildContext context, {
   required GameScreenViewModel viewModel,
   required String catIndex,
   required int currentBet,
   required ItemType? placedItem,
   bool isSmallScreen = false,
+  bool isTarget = false,
 }) {
-  return DragTarget<Object>(
-    onWillAccept: (data) => !viewModel.hasPlacedBet,
-    onAccept: (data) {
-      if (data == 'fish_from_hand') {
-        // 手元からの魚
-        final totalFish = viewModel.playerData?.myFishCount ?? 0;
-        if (viewModel.totalBet < totalFish) {
-          viewModel.updateBet(catIndex, currentBet + 1);
-          SeService().play('button_buni.mp3');
-        }
-      } else if (data is String && data.startsWith('fish_from_')) {
-        // 他のお皿からの魚
-        final fromIndex = data.replaceFirst('fish_from_', '');
-        if (fromIndex != catIndex && fromIndex != 'hand') {
-          final fromBet = viewModel.bets[fromIndex] ?? 0;
-          if (fromBet > 0) {
-            viewModel.updateBet(fromIndex, fromBet - 1);
-            viewModel.updateBet(catIndex, currentBet + 1);
-            SeService().play('button_buni.mp3');
-          }
-        }
-      } else if (data is ItemType) {
-        // 手元からのアイテム
-        viewModel.updateItemPlacement(catIndex, data);
-        SeService().play('button_buni.mp3');
-      } else if (data is String && data.startsWith('item_from_')) {
-        // 他のお皿からのアイテム
-        final fromIndex = data.replaceFirst('item_from_', '');
-        if (fromIndex != catIndex) {
-          final item = viewModel.getPlacedItem(fromIndex);
-          if (item != null) {
-            viewModel.updateItemPlacement(fromIndex, null);
-            viewModel.updateItemPlacement(catIndex, item);
-            SeService().play('button_buni.mp3');
-          }
-        }
-      }
-    },
-    builder: (context, candidateData, rejectedData) {
-      final isTarget = candidateData.isNotEmpty;
-      Offset tapPosition = Offset.zero;
-      final dishWidth = isSmallScreen ? 60.0 : 100.0;
-      final fishSize = isSmallScreen ? 35.0 : 50.0;
+  Offset tapPosition = Offset.zero;
+  final dishWidth = isSmallScreen ? 60.0 : 100.0;
+  final fishSize = isSmallScreen ? 35.0 : 50.0;
 
-      return Column(
-        mainAxisSize: MainAxisSize.min,
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Stack(
+        alignment: Alignment.center,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // お皿画像
-              Container(
-                decoration: isTarget
-                    ? BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.yellow.withOpacity(0.6),
-                            blurRadius: 12,
-                            spreadRadius: 4,
-                          ),
-                        ],
-                      )
-                    : null,
-                child: Image.asset(
-                  'assets/images/dish.png',
-                  width: dishWidth,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              // 魚の賭け数表示
-              Transform.translate(
-                offset: Offset(0, isSmallScreen ? -10 : -15),
-                child: (!viewModel.isMyReady)
-                    ? (currentBet > 0 && !viewModel.hasPlacedBet
-                          ? Draggable<String>(
-                              data: 'fish_from_$catIndex',
-                              feedback: Material(
-                                color: const Color.fromARGB(0, 141, 43, 43),
-                                child: _buildFishWithNumber(
-                                  '$currentBet',
-                                  size: fishSize * 1.3,
-                                ),
-                              ),
-                              childWhenDragging: Opacity(
-                                opacity: 0.3,
-                                child: _buildFishWithNumber(
-                                  '$currentBet',
-                                  size: fishSize,
-                                ),
-                              ),
-                              child: GestureDetector(
-                                onTapDown: (details) {
-                                  tapPosition = details.globalPosition;
-                                },
-                                onTap: () {
-                                  if (currentBet > 0) {
-                                    if (tapPosition != Offset.zero) {
-                                      _flyFishAnimation(
-                                        context,
-                                        tapPosition,
-                                        '1',
-                                      );
-                                    }
-                                    viewModel.updateBet(
-                                      catIndex,
-                                      currentBet - 1,
-                                    );
-                                    SeService().play('button_buni.mp3');
-                                  }
-                                },
-                                child: _buildFishWithNumber(
-                                  '$currentBet',
-                                  size: fishSize,
-                                ),
-                              ),
-                            )
-                          : _buildFishWithNumber('$currentBet', size: fishSize))
-                    : _buildFishWithNumber('$currentBet', size: fishSize),
-              ),
-            ],
+          // お皿画像
+          Container(
+            decoration: isTarget
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.yellow.withOpacity(0.6),
+                        blurRadius: 12,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  )
+                : null,
+            child: Image.asset(
+              'assets/images/dish.png',
+              width: dishWidth,
+              fit: BoxFit.contain,
+            ),
           ),
-          SizedBox(height: isSmallScreen ? 4 : 8),
-          // アイテムスロット（お皿と被らないように下に配置）
-          _buildItemSlot(
-            catIndex,
-            placedItem,
-            viewModel,
-            isSmallScreen: isSmallScreen,
+          // 魚の賭け数表示
+          Transform.translate(
+            offset: Offset(0, isSmallScreen ? -10 : -15),
+            child: (!viewModel.isMyReady)
+                ? (currentBet > 0 && !viewModel.hasPlacedBet
+                      ? Draggable<String>(
+                          data: 'fish_from_$catIndex',
+                          feedback: Material(
+                            color: const Color.fromARGB(0, 141, 43, 43),
+                            child: _buildFishWithNumber(
+                              '$currentBet',
+                              size: fishSize * 1.3,
+                            ),
+                          ),
+                          childWhenDragging: Opacity(
+                            opacity: 0.3,
+                            child: _buildFishWithNumber(
+                              '$currentBet',
+                              size: fishSize,
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTapDown: (details) {
+                              tapPosition = details.globalPosition;
+                            },
+                            onTap: () {
+                              if (currentBet > 0) {
+                                if (tapPosition != Offset.zero) {
+                                  _flyFishAnimation(context, tapPosition, '1');
+                                }
+                                viewModel.updateBet(catIndex, currentBet - 1);
+                                SeService().play('button_buni.mp3');
+                              }
+                            },
+                            child: _buildFishWithNumber(
+                              '$currentBet',
+                              size: fishSize,
+                            ),
+                          ),
+                        )
+                      : _buildFishWithNumber('$currentBet', size: fishSize))
+                : _buildFishWithNumber('$currentBet', size: fishSize),
           ),
         ],
-      );
-    },
+      ),
+      SizedBox(height: isSmallScreen ? 4 : 8),
+      // アイテムスロット（お皿と被らないように下に配置）
+      _buildItemSlot(
+        catIndex,
+        placedItem,
+        viewModel,
+        isSmallScreen: isSmallScreen,
+      ),
+    ],
   );
+}
+
+void _handleDrop(
+  GameScreenViewModel viewModel,
+  String catIndex,
+  Object? data,
+  int currentBet,
+) {
+  if (data == 'fish_from_hand') {
+    // 手元からの魚
+    final totalFish = viewModel.playerData?.myFishCount ?? 0;
+    if (viewModel.totalBet < totalFish) {
+      viewModel.updateBet(catIndex, currentBet + 1);
+      SeService().play('button_buni.mp3');
+    }
+  } else if (data is String && data.startsWith('fish_from_')) {
+    // 他のお皿からの魚
+    final fromIndex = data.replaceFirst('fish_from_', '');
+    if (fromIndex != catIndex && fromIndex != 'hand') {
+      final fromBet = viewModel.bets[fromIndex] ?? 0;
+      if (fromBet > 0) {
+        viewModel.updateBet(fromIndex, fromBet - 1);
+        viewModel.updateBet(catIndex, currentBet + 1);
+        SeService().play('button_buni.mp3');
+      }
+    }
+  } else if (data is ItemType) {
+    // 手元からのアイテム
+    viewModel.updateItemPlacement(catIndex, data);
+    SeService().play('button_buni.mp3');
+  } else if (data is String && data.startsWith('item_from_')) {
+    // 他のお皿からのアイテム
+    final fromIndex = data.replaceFirst('item_from_', '');
+    if (fromIndex != catIndex) {
+      final item = viewModel.getPlacedItem(fromIndex);
+      if (item != null) {
+        viewModel.updateItemPlacement(fromIndex, null);
+        viewModel.updateItemPlacement(catIndex, item);
+        SeService().play('button_buni.mp3');
+      }
+    }
+  }
 }
 
 /// 自分のアイテムリスト
@@ -789,17 +806,27 @@ Widget _buildDraggableItem(
           opacity: 0.3,
           child: _buildItemIcon(type, isPlaced: true, size: itemSize),
         )
-      : Draggable<ItemType>(
-          data: type,
-          feedback: Material(
-            color: Colors.transparent,
-            child: _buildItemIcon(type, isFeedback: true, size: itemSize * 1.2),
-          ),
-          childWhenDragging: Opacity(
-            opacity: 0.5,
-            child: _buildItemIcon(type, size: itemSize),
-          ),
-          child: _buildItemIcon(type, size: itemSize),
+      : IndexedStack(
+          index: 0,
+          children: [
+            Draggable<ItemType>(
+              key: _itemTypeKeys[type],
+              data: type,
+              feedback: Material(
+                color: Colors.transparent,
+                child: _buildItemIcon(
+                  type,
+                  isFeedback: true,
+                  size: itemSize * 1.2,
+                ),
+              ),
+              childWhenDragging: Opacity(
+                opacity: 0.5,
+                child: _buildItemIcon(type, size: itemSize),
+              ),
+              child: _buildItemIcon(type, size: itemSize),
+            ),
+          ],
         );
 }
 
@@ -1060,11 +1087,20 @@ void _flyFishAnimation(BuildContext context, Offset start, String number) {
 }
 
 void _flyItemAnimation(BuildContext context, Offset start, ItemType type) {
-  final RenderBox? handBox =
-      _myItemsKey.currentContext?.findRenderObject() as RenderBox?;
-  if (handBox == null) return;
+  final targetKey = _itemTypeKeys[type];
+  final RenderBox? itemBox =
+      targetKey?.currentContext?.findRenderObject() as RenderBox?;
 
-  final Offset end = handBox.localToGlobal(handBox.size.center(Offset.zero));
+  // 指定のアイテムが見つからない場合は従来の _myItemsKey をフォールバックに使用
+  final RenderBox? fallBackBox =
+      _myItemsKey.currentContext?.findRenderObject() as RenderBox?;
+
+  final targetRenderBox = itemBox ?? fallBackBox;
+  if (targetRenderBox == null) return;
+
+  final Offset end = targetRenderBox.localToGlobal(
+    targetRenderBox.size.center(Offset.zero),
+  );
 
   final overlay = Overlay.of(context);
   late OverlayEntry entry;
