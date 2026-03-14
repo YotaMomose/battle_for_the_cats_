@@ -29,213 +29,538 @@ class BettingPhaseView extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.height < 680;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
-      child: Column(
-        children: [
-          // ターン情報 (最上部)
-          Text(
-            'ターン ${room.currentTurn}',
-            style: TextStyle(
-              fontSize: isSmallScreen ? 12 : 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    return Stack(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
+          child: Column(
+            children: [
+              // ターン情報 (最上部)
+              Text(
+                'ターン ${room.currentTurn}',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-          // 対戦相手セクション
-          Expanded(
-            flex: isSmallScreen ? 4 : 4,
-            child: _buildPlayerSection(
-              context,
-              isOpponent: true,
-              displayName: viewModel.opponentDisplayName,
-              iconEmoji: viewModel.opponentIconEmoji,
-              fishCount: playerData.opponentFishCount,
-              inventory: playerData.opponentCatsWon,
-              viewModel: viewModel,
-              statusLabel: viewModel.opponentReadyStatusLabel,
-              statusColor: viewModel.opponentReadyStatusColor,
-              isSmallScreen: isSmallScreen,
-            ),
-          ),
+              // 対戦相手セクション
+              Expanded(
+                flex: isSmallScreen ? 4 : 4,
+                child: _buildPlayerSection(
+                  context,
+                  isOpponent: true,
+                  displayName: viewModel.opponentDisplayName,
+                  iconEmoji: viewModel.opponentIconEmoji,
+                  fishCount: playerData.opponentFishCount,
+                  inventory: playerData.opponentCatsWon,
+                  viewModel: viewModel,
+                  statusLabel: viewModel.opponentReadyStatusLabel,
+                  statusColor: viewModel.opponentReadyStatusColor,
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
 
-          // 3匹の猫カードとお皿のエリア (中央)
-          Expanded(
-            flex: isSmallScreen ? 6 : 5,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List.generate(3, (index) {
-                final catIndex = index.toString();
-                final cards = room.currentRound?.toList() ?? [];
-                if (cards.isEmpty || index >= cards.length) {
-                  return const Expanded(child: SizedBox());
-                }
+              // 3匹の猫カードとお皿のエリア (中央)
+              Expanded(
+                flex: isSmallScreen ? 6 : 5,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: List.generate(3, (index) {
+                    final catIndex = index.toString();
+                    final cards = room.currentRound?.toList() ?? [];
+                    if (cards.isEmpty || index >= cards.length) {
+                      return const Expanded(child: SizedBox());
+                    }
 
-                final card = cards[index];
-                final currentBet = viewModel.bets[catIndex] ?? 0;
-                final placedItem = viewModel.getPlacedItem(catIndex);
+                    final card = cards[index];
+                    final currentBet = viewModel.bets[catIndex] ?? 0;
+                    final placedItem = viewModel.getPlacedItem(catIndex);
 
-                return Expanded(
-                  child: DragTarget<Object>(
-                    onWillAccept: (data) => !viewModel.hasPlacedBet,
-                    onAccept: (data) {
-                      _handleDrop(viewModel, catIndex, data, currentBet);
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      final isTarget = candidateData.isNotEmpty;
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                        padding: EdgeInsets.symmetric(
-                          vertical: isSmallScreen ? 2.0 : 8.0,
-                          horizontal: 2.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(
-                            255,
-                            221,
-                            153,
-                            5,
-                          ).withOpacity(isTarget ? 0.9 : 0.7),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isTarget
-                                ? Colors.yellow
-                                : Colors.grey.shade300,
-                            width: isTarget ? 3 : 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
+                    return Expanded(
+                      child: DragTarget<Object>(
+                        onWillAccept: (data) => !viewModel.hasPlacedBet,
+                        onAccept: (data) {
+                          _handleDrop(viewModel, catIndex, data, currentBet);
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          final isTarget = candidateData.isNotEmpty;
+                          return Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isSmallScreen ? 2.0 : 8.0,
                               horizontal: 2.0,
                             ),
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildCatCard(viewModel, card, isSmallScreen),
-                                  SizedBox(height: isSmallScreen ? 4 : 8),
-                                  _buildDishArea(
-                                    context,
-                                    viewModel: viewModel,
-                                    catIndex: catIndex,
-                                    currentBet: currentBet,
-                                    placedItem: placedItem,
-                                    isSmallScreen: isSmallScreen,
-                                    isTarget: isTarget,
-                                  ),
-                                ],
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(
+                                255,
+                                221,
+                                153,
+                                5,
+                              ).withOpacity(isTarget ? 0.9 : 0.7),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isTarget
+                                    ? Colors.yellow
+                                    : Colors.grey.shade300,
+                                width: isTarget ? 3 : 1,
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
-            ),
-          ),
-
-          // 自分セクション
-          Expanded(
-            flex: isSmallScreen ? 4 : 4,
-            child: _buildPlayerSection(
-              context,
-              isOpponent: false,
-              displayName: viewModel.myDisplayName,
-              iconEmoji: viewModel.myIconEmoji,
-              fishCount: playerData.myFishCount,
-              inventory: playerData.myCatsWon,
-              viewModel: viewModel,
-              isReady: viewModel.isMyReady,
-              isSmallScreen: isSmallScreen,
-            ),
-          ),
-
-          // 確定ボタン
-          if (!viewModel.isMyReady)
-            Padding(
-              padding: EdgeInsets.only(
-                top: isSmallScreen ? 2.0 : 4.0,
-                bottom: isSmallScreen ? 2.0 : 4.0,
-              ),
-              child: SizedBox(
-                height: isSmallScreen ? 36 : 44,
-                width: isSmallScreen ? 140 : 160,
-                child: ElevatedButton(
-                  onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
-                      ? null
-                      : () {
-                          SeService().play('button_buni.mp3');
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              alignment: Alignment.bottomCenter,
-                              title: const Text(
-                                '確定しますか？',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              content: const Text(
-                                'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text(
-                                    'キャンセル',
-                                    style: TextStyle(color: Colors.grey),
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 2.0,
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _buildCatCard(
+                                        viewModel,
+                                        card,
+                                        isSmallScreen,
+                                      ),
+                                      SizedBox(height: isSmallScreen ? 4 : 8),
+                                      _buildDishArea(
+                                        context,
+                                        viewModel: viewModel,
+                                        catIndex: catIndex,
+                                        currentBet: currentBet,
+                                        placedItem: placedItem,
+                                        isSmallScreen: isSmallScreen,
+                                        isTarget: isTarget,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.pink.shade400,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  onPressed: () {
-                                    SeService().play('button_buni.mp3');
-                                    Navigator.of(context).pop();
-                                    viewModel.placeBets();
-                                  },
-                                  child: const Text(
-                                    '確定する',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }),
+                ),
+              ),
+
+              // 自分セクション
+              Expanded(
+                flex: isSmallScreen ? 4 : 4,
+                child: _buildPlayerSection(
+                  context,
+                  isOpponent: false,
+                  displayName: viewModel.myDisplayName,
+                  iconEmoji: viewModel.myIconEmoji,
+                  fishCount: playerData.myFishCount,
+                  inventory: playerData.myCatsWon,
+                  viewModel: viewModel,
+                  isReady: viewModel.isMyReady,
+                  isSmallScreen: isSmallScreen,
+                ),
+              ),
+
+              // 確定ボタン
+              if (!viewModel.isMyReady)
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: isSmallScreen ? 2.0 : 4.0,
+                    bottom: isSmallScreen ? 2.0 : 4.0,
+                  ),
+                  child: SizedBox(
+                    height: isSmallScreen ? 36 : 44,
+                    width: isSmallScreen ? 140 : 160,
+                    child: ElevatedButton(
+                      onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
+                          ? null
+                          : () {
+                              SeService().play('button_buni.mp3');
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  alignment: Alignment.bottomCenter,
+                                  title: const Text(
+                                    '確定しますか？',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  content: const Text(
+                                    'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text(
+                                        'キャンセル',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.pink.shade400,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        SeService().play('button_buni.mp3');
+                                        Navigator.of(context).pop();
+                                        viewModel.placeBets();
+                                      },
+                                      child: const Text(
+                                        '確定する',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink.shade400,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                  ),
-                  child: Text(
-                    viewModel.confirmBetsButtonLabel,
-                    style: TextStyle(
-                      fontSize: isSmallScreen ? 14 : 16,
-                      fontWeight: FontWeight.bold,
+                              );
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink.shade400,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                      ),
+                      child: Text(
+                        viewModel.confirmBetsButtonLabel,
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 14 : 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
+            ],
+          ),
+        ),
+        // ヘルプボタン (右下)
+        Positioned(
+          bottom: 12,
+          right: 4,
+          child: _buildHelpButton(context, isSmallScreen),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHelpButton(BuildContext context, bool isSmallScreen) {
+    return GestureDetector(
+      onTap: () {
+        SeService().play('button_buni.mp3');
+        _showGameGuideDialog(context, isSmallScreen);
+      },
+      child: Container(
+        padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: Colors.orange.shade200, width: 2),
+        ),
+        child: Icon(
+          Icons.question_mark,
+          size: isSmallScreen ? 14 : 20,
+          color: Colors.orange.shade700,
+        ),
+      ),
+    );
+  }
+
+  void _showGameGuideDialog(BuildContext context, bool isSmallScreen) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        int selectedTab = 0; // 0: アイテム, 1: キャラクター
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              contentPadding: EdgeInsets.zero,
+              titlePadding: EdgeInsets.zero,
+              title: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ヘッダー
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.question_mark, size: 18),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'カード・アイテム説明',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            '× 閉じる',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // タブ
+                  Row(
+                    children: [
+                      _buildTabButton(
+                        text: 'アイテム',
+                        isSelected: selectedTab == 0,
+                        onTap: () => setState(() => selectedTab = 0),
+                      ),
+                      _buildTabButton(
+                        text: 'キャラクター',
+                        isSelected: selectedTab == 1,
+                        onTap: () => setState(() => selectedTab = 1),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 1),
+                ],
+              ),
+              content: SizedBox(
+                width: isSmallScreen ? 320 : 380,
+                height: isSmallScreen ? 400 : 550,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: selectedTab == 0
+                      ? _buildGuideList([
+                          _GuideItem(
+                            'ねこじゃらし',
+                            'assets/images/nekojarashi.png',
+                            '相手が魚を置いていなければ、その猫をタダで獲得できる。読み勝ちの一手。',
+                            tag: '攻め',
+                            tagColor: Colors.red.shade50,
+                            tagTextColor: Colors.red.shade400,
+                          ),
+                          _GuideItem(
+                            'びっくりホーン',
+                            'assets/images/horn.png',
+                            '両者が置いた魚をすべて無効化。お互い消耗したくないときの切り札。',
+                            tag: '妨害',
+                            tagColor: Colors.blue.shade50,
+                            tagTextColor: Colors.blue.shade400,
+                          ),
+                          _GuideItem(
+                            'またたび',
+                            'assets/images/matatabi.png',
+                            'その猫を獲得するために必要な魚の数が2倍になる。狙われている猫を守るのに使える。',
+                            tag: 'トリック',
+                            tagColor: Colors.purple.shade50,
+                            tagTextColor: Colors.purple.shade400,
+                          ),
+                        ])
+                      : _buildGuideList([
+                          _GuideItem(
+                            '茶トラねこ・白ねこ・黒ねこ',
+                            null,
+                            '3種類または同じ色3匹集めると勝利！基本となるカード。',
+                            imagePaths: [
+                              'assets/images/tyatoranekopng.png',
+                              'assets/images/sironeko.png',
+                              'assets/images/kuroneko.png',
+                            ],
+                            tag: '勝利条件',
+                            tagColor: Colors.orange.shade50,
+                            tagTextColor: Colors.orange.shade600,
+                          ),
+                          _GuideItem(
+                            '漁師にゃんこ',
+                            'assets/images/ryousi.png',
+                            '仲間にした後のターンから、サイコロの出目に追加で魚がもらえる。',
+                            tag: '特殊効果',
+                            tagColor: Colors.orange.shade50,
+                            tagTextColor: Colors.orange.shade600,
+                          ),
+                          _GuideItem(
+                            '番犬',
+                            'assets/images/inu.png',
+                            '相手が持っている猫をランダムで1枚逃がしてしまう。選ぶことはできない。',
+                            tag: '特殊効果',
+                            tagColor: Colors.orange.shade50,
+                            tagTextColor: Colors.orange.shade600,
+                          ),
+                          _GuideItem(
+                            'アイテム屋',
+                            'assets/images/shop.png',
+                            '仲間にした時、使ったアイテムを2つランダムで復活させる。',
+                            tag: '特殊効果',
+                            tagColor: Colors.orange.shade50,
+                            tagTextColor: Colors.orange.shade600,
+                          ),
+                        ]),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTabButton({
+    required String text,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.black87 : Colors.grey,
+                ),
               ),
             ),
-        ],
+            Container(
+              height: 2,
+              color: isSelected ? Colors.black87 : Colors.transparent,
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildGuideList(List<_GuideItem> items) {
+    return Column(
+      children: items.map((item) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // アイコン画像
+              Container(
+                width: 50,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7EA),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: item.imagePaths != null && item.imagePaths!.isNotEmpty
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: item.imagePaths!
+                            .map(
+                              (path) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 2,
+                                ),
+                                child: Image.asset(
+                                  path,
+                                  height: 32,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      )
+                    : Container(
+                        height: 40,
+                        alignment: Alignment.center,
+                        child: item.imagePath != null
+                            ? Image.asset(item.imagePath!, fit: BoxFit.contain)
+                            : const Icon(Icons.help_outline),
+                      ),
+              ),
+              const SizedBox(width: 12),
+              // 説明テキスト
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                        height: 1.4,
+                      ),
+                    ),
+                    if (item.tag != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: item.tagColor ?? Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          item.tag!,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: item.tagTextColor ?? Colors.grey.shade600,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -599,9 +924,9 @@ Widget _buildDishArea(
   bool isSmallScreen = false,
   bool isTarget = false,
 }) {
-  Offset tapPosition = Offset.zero;
   final dishWidth = isSmallScreen ? 60.0 : 100.0;
   final fishSize = isSmallScreen ? 35.0 : 50.0;
+  final dishKey = GlobalObjectKey('dish_fish_$catIndex');
 
   return Column(
     mainAxisSize: MainAxisSize.min,
@@ -651,13 +976,22 @@ Widget _buildDishArea(
                             ),
                           ),
                           child: GestureDetector(
-                            onTapDown: (details) {
-                              tapPosition = details.globalPosition;
-                            },
+                            key: dishKey,
                             onTap: () {
                               if (currentBet > 0) {
-                                if (tapPosition != Offset.zero) {
-                                  _flyFishAnimation(context, tapPosition, '1');
+                                final RenderBox? box =
+                                    dishKey.currentContext?.findRenderObject()
+                                        as RenderBox?;
+                                if (box != null) {
+                                  final center = box.localToGlobal(
+                                    box.size.center(Offset.zero),
+                                  );
+                                  _flyFishAnimation(
+                                    context,
+                                    center,
+                                    '1',
+                                    size: fishSize,
+                                  );
                                 }
                                 viewModel.updateBet(catIndex, currentBet - 1);
                                 SeService().play('button_buni.mp3');
@@ -874,6 +1208,7 @@ Widget _buildItemSlot(
 }) {
   final slotSize = isSmallScreen ? 26.0 : 40.0;
   final itemIconSize = isSmallScreen ? 20.0 : 32.0;
+  final slotKey = GlobalObjectKey('item_slot_$catIndex');
 
   return Container(
     width: slotSize,
@@ -892,7 +1227,6 @@ Widget _buildItemSlot(
           ? (!viewModel.hasPlacedBet
                 ? Builder(
                     builder: (context) {
-                      Offset tapPosition = Offset.zero;
                       return Draggable<String>(
                         data: 'item_from_$catIndex',
                         feedback: Material(
@@ -910,15 +1244,20 @@ Widget _buildItemSlot(
                           ),
                         ),
                         child: GestureDetector(
-                          onTapDown: (details) {
-                            tapPosition = details.globalPosition;
-                          },
+                          key: slotKey,
                           onTap: () {
-                            if (tapPosition != Offset.zero) {
+                            final RenderBox? box =
+                                slotKey.currentContext?.findRenderObject()
+                                    as RenderBox?;
+                            if (box != null) {
+                              final center = box.localToGlobal(
+                                box.size.center(Offset.zero),
+                              );
                               _flyItemAnimation(
                                 context,
-                                tapPosition,
+                                center,
                                 placedItem,
+                                size: itemIconSize,
                               );
                             }
                             viewModel.updateItemPlacement(catIndex, null);
@@ -1053,7 +1392,12 @@ Widget _buildCatAvatar(
   );
 }
 
-void _flyFishAnimation(BuildContext context, Offset start, String number) {
+void _flyFishAnimation(
+  BuildContext context,
+  Offset start,
+  String number, {
+  double size = 48,
+}) {
   final RenderBox? handBox =
       _myHandFishKey.currentContext?.findRenderObject() as RenderBox?;
   if (handBox == null) return;
@@ -1075,9 +1419,14 @@ void _flyFishAnimation(BuildContext context, Offset start, String number) {
         builder: (context, value, child) {
           final pos = Offset.lerp(start, end, value)!;
           return Positioned(
-            left: pos.dx - 24, // 魚アイコンの半分のサイズで中心を合わせる
-            top: pos.dy - 24,
-            child: IgnorePointer(child: _buildFishWithNumber(number, size: 48)),
+            left: pos.dx,
+            top: pos.dy,
+            child: FractionalTranslation(
+              translation: const Offset(-0.5, -0.5),
+              child: IgnorePointer(
+                child: _buildFishWithNumber(number, size: size),
+              ),
+            ),
           );
         },
       );
@@ -1086,7 +1435,12 @@ void _flyFishAnimation(BuildContext context, Offset start, String number) {
   overlay.insert(entry);
 }
 
-void _flyItemAnimation(BuildContext context, Offset start, ItemType type) {
+void _flyItemAnimation(
+  BuildContext context,
+  Offset start,
+  ItemType type, {
+  double size = 32,
+}) {
   final targetKey = _itemTypeKeys[type];
   final RenderBox? itemBox =
       targetKey?.currentContext?.findRenderObject() as RenderBox?;
@@ -1117,9 +1471,12 @@ void _flyItemAnimation(BuildContext context, Offset start, ItemType type) {
         builder: (context, value, child) {
           final pos = Offset.lerp(start, end, value)!;
           return Positioned(
-            left: pos.dx - 16, // アイコンサイズ(32)の半分
-            top: pos.dy - 16,
-            child: IgnorePointer(child: _buildItemImage(type, size: 32)),
+            left: pos.dx,
+            top: pos.dy,
+            child: FractionalTranslation(
+              translation: const Offset(-0.5, -0.5),
+              child: IgnorePointer(child: _buildItemImage(type, size: size)),
+            ),
           );
         },
       );
@@ -1148,4 +1505,26 @@ Widget _buildFishWithNumber(String number, {double size = 48}) {
       ),
     ],
   );
+}
+
+class _GuideItem {
+  final String name;
+  final String? imagePath;
+  final List<String>? imagePaths;
+  final String description;
+  final IconData? fallbackIcon;
+  final String? tag;
+  final Color? tagColor;
+  final Color? tagTextColor;
+
+  _GuideItem(
+    this.name,
+    this.imagePath,
+    this.description, {
+    this.imagePaths,
+    this.fallbackIcon,
+    this.tag,
+    this.tagColor,
+    this.tagTextColor,
+  });
 }

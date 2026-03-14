@@ -2,7 +2,6 @@ import '../player.dart';
 import 'card_type.dart';
 import 'card_effect.dart';
 import 'regular_cat.dart';
-import 'boss_cat.dart';
 import 'item_shop.dart';
 import 'fisherman.dart';
 import 'dog.dart';
@@ -47,9 +46,6 @@ abstract interface class GameCard {
     }
     if (type == CardType.itemShop.value) {
       return ItemShop.fromMap(map);
-    }
-    if (type == CardType.bossKitty.value) {
-      return BossCat.fromMap(map);
     }
     if (type == CardType.fisherman.value) {
       return Fisherman.fromMap(map);

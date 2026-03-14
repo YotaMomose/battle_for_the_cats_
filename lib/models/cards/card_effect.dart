@@ -4,8 +4,7 @@ enum CardEffect {
   dogEffect('dog', '相手の猫を逃がす'),
   fattyEffect('fatty', '登場時、手札の魚全て破棄'),
   fishermanEffect('fisherman', '毎ターン魚+1'),
-  itemShopEffect('item_shop', 'アイテム1つ復活'),
-  bossEffect('boss', 'ボスの複合効果');
+  itemShopEffect('item_shop', 'アイテム1つ復活');
 
   final String value;
   final String description;

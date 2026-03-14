@@ -4,8 +4,7 @@ enum CardType {
   dog('dog', '犬'),
   fatCat('fat_cat', '太っちょねこ'),
   fisherman('fisherman', '漁師'),
-  itemShop('item_shop', 'アイテム屋'),
-  bossKitty('boss_kitty', 'ボスねこ');
+  itemShop('item_shop', 'アイテム屋');
 
   final String value;
   final String displayName;

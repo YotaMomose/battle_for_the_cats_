@@ -48,7 +48,7 @@ class CatInventory {
 
   // ===== 勝利条件に関する問い合わせ =====
 
-  /// ボス猫を通常猫に正規化したうえでの種類別カウント
+  /// 通常猫の種類別カウント
   Map<String, int> get normalizedCounts {
     final allCounts = countByName();
     final counts = <String, int>{};
@@ -62,7 +62,7 @@ class CatInventory {
     return counts;
   }
 
-  /// 勝利条件に有効な猫の合計数（ボス猫含む、アイテム屋等は除外）
+  /// 勝利条件に有効な猫の合計数（アイテム屋等は除外）
   int get totalValidCatCount =>
       normalizedCounts.values.fold(0, (sum, count) => sum + count);
 
@@ -107,11 +107,8 @@ class CatInventory {
     return result;
   }
 
-  /// ボスねこの名前を対応する通常ねこの名前に正規化する
+  /// 猫の名前を正規化する（将来的な拡張用）
   String _getNormalizedName(String name) {
-    for (final type in GameConstants.catTypes) {
-      if (name == 'ボス$type') return type;
-    }
     return name;
   }
 

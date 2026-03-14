@@ -12,9 +12,6 @@ class GameConstants {
   static const String catOrange = '茶トラねこ';
   static const String catWhite = '白ねこ';
   static const String catBlack = '黒ねこ';
-  static const String bossCatOrange = 'ボス茶トラねこ';
-  static const String bossCatWhite = 'ボス白ねこ';
-  static const String bossCatBlack = 'ボス黒ねこ';
 
   // 特殊カード名
   static const String fisherman = '漁師';
@@ -26,11 +23,6 @@ class GameConstants {
   static const int maxCatCost = 4; // 猫のコストの最大値（1～4）
   static const int winCondition = 3; // 勝利に必要な猫の数
   static const List<String> catTypes = [catOrange, catWhite, catBlack];
-  static const List<String> bossCatTypes = [
-    bossCatOrange,
-    bossCatWhite,
-    bossCatBlack,
-  ];
 
   // マッチング
   static const int matchmakingSearchLimit = 10; // マッチング検索数上限

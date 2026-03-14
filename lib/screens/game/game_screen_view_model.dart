@@ -233,11 +233,7 @@ class GameScreenViewModel extends ChangeNotifier {
     return Colors.grey;
   }
 
-  /// 猫の名前に応じてアイコンを返す（内部用ヘルパー）
   IconData _getCatIcon(String catName) {
-    if (catName.startsWith('ボス')) {
-      return Icons.stars;
-    }
     if (catName == GameConstants.itemShop) {
       return Icons.store;
     }
