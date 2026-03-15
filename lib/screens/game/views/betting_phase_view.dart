@@ -297,58 +297,70 @@ class BettingPhaseView extends StatelessWidget {
               ),
               contentPadding: EdgeInsets.zero,
               titlePadding: EdgeInsets.zero,
-              title: Column(
-                mainAxisSize: MainAxisSize.min,
+              title: Stack(
                 children: [
-                  // ヘッダー
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.question_mark, size: 18),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'カード・アイテム説明',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            '× 閉じる',
-                            style: TextStyle(color: Colors.grey, fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // タブ
-                  Row(
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildTabButton(
-                        text: 'アイテム',
-                        isSelected: selectedTab == 0,
-                        onTap: () => setState(() => selectedTab = 0),
+                      // ヘッダー
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 48, 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.question_mark, size: 18),
+                            ),
+                            const SizedBox(width: 8),
+                            const Expanded(
+                              child: Text(
+                                'アイテム・キャラクター',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      _buildTabButton(
-                        text: 'キャラクター',
-                        isSelected: selectedTab == 1,
-                        onTap: () => setState(() => selectedTab = 1),
+                      // タブ
+                      Row(
+                        children: [
+                          _buildTabButton(
+                            text: 'アイテム',
+                            isSelected: selectedTab == 0,
+                            onTap: () => setState(() => selectedTab = 0),
+                          ),
+                          _buildTabButton(
+                            text: 'キャラクター',
+                            isSelected: selectedTab == 1,
+                            onTap: () => setState(() => selectedTab = 1),
+                          ),
+                        ],
                       ),
+                      const Divider(height: 1),
                     ],
                   ),
-                  const Divider(height: 1),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.grey,
+                        size: 20,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      splashRadius: 20,
+                    ),
+                  ),
                 ],
               ),
               content: SizedBox(
@@ -362,15 +374,13 @@ class BettingPhaseView extends StatelessWidget {
                             'ねこじゃらし',
                             'assets/images/nekojarashi.png',
                             '相手が魚を置いていなければ、その猫をタダで獲得できる。読み勝ちの一手。',
-                            tag: '攻め',
                             tagColor: Colors.red.shade50,
                             tagTextColor: Colors.red.shade400,
                           ),
                           _GuideItem(
                             'びっくりホーン',
                             'assets/images/horn.png',
-                            '両者が置いた魚をすべて無効化。お互い消耗したくないときの切り札。',
-                            tag: '妨害',
+                            '両者が置いた魚をすべて無効化。相手に取られたくない時に有効！',
                             tagColor: Colors.blue.shade50,
                             tagTextColor: Colors.blue.shade400,
                           ),
@@ -378,7 +388,6 @@ class BettingPhaseView extends StatelessWidget {
                             'またたび',
                             'assets/images/matatabi.png',
                             'その猫を獲得するために必要な魚の数が2倍になる。狙われている猫を守るのに使える。',
-                            tag: 'トリック',
                             tagColor: Colors.purple.shade50,
                             tagTextColor: Colors.purple.shade400,
                           ),
@@ -393,31 +402,27 @@ class BettingPhaseView extends StatelessWidget {
                               'assets/images/sironeko.png',
                               'assets/images/kuroneko.png',
                             ],
-                            tag: '勝利条件',
                             tagColor: Colors.orange.shade50,
                             tagTextColor: Colors.orange.shade600,
                           ),
                           _GuideItem(
-                            '漁師にゃんこ',
+                            '漁師',
                             'assets/images/ryousi.png',
-                            '仲間にした後のターンから、サイコロの出目に追加で魚がもらえる。',
-                            tag: '特殊効果',
+                            '仲間にした後のターンから、毎ターンさかなが1つおまけで貰えるようになる。',
                             tagColor: Colors.orange.shade50,
                             tagTextColor: Colors.orange.shade600,
                           ),
                           _GuideItem(
-                            '番犬',
+                            'いぬ',
                             'assets/images/inu.png',
-                            '相手が持っている猫をランダムで1枚逃がしてしまう。選ぶことはできない。',
-                            tag: '特殊効果',
+                            '相手が持っているキャラクターを強制的に逃がす事ができる。',
                             tagColor: Colors.orange.shade50,
                             tagTextColor: Colors.orange.shade600,
                           ),
                           _GuideItem(
                             'アイテム屋',
                             'assets/images/shop.png',
-                            '仲間にした時、使ったアイテムを2つランダムで復活させる。',
-                            tag: '特殊効果',
+                            '仲間にした時、使ったアイテムを1つ復活させることができる。',
                             tagColor: Colors.orange.shade50,
                             tagTextColor: Colors.orange.shade600,
                           ),
