@@ -36,11 +36,36 @@ class BettingPhaseView extends StatelessWidget {
           child: Column(
             children: [
               // ターン情報 (最上部)
-              Text(
-                'ターン ${room.currentTurn}',
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 12 : 16,
-                  fontWeight: FontWeight.bold,
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFBF5F),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFF4D331F), width: 3),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0xFF4D331F), offset: Offset(0, 4)),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.star, color: Color(0xFFFF9800), size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'ターン ${room.currentTurn}',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 14 : 18,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF333333),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.star, color: Color(0xFFFF9800), size: 16),
+                  ],
                 ),
               ),
 
