@@ -8,6 +8,7 @@ import '../../../models/player.dart';
 import '../../../widgets/paw_background.dart';
 import '../../profile_screen.dart';
 import '../../friend_management/friend_management_screen.dart';
+import '../../../widgets/stereoscopic_ui.dart';
 
 /// メインメニュー画面
 class MainMenuView extends StatefulWidget {
@@ -86,49 +87,85 @@ class _MainMenuViewState extends State<MainMenuView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: isNotIdle
-                            ? null
-                            : () {
-                                FocusScope.of(context).unfocus();
-                                SeService().play('button_buni.mp3');
-                                viewModel.createRoom();
-                              },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(12),
-                        ),
-                        child: (viewModel.state is LoadingState)
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'ルームを作成',
-                                style: TextStyle(fontSize: 18),
-                              ),
+                      const SizedBox(height: 8),
+                      // 3匹の猫
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/tyatoranekopng.png',
+                            height: 60,
+                          ),
+                          const SizedBox(width: 16),
+                          Image.asset('assets/images/sironeko.png', height: 60),
+                          const SizedBox(width: 16),
+                          Image.asset('assets/images/kuroneko.png', height: 60),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: isNotIdle
-                            ? null
-                            : () {
-                                FocusScope.of(context).unfocus();
-                                SeService().play('button_buni.mp3');
-                                viewModel.startRandomMatch();
-                              },
-                        icon: const Icon(Icons.shuffle),
-                        label: const Text(
-                          'ランダムマッチ',
-                          style: TextStyle(fontSize: 18),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 52,
+                        child: StereoscopicButton(
+                          onPressed: isNotIdle
+                              ? null
+                              : () {
+                                  FocusScope.of(context).unfocus();
+                                  SeService().play('button_buni.mp3');
+                                  viewModel.createRoom();
+                                },
+                          baseColor: Colors.pink.shade300,
+                          shadowColor: Colors.pink.shade800,
+                          child: Center(
+                            child: (viewModel.state is LoadingState)
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'ルームを作成',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(12),
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 52,
+                        child: StereoscopicButton(
+                          onPressed: isNotIdle
+                              ? null
+                              : () {
+                                  FocusScope.of(context).unfocus();
+                                  SeService().play('button_buni.mp3');
+                                  viewModel.startRandomMatch();
+                                },
+                          baseColor: Colors.orange,
+                          shadowColor: Colors.orange.shade900,
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.shuffle, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  'ランダムマッチ',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -147,25 +184,34 @@ class _MainMenuViewState extends State<MainMenuView> {
                         maxLength: 6,
                       ),
                       const SizedBox(height: 4),
-                      ElevatedButton(
-                        onPressed: isNotIdle
-                            ? null
-                            : () => _handleJoinRoom(context, viewModel),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(12),
+                      SizedBox(
+                        height: 52,
+                        child: StereoscopicButton(
+                          onPressed: isNotIdle
+                              ? null
+                              : () => _handleJoinRoom(context, viewModel),
+                          baseColor: Colors.blue.shade400,
+                          shadowColor: Colors.blue.shade900,
+                          child: Center(
+                            child: (viewModel.state is LoadingState)
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'ルームに参加',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
                         ),
-                        child: (viewModel.state is LoadingState)
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'ルームに参加',
-                                style: TextStyle(fontSize: 18),
-                              ),
                       ),
                     ],
                   ),
@@ -323,12 +369,28 @@ class _MainMenuViewState extends State<MainMenuView> {
                                     style: TextStyle(color: Colors.grey),
                                   ),
                                 ),
-                                ElevatedButton(
+                                StereoscopicButton(
                                   onPressed: () {
                                     Navigator.pop(context);
                                     viewModel.acceptInvitation(invitation);
                                   },
-                                  child: const Text('参加'),
+                                  baseColor: Colors.pink.shade300,
+                                  shadowColor: Colors.pink.shade800,
+                                  borderRadius: 12,
+                                  depth: 4,
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    child: Text(
+                                      '参加',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -357,29 +419,23 @@ class _MainMenuViewState extends State<MainMenuView> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Tooltip(
         message: tooltip ?? '',
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: Colors.pink.shade100,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: child ?? Icon(icon, color: Colors.pink.shade900),
-                onPressed: onPressed,
-              ),
-              if (badge != null) Positioned(right: 0, top: 0, child: badge),
-            ],
+        child: SizedBox(
+          width: 52,
+          height: 52,
+          child: StereoscopicButton(
+            onPressed: onPressed,
+            baseColor: Colors.pink.shade100,
+            shadowColor: Colors.pink.shade800,
+            borderRadius: 26,
+            depth: 4,
+            showStripes: false,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Center(child: child ?? Icon(icon, color: Colors.pink.shade900)),
+                if (badge != null) Positioned(right: 4, top: 4, child: badge),
+              ],
+            ),
           ),
         ),
       ),
@@ -430,9 +486,22 @@ class _MainMenuViewState extends State<MainMenuView> {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('キャンセル'),
           ),
-          ElevatedButton(
+          StereoscopicButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('参加する'),
+            baseColor: Colors.pink.shade300,
+            shadowColor: Colors.pink.shade800,
+            borderRadius: 12,
+            depth: 4,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                '参加する',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         ],
       ),

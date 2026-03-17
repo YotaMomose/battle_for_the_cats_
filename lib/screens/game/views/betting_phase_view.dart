@@ -6,6 +6,7 @@ import '../../../models/cat_inventory.dart';
 import '../../../models/item.dart';
 import '../../../models/cards/game_card.dart';
 import '../game_screen_view_model.dart';
+import '../../../widgets/stereoscopic_ui.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
@@ -198,7 +199,7 @@ class BettingPhaseView extends StatelessWidget {
                     child: SizedBox(
                       height: (isSmallScreen ? 36.0 : 44.0) + 6.0,
                       width: isSmallScreen ? 140.0 : 160.0,
-                      child: _StereoscopicButton(
+                      child: StereoscopicButton(
                         onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
                             ? null
                             : () {
@@ -229,7 +230,7 @@ class BettingPhaseView extends StatelessWidget {
                                           style: TextStyle(color: Colors.grey),
                                         ),
                                       ),
-                                      _StereoscopicButton(
+                                      StereoscopicButton(
                                         baseColor: Colors.pink.shade400,
                                         shadowColor: Colors.pink.shade900,
                                         borderRadius: 12,
@@ -294,7 +295,7 @@ class BettingPhaseView extends StatelessWidget {
         SeService().play('button_buni.mp3');
         _showGameGuideDialog(context, isSmallScreen);
       },
-      child: _StereoscopicWidget(
+      child: StereoscopicWidget(
         baseColor: Colors.white,
         shadowColor: Colors.orange.shade200,
         borderRadius: 50,
@@ -540,7 +541,9 @@ class BettingPhaseView extends StatelessWidget {
                         alignment: Alignment.center,
                         child: item.imagePath != null
                             ? Image.asset(item.imagePath!, fit: BoxFit.contain)
-                            : const Icon(Icons.help_outline),
+                            : (item.fallbackIcon != null
+                                  ? Icon(item.fallbackIcon)
+                                  : const Icon(Icons.help_outline)),
                       ),
               ),
               const SizedBox(width: 12),
@@ -943,7 +946,7 @@ Widget _buildCatCard(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _StereoscopicContainer(
+        StereoscopicContainer(
           baseColor: const Color(0xFFFFBF5F),
           shadowColor: const Color(0xFF4D331F),
           borderRadius: 20,
@@ -1240,7 +1243,7 @@ Widget _buildItemIcon(
 }) {
   final color = _getItemColor(type);
 
-  return _StereoscopicContainer(
+  return StereoscopicContainer(
     baseColor: Colors.white,
     shadowColor: color.withOpacity(0.3),
     borderRadius: 12,
@@ -1274,7 +1277,7 @@ Widget _buildItemSlot(
   GameScreenViewModel viewModel, {
   bool isSmallScreen = false,
 }) {
-  final itemIconSize = isSmallScreen ? 20.0 : 32.0;
+  final itemIconSize = isSmallScreen ? 30.0 : 48.0;
   final slotKey = GlobalObjectKey('item_slot_$catIndex');
 
   final color = placedItem != null ? _getItemColor(placedItem) : Colors.white;
@@ -1282,7 +1285,7 @@ Widget _buildItemSlot(
       ? _getItemColor(placedItem).withOpacity(0.8)
       : Colors.grey.shade300;
 
-  return _StereoscopicContainer(
+  return StereoscopicContainer(
     baseColor: placedItem != null ? color : Colors.white.withOpacity(0.5),
     shadowColor: shadowColor,
     borderRadius: 8,
@@ -1405,28 +1408,33 @@ Widget _buildWonCatsList(
     itemCount: cats.length,
     itemBuilder: (context, index) {
       final cat = cats[index];
-      return Container(
-        margin: const EdgeInsets.only(right: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildCatAvatar(viewModel, cat.name, size: isSmallScreen ? 24 : 36),
-            Text(
-              '🐟${cat.cost}',
-              style: TextStyle(
-                fontSize: isSmallScreen ? 10 : 12,
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
+      return StereoscopicContainer(
+        baseColor: Colors.white,
+        shadowColor: Colors.grey.shade300,
+        borderRadius: 6,
+        depth: 2,
+        showStripes: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildCatAvatar(
+                viewModel,
+                cat.name,
+                size: isSmallScreen ? 24 : 36,
               ),
-            ),
-          ],
+              Text(
+                '🐟${cat.cost}',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 10 : 12,
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     },
@@ -1574,218 +1582,11 @@ Widget _buildFishWithNumber(String number, {double size = 48}) {
   );
 }
 
-// --- 3D Stereoscopic UI Components ---
-
-class _StereoscopicWidget extends StatelessWidget {
-  final Widget child;
-  final Color baseColor;
-  final Color shadowColor;
-  final double borderRadius;
-  final double depth;
-  final bool isPressed;
-  final bool showStripes;
-  final bool showDots;
-  final bool showHighlight;
-
-  const _StereoscopicWidget({
-    required this.child,
-    required this.baseColor,
-    required this.shadowColor,
-    this.borderRadius = 16.0,
-    this.depth = 4.0,
-    this.isPressed = false,
-    this.showStripes = true,
-    this.showDots = false,
-    this.showHighlight = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 60),
-      padding: EdgeInsets.only(
-        top: isPressed ? depth : 0,
-        bottom: isPressed ? 0 : depth,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: [
-            if (!isPressed)
-              BoxShadow(
-                color: shadowColor,
-                offset: Offset(0, depth),
-                blurRadius: 0,
-              ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: Stack(
-            children: [
-              if (showStripes)
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _StripePainter(
-                      color: Colors.white.withOpacity(0.15),
-                    ),
-                  ),
-                ),
-              if (showDots)
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: DotPatternPainter(
-                      dotColor: Colors.black.withOpacity(0.05),
-                      dotRadius: 1.0,
-                      spacing: 6.0,
-                    ),
-                  ),
-                ),
-              if (showHighlight)
-                Positioned(
-                  top: 2,
-                  left: 2,
-                  right: 2,
-                  child: Container(
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(borderRadius),
-                    ),
-                  ),
-                ),
-              child,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StereoscopicButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onPressed;
-  final Color baseColor;
-  final Color shadowColor;
-  final double borderRadius;
-  final double depth;
-
-  const _StereoscopicButton({
-    required this.child,
-    this.onPressed,
-    required this.baseColor,
-    required this.shadowColor,
-    this.borderRadius = 22.0,
-    this.depth = 6.0,
-  });
-
-  @override
-  State<_StereoscopicButton> createState() => _StereoscopicButtonState();
-}
-
-class _StereoscopicButtonState extends State<_StereoscopicButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: widget.onPressed == null
-          ? null
-          : (_) => setState(() => _isPressed = true),
-      onTapUp: widget.onPressed == null
-          ? null
-          : (_) {
-              setState(() => _isPressed = false);
-              widget.onPressed!();
-            },
-      onTapCancel: widget.onPressed == null
-          ? null
-          : () => setState(() => _isPressed = false),
-      child: _StereoscopicWidget(
-        baseColor: widget.onPressed == null ? Colors.grey : widget.baseColor,
-        shadowColor: widget.onPressed == null
-            ? Colors.grey.shade700
-            : widget.shadowColor,
-        borderRadius: widget.borderRadius,
-        depth: widget.depth,
-        isPressed: _isPressed,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-class _StereoscopicContainer extends StatelessWidget {
-  final Widget child;
-  final Color baseColor;
-  final Color shadowColor;
-  final double borderRadius;
-  final double depth;
-  final bool showStripes;
-  final bool showDots;
-  final bool showHighlight;
-
-  const _StereoscopicContainer({
-    required this.child,
-    required this.baseColor,
-    required this.shadowColor,
-    this.borderRadius = 8.0,
-    this.depth = 4.0,
-    this.showStripes = true,
-    this.showDots = false,
-    this.showHighlight = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _StereoscopicWidget(
-      baseColor: baseColor,
-      shadowColor: shadowColor,
-      borderRadius: borderRadius,
-      depth: depth,
-      isPressed: false,
-      showStripes: showStripes,
-      showDots: showDots,
-      showHighlight: showHighlight,
-      child: child,
-    );
-  }
-}
-
-class _StripePainter extends CustomPainter {
-  final Color color;
-  _StripePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    const double step = 8.0;
-    for (double i = -size.height; i < size.width; i += step) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// --- End of Stereoscopic UI Components ---
-
 class _GuideItem {
   final String name;
   final String? imagePath;
-  final List<String>? imagePaths;
   final String description;
+  final List<String>? imagePaths;
   final IconData? fallbackIcon;
   final String? tag;
   final Color? tagColor;

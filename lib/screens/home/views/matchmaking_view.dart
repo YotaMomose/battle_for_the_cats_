@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../widgets/paw_background.dart';
 import '../../../services/se_service.dart';
 import '../home_screen_view_model.dart';
+import '../../../widgets/stereoscopic_ui.dart';
 
 /// ランダムマッチング中画面
 class MatchmakingView extends StatelessWidget {
@@ -38,20 +39,34 @@ class MatchmakingView extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                     const SizedBox(height: 48),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        SeService().play('button_buni.mp3');
-                        viewModel.cancelMatchmaking();
-                      },
-                      icon: const Icon(Icons.close),
-                      label: const Text(
-                        'キャンセル',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
+                    SizedBox(
+                      height: 56,
+                      width: 200,
+                      child: StereoscopicButton(
+                        onPressed: () {
+                          SeService().play('button_buni.mp3');
+                          viewModel.cancelMatchmaking();
+                        },
+                        baseColor: Colors.grey.shade400,
+                        shadowColor: Colors.grey.shade700,
+                        borderRadius: 28,
+                        depth: 6,
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.close, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'キャンセル',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
