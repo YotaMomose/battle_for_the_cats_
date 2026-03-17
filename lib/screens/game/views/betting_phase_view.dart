@@ -194,74 +194,82 @@ class BettingPhaseView extends StatelessWidget {
                     top: isSmallScreen ? 2.0 : 4.0,
                     bottom: isSmallScreen ? 2.0 : 4.0,
                   ),
-                  child: SizedBox(
-                    height: isSmallScreen ? 36 : 44,
-                    width: isSmallScreen ? 140 : 160,
-                    child: ElevatedButton(
-                      onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
-                          ? null
-                          : () {
-                              SeService().play('button_buni.mp3');
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  alignment: Alignment.bottomCenter,
-                                  title: const Text(
-                                    '確定しますか？',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  content: const Text(
-                                    'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text(
-                                        'キャンセル',
-                                        style: TextStyle(color: Colors.grey),
+                  child: Center(
+                    child: SizedBox(
+                      height: (isSmallScreen ? 36.0 : 44.0) + 6.0,
+                      width: isSmallScreen ? 140.0 : 160.0,
+                      child: _StereoscopicButton(
+                        onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
+                            ? null
+                            : () {
+                                SeService().play('button_buni.mp3');
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    alignment: Alignment.bottomCenter,
+                                    title: const Text(
+                                      '確定しますか？',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.pink.shade400,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: () {
-                                        SeService().play('button_buni.mp3');
-                                        Navigator.of(context).pop();
-                                        viewModel.placeBets();
-                                      },
-                                      child: const Text(
-                                        '確定する',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                    content: const Text(
+                                      'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text(
+                                          'キャンセル',
+                                          style: TextStyle(color: Colors.grey),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink.shade400,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(22),
-                        ),
-                      ),
-                      child: Text(
-                        viewModel.confirmBetsButtonLabel,
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 14 : 16,
-                          fontWeight: FontWeight.bold,
+                                      _StereoscopicButton(
+                                        baseColor: Colors.pink.shade400,
+                                        shadowColor: Colors.pink.shade900,
+                                        borderRadius: 12,
+                                        depth: 4,
+                                        onPressed: () {
+                                          SeService().play('button_buni.mp3');
+                                          Navigator.of(context).pop();
+                                          viewModel.placeBets();
+                                        },
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                          child: Text(
+                                            '確定する',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                        baseColor: Colors.pink.shade400,
+                        shadowColor: Colors.pink.shade900,
+                        borderRadius: 22,
+                        depth: 6,
+                        child: Center(
+                          child: Text(
+                            viewModel.confirmBetsButtonLabel,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -286,24 +294,19 @@ class BettingPhaseView extends StatelessWidget {
         SeService().play('button_buni.mp3');
         _showGameGuideDialog(context, isSmallScreen);
       },
-      child: Container(
-        padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          border: Border.all(color: Colors.orange.shade200, width: 2),
-        ),
-        child: Icon(
-          Icons.question_mark,
-          size: isSmallScreen ? 14 : 20,
-          color: Colors.orange.shade700,
+      child: _StereoscopicWidget(
+        baseColor: Colors.white,
+        shadowColor: Colors.orange.shade200,
+        borderRadius: 50,
+        depth: 4,
+        showStripes: false,
+        child: Padding(
+          padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+          child: Icon(
+            Icons.question_mark,
+            size: isSmallScreen ? 14 : 20,
+            color: Colors.orange.shade700,
+          ),
         ),
       ),
     );
@@ -940,25 +943,25 @@ Widget _buildCatCard(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFBF5F),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
-            boxShadow: const [
-              BoxShadow(color: Color(0xFF4D331F), offset: Offset(0, 1.5)),
-            ],
-          ),
-          child: Text(
-            card.displayName,
-            style: TextStyle(
-              fontSize: isSmallScreen ? 9 : 11,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF1A1A1A),
+        _StereoscopicContainer(
+          baseColor: const Color(0xFFFFBF5F),
+          shadowColor: const Color(0xFF4D331F),
+          borderRadius: 20,
+          depth: 2,
+          showHighlight: true,
+          showStripes: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            child: Text(
+              card.displayName,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 9 : 11,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF1A1A1A),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
@@ -1236,30 +1239,31 @@ Widget _buildItemIcon(
   bool showLabel = false, // デフォルトでオフにする
 }) {
   final color = _getItemColor(type);
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: color.withOpacity(0.5)),
-      boxShadow: isFeedback
-          ? [const BoxShadow(color: Colors.black26, blurRadius: 4)]
-          : null,
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildItemImage(type, size: size),
-        if (showLabel)
-          Text(
-            type.displayName,
-            style: TextStyle(
-              fontSize: 8,
-              color: isPlaced ? Colors.grey : color,
+
+  return _StereoscopicContainer(
+    baseColor: Colors.white,
+    shadowColor: color.withOpacity(0.3),
+    borderRadius: 12,
+    depth: 4,
+    showStripes: false,
+    showHighlight: true,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildItemImage(type, size: size),
+          if (showLabel)
+            Text(
+              type.displayName,
+              style: TextStyle(
+                fontSize: 8,
+                color: isPlaced ? Colors.grey : color,
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -1270,22 +1274,21 @@ Widget _buildItemSlot(
   GameScreenViewModel viewModel, {
   bool isSmallScreen = false,
 }) {
-  final slotSize = isSmallScreen ? 26.0 : 40.0;
   final itemIconSize = isSmallScreen ? 20.0 : 32.0;
   final slotKey = GlobalObjectKey('item_slot_$catIndex');
 
-  return Container(
-    width: slotSize,
-    height: slotSize,
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.5),
-      shape: BoxShape.rectangle,
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(
-        color: Colors.grey.shade400.withOpacity(0.5),
-        style: placedItem == null ? BorderStyle.none : BorderStyle.solid,
-      ),
-    ),
+  final color = placedItem != null ? _getItemColor(placedItem) : Colors.white;
+  final shadowColor = placedItem != null
+      ? _getItemColor(placedItem).withOpacity(0.8)
+      : Colors.grey.shade300;
+
+  return _StereoscopicContainer(
+    baseColor: placedItem != null ? color : Colors.white.withOpacity(0.5),
+    shadowColor: shadowColor,
+    borderRadius: 8,
+    depth: 4,
+    showStripes: placedItem != null,
+    showDots: placedItem == null,
     child: Center(
       child: placedItem != null
           ? (!viewModel.hasPlacedBet
@@ -1570,6 +1573,213 @@ Widget _buildFishWithNumber(String number, {double size = 48}) {
     ],
   );
 }
+
+// --- 3D Stereoscopic UI Components ---
+
+class _StereoscopicWidget extends StatelessWidget {
+  final Widget child;
+  final Color baseColor;
+  final Color shadowColor;
+  final double borderRadius;
+  final double depth;
+  final bool isPressed;
+  final bool showStripes;
+  final bool showDots;
+  final bool showHighlight;
+
+  const _StereoscopicWidget({
+    required this.child,
+    required this.baseColor,
+    required this.shadowColor,
+    this.borderRadius = 16.0,
+    this.depth = 4.0,
+    this.isPressed = false,
+    this.showStripes = true,
+    this.showDots = false,
+    this.showHighlight = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 60),
+      padding: EdgeInsets.only(
+        top: isPressed ? depth : 0,
+        bottom: isPressed ? 0 : depth,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            if (!isPressed)
+              BoxShadow(
+                color: shadowColor,
+                offset: Offset(0, depth),
+                blurRadius: 0,
+              ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Stack(
+            children: [
+              if (showStripes)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _StripePainter(
+                      color: Colors.white.withOpacity(0.15),
+                    ),
+                  ),
+                ),
+              if (showDots)
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: DotPatternPainter(
+                      dotColor: Colors.black.withOpacity(0.05),
+                      dotRadius: 1.0,
+                      spacing: 6.0,
+                    ),
+                  ),
+                ),
+              if (showHighlight)
+                Positioned(
+                  top: 2,
+                  left: 2,
+                  right: 2,
+                  child: Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(borderRadius),
+                    ),
+                  ),
+                ),
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StereoscopicButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onPressed;
+  final Color baseColor;
+  final Color shadowColor;
+  final double borderRadius;
+  final double depth;
+
+  const _StereoscopicButton({
+    required this.child,
+    this.onPressed,
+    required this.baseColor,
+    required this.shadowColor,
+    this.borderRadius = 22.0,
+    this.depth = 6.0,
+  });
+
+  @override
+  State<_StereoscopicButton> createState() => _StereoscopicButtonState();
+}
+
+class _StereoscopicButtonState extends State<_StereoscopicButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: widget.onPressed == null
+          ? null
+          : (_) => setState(() => _isPressed = true),
+      onTapUp: widget.onPressed == null
+          ? null
+          : (_) {
+              setState(() => _isPressed = false);
+              widget.onPressed!();
+            },
+      onTapCancel: widget.onPressed == null
+          ? null
+          : () => setState(() => _isPressed = false),
+      child: _StereoscopicWidget(
+        baseColor: widget.onPressed == null ? Colors.grey : widget.baseColor,
+        shadowColor: widget.onPressed == null
+            ? Colors.grey.shade700
+            : widget.shadowColor,
+        borderRadius: widget.borderRadius,
+        depth: widget.depth,
+        isPressed: _isPressed,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _StereoscopicContainer extends StatelessWidget {
+  final Widget child;
+  final Color baseColor;
+  final Color shadowColor;
+  final double borderRadius;
+  final double depth;
+  final bool showStripes;
+  final bool showDots;
+  final bool showHighlight;
+
+  const _StereoscopicContainer({
+    required this.child,
+    required this.baseColor,
+    required this.shadowColor,
+    this.borderRadius = 8.0,
+    this.depth = 4.0,
+    this.showStripes = true,
+    this.showDots = false,
+    this.showHighlight = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _StereoscopicWidget(
+      baseColor: baseColor,
+      shadowColor: shadowColor,
+      borderRadius: borderRadius,
+      depth: depth,
+      isPressed: false,
+      showStripes: showStripes,
+      showDots: showDots,
+      showHighlight: showHighlight,
+      child: child,
+    );
+  }
+}
+
+class _StripePainter extends CustomPainter {
+  final Color color;
+  _StripePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    const double step = 8.0;
+    for (double i = -size.height; i < size.width; i += step) {
+      canvas.drawLine(
+        Offset(i, 0),
+        Offset(i + size.height, size.height),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// --- End of Stereoscopic UI Components ---
 
 class _GuideItem {
   final String name;
