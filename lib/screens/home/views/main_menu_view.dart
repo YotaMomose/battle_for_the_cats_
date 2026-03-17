@@ -86,7 +86,7 @@ class _MainMenuViewState extends State<MainMenuView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: isNotIdle
                             ? null

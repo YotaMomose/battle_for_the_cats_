@@ -765,55 +765,74 @@ class BettingPhaseView extends StatelessWidget {
     );
 
     final content = Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 6.0,
-        vertical: isSmallScreen ? 1.0 : 8.0,
-      ),
       decoration: BoxDecoration(
         color: bgColor.withOpacity(0.7),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isOpponent) ...[
-              iconAndCardsRow,
-              SizedBox(height: isSmallScreen ? 1 : 6),
-              fishAndItemsRow,
-            ] else ...[
-              fishAndItemsRow,
-              SizedBox(height: isSmallScreen ? 1 : 6),
-              iconAndCardsRow,
-            ],
-            if (statusLabel != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 2.0),
-                child: Text(
-                  statusLabel,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: statusColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // ドット柄背景 (セクション全体に広がる)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: DotPatternPainter(
+                dotColor: Colors.white.withOpacity(0.4),
+                spacing: 12,
+              ),
+            ),
+          ),
+          // 元のレイアウト構造を維持したコンテンツ
+          Positioned.fill(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 6.0,
+                vertical: isSmallScreen ? 1.0 : 8.0,
+              ),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isOpponent) ...[
+                      iconAndCardsRow,
+                      SizedBox(height: isSmallScreen ? 1 : 6),
+                      fishAndItemsRow,
+                    ] else ...[
+                      fishAndItemsRow,
+                      SizedBox(height: isSmallScreen ? 1 : 6),
+                      iconAndCardsRow,
+                    ],
+                    if (statusLabel != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2.0),
+                        child: Text(
+                          statusLabel,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    if (isReady && !isOpponent)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2.0),
+                        child: Text(
+                          '準備完了：結果を待っています...',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            if (isReady && !isOpponent)
-              const Padding(
-                padding: EdgeInsets.only(top: 2.0),
-                child: Text(
-                  '準備完了：結果を待っています...',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
 
@@ -847,7 +866,10 @@ class BettingPhaseView extends StatelessWidget {
                 ? BoxDecoration(
                     color: Colors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.blue, width: 2),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 165, 173, 180),
+                      width: 2,
+                    ),
                   )
                 : null,
             child: content,
@@ -918,14 +940,26 @@ Widget _buildCatCard(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          card.displayName,
-          style: TextStyle(
-            fontSize: isSmallScreen ? 10 : 12,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFBF5F),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+            boxShadow: const [
+              BoxShadow(color: Color(0xFF4D331F), offset: Offset(0, 1.5)),
+            ],
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          child: Text(
+            card.displayName,
+            style: TextStyle(
+              fontSize: isSmallScreen ? 9 : 11,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF1A1A1A),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
         SizedBox(height: isSmallScreen ? 1 : 2),
@@ -1557,4 +1591,33 @@ class _GuideItem {
     this.tagColor,
     this.tagTextColor,
   });
+}
+
+/// 背景のドット柄を描画するペインター
+class DotPatternPainter extends CustomPainter {
+  final Color dotColor;
+  final double dotRadius;
+  final double spacing;
+
+  DotPatternPainter({
+    required this.dotColor,
+    this.dotRadius = 1.5,
+    this.spacing = 10.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = dotColor
+      ..style = PaintingStyle.fill;
+
+    for (double x = spacing / 2; x < size.width; x += spacing) {
+      for (double y = spacing / 2; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), dotRadius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

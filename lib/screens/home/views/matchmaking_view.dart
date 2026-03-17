@@ -15,41 +15,64 @@ class MatchmakingView extends StatelessWidget {
     return PawBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(strokeWidth: 6),
-                const SizedBox(height: 32),
-                const Text(
-                  'マッチング中...',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  '対戦相手を探しています',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 48),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    SeService().play('button_buni.mp3');
-                    viewModel.cancelMatchmaking();
-                  },
-                  icon: const Icon(Icons.close),
-                  label: const Text('キャンセル', style: TextStyle(fontSize: 18)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
+        body: Stack(
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(strokeWidth: 6),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'マッチング中...',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '対戦相手を探しています',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 48),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.cancelMatchmaking();
+                      },
+                      icon: const Icon(Icons.close),
+                      label: const Text(
+                        'キャンセル',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            // 画面下部の猫アニメーション
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Image.asset(
+                  'assets/images/neko3_walk.gif',
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
