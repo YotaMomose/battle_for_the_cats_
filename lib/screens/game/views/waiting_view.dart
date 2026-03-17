@@ -4,6 +4,7 @@ import '../../../services/se_service.dart';
 import '../game_screen_view_model.dart';
 import '../../../models/user_profile.dart';
 import 'package:flutter/services.dart';
+import '../../../widgets/stereoscopic_ui.dart';
 
 /// 対戦相手待機画面
 class WaitingView extends StatelessWidget {
@@ -78,24 +79,28 @@ class WaitingView extends StatelessWidget {
                   if (viewModel.isHost) ...[
                     const Text('このユーザーと対戦しますか？'),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        SeService().play('button_buni.mp3');
-                        viewModel.startGame();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 48,
-                          vertical: 16,
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                    SizedBox(
+                      height: 56,
+                      child: StereoscopicButton(
+                        onPressed: () {
+                          SeService().play('button_buni.mp3');
+                          viewModel.startGame();
+                        },
+                        baseColor: Colors.pink,
+                        shadowColor: Colors.pink.shade900,
+                        borderRadius: 28,
+                        depth: 6,
+                        child: const Center(
+                          child: Text(
+                            'バトル開始！',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
-                      child: const Text('バトル開始！'),
                     ),
                     const SizedBox(height: 12),
                     TextButton(
@@ -128,7 +133,8 @@ class WaitingView extends StatelessWidget {
                       // ルームコードコピーボタン
                       SizedBox(
                         width: 200,
-                        child: ElevatedButton.icon(
+                        height: 48,
+                        child: StereoscopicButton(
                           onPressed: () {
                             SeService().play('button_buni.mp3');
                             Clipboard.setData(ClipboardData(text: roomCode));
@@ -136,10 +142,25 @@ class WaitingView extends StatelessWidget {
                               const SnackBar(content: Text('ルームコードをコピーしました')),
                             );
                           },
-                          icon: const Icon(Icons.copy),
-                          label: const Text('コードをコピー'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          baseColor: Colors.blue.shade100,
+                          shadowColor: Colors.blue.shade800,
+                          borderRadius: 24,
+                          depth: 4,
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.copy, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Text(
+                                  'コードをコピー',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -147,17 +168,31 @@ class WaitingView extends StatelessWidget {
                       // フレンド招待ボタン
                       SizedBox(
                         width: 200,
-                        child: ElevatedButton.icon(
+                        height: 48,
+                        child: StereoscopicButton(
                           onPressed: () {
                             SeService().play('button_buni.mp3');
                             _showInviteFriendDialog(context, viewModel);
                           },
-                          icon: const Icon(Icons.person_add),
-                          label: const Text('フレンドを招待'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
+                          baseColor: Colors.orange,
+                          shadowColor: Colors.orange.shade900,
+                          borderRadius: 24,
+                          depth: 4,
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.person_add, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  'フレンドを招待',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -166,17 +201,31 @@ class WaitingView extends StatelessWidget {
                     // 退出ボタン
                     SizedBox(
                       width: 200,
-                      child: ElevatedButton.icon(
+                      height: 48,
+                      child: StereoscopicButton(
                         onPressed: () {
                           SeService().play('button_buni.mp3');
                           _showLeaveDialog(context, viewModel);
                         },
-                        icon: const Icon(Icons.exit_to_app),
-                        label: const Text('ルームを閉じる'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          backgroundColor: Colors.grey.shade200,
-                          foregroundColor: Colors.grey.shade700,
+                        baseColor: Colors.grey.shade300,
+                        shadowColor: Colors.grey.shade700,
+                        borderRadius: 24,
+                        depth: 4,
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.exit_to_app, color: Colors.black54),
+                              SizedBox(width: 8),
+                              Text(
+                                'ルームを閉じる',
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -290,7 +339,7 @@ class WaitingView extends StatelessWidget {
                               style: const TextStyle(fontSize: 24),
                             ),
                             title: Text(friend.displayName),
-                            trailing: ElevatedButton(
+                            trailing: StereoscopicButton(
                               onPressed: () {
                                 SeService().play('button_buni.mp3');
                                 vm.inviteFriend(friend);
@@ -303,7 +352,23 @@ class WaitingView extends StatelessWidget {
                                   ),
                                 );
                               },
-                              child: const Text('招待'),
+                              baseColor: Colors.pink.shade300,
+                              shadowColor: Colors.pink.shade800,
+                              borderRadius: 12,
+                              depth: 4,
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  '招待',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                           );
                         },
