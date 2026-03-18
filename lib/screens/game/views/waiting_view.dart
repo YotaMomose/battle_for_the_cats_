@@ -20,8 +20,10 @@ class WaitingView extends StatelessWidget {
       children: [
         Center(
           child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 48.0,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -103,14 +105,27 @@ class WaitingView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () {
-                        SeService().play('button_buni.mp3');
-                        _showRejectConfirmDialog(context, viewModel);
-                      },
-                      child: const Text(
-                        'お断りする',
-                        style: TextStyle(color: Colors.grey),
+                    SizedBox(
+                      height: 48,
+                      child: StereoscopicButton(
+                        onPressed: () {
+                          SeService().play('button_buni.mp3');
+                          _showRejectConfirmDialog(context, viewModel);
+                        },
+                        baseColor: Colors.grey.shade300,
+                        shadowColor: Colors.grey.shade600,
+                        borderRadius: 24,
+                        depth: 4,
+                        child: const Center(
+                          child: Text(
+                            'お断りする',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ] else ...[
@@ -235,19 +250,20 @@ class WaitingView extends StatelessWidget {
             ),
           ),
         ),
-        // 画面下部の猫アニメーション
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: IgnorePointer(
-            child: Image.asset(
-              'assets/images/neko3_walk.gif',
-              height: 120,
-              fit: BoxFit.contain,
+        // 画面下部の猫アニメーション (対戦相手がまだいない時のみ表示)
+        if (!viewModel.hasGuest)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: Image.asset(
+                'assets/images/neko3_walk.gif',
+                height: 120,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -263,12 +279,26 @@ class WaitingView extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text('キャンセル'),
           ),
-          TextButton(
+          StereoscopicButton(
             onPressed: () {
+              SeService().play('button_buni.mp3');
               Navigator.pop(context);
               vm.rejectGuest();
             },
-            child: const Text('お断りする', style: TextStyle(color: Colors.red)),
+            baseColor: Colors.red.shade400,
+            shadowColor: Colors.red.shade900,
+            borderRadius: 12,
+            depth: 4,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'お断りする',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         ],
       ),
