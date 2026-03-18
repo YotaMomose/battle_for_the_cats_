@@ -7,6 +7,7 @@ import '../services/settings_service.dart';
 import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
 import '../services/iap_service.dart';
+import '../widgets/stereoscopic_ui.dart';
 
 /// プロフィール設定画面
 ///
@@ -21,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _nameController;
   String? _selectedIconId;
-  bool _isSaving = false;
 
   @override
   void initState() {
@@ -40,461 +40,532 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _saveProfile() async {
-    if (_isSaving) return;
-    setState(() => _isSaving = true);
-
-    final viewModel = context.read<HomeScreenViewModel>();
-    // 名前変更は不可なので、アイコンのみ更新
-
-    try {
-      await viewModel.updateProfile(iconId: _selectedIconId);
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('プロフィールを保存しました')));
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        final message = e.toString().replaceAll('Exception: ', '');
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存に失敗しました: $message')));
-        setState(() => _isSaving = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeScreenViewModel>();
     return PawBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('プロフィール設定'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD54F), // 明るい黄色
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  offset: const Offset(0, 4),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: StripePainter(
+                        color: Colors.white.withOpacity(0.2),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      'プロフィール設定',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.brown.shade900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 16,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          SeService().play('button_buni.mp3');
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.brown.shade900,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 現在のアイコンプレビュー
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      UserIcon.fromId(_selectedIconId ?? 'cat_orange').emoji,
-                      style: const TextStyle(fontSize: 72),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      UserIcon.fromId(_selectedIconId ?? 'cat_orange').label,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // ユーザー名表示（変更不可）
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceVariant.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withOpacity(0.2),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.person, color: Colors.grey, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'ユーザー名 (変更不可)',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(color: Colors.grey),
-                          ),
-                          Text(
-                            _nameController.text,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // フレンドコード表示
-              if (viewModel.userProfile?.friendCode != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceVariant.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.people_outline, size: 20),
-                      const SizedBox(width: 8),
-                      const Text('フレンドコード: '),
-                      Text(
-                        viewModel.userProfile!.friendCode!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.copy, size: 20),
-                        onPressed: () {
-                          SeService().play('button_buni.mp3');
-                          Clipboard.setData(
-                            ClipboardData(
-                              text: viewModel.userProfile!.friendCode!,
-                            ),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('コピーしました')),
-                          );
-                        },
-                        tooltip: 'コピー',
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 24),
-
-              // 開発者応援・広告非表示セクション
-              if (viewModel.shouldShowAds)
-                Column(
-                  children: [
-                    // 開発者応援カード
-                    Card(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withOpacity(0.3),
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.favorite, color: Colors.red),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '開発者を応援する（限定アイコン解放）',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const Text(
-                                        'プレミアムアイコンがすべて解放され、広告も非表示になります。',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  SeService().play('button_buni.mp3');
-                                  IapService().buySupporter();
-                                },
-                                icon: const Icon(
-                                  Icons.volunteer_activism,
-                                  size: 18,
-                                ),
-                                label: const Text('応援する（投げ銭）'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // 広告非表示カード
-                    Card(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceVariant.withOpacity(0.3),
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.block, color: Colors.blueGrey),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '広告を非表示にする',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const Text(
-                                        'ゲーム内の広告が表示されなくなります。',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  SeService().play('button_buni.mp3');
-                                  IapService().buyRemoveAds();
-                                },
-                                icon: const Icon(
-                                  Icons.ad_units_outlined,
-                                  size: 18,
-                                ),
-                                label: const Text('広告非表示を購入'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              _buildMainProfileCard(context, viewModel),
               const SizedBox(height: 24),
 
               // アイコン選択
-              Text('アイコンを選択', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: UserIcon.presets.length,
-                itemBuilder: (context, index) {
-                  final icon = UserIcon.presets[index];
-                  final isSelected = icon.id == _selectedIconId;
-                  final isLocked =
-                      icon.isPremium &&
-                      !(viewModel.userProfile?.isSupporter ?? false);
-
-                  return GestureDetector(
-                    onTap: () {
-                      SeService().play('button_buni.mp3');
-                      if (isLocked) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('このアイコンは開発者を応援すると解放されます'),
-                          ),
-                        );
-                        return;
-                      }
-                      setState(() => _selectedIconId = icon.id);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : isLocked
-                            ? Colors.grey.withOpacity(0.1)
-                            : Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                        border: isSelected
-                            ? Border.all(
-                                color: Theme.of(context).colorScheme.primary,
-                                width: 3,
-                              )
-                            : null,
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Opacity(
-                                opacity: isLocked ? 0.3 : 1.0,
-                                child: Text(
-                                  icon.emoji,
-                                  style: const TextStyle(fontSize: 32),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                icon.label,
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: isLocked ? Colors.grey : null,
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                          if (isLocked)
-                            const Positioned(
-                              top: 4,
-                              right: 4,
-                              child: Icon(
-                                Icons.lock,
-                                size: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _buildSectionHeader('アイコンを選択'),
+              const SizedBox(height: 16),
+              _buildIconGrid(context, viewModel),
               const SizedBox(height: 32),
 
               // 音設定
-              Text('サウンド設定', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 12),
-              Consumer<SettingsService>(
-                builder: (context, settings, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // BGM設定
-                      Row(
-                        children: [
-                          const Icon(Icons.music_note, color: Colors.grey),
-                          const SizedBox(width: 12),
-                          const Text('BGM音量'),
-                          const Spacer(),
-                          Text(
-                            (settings.bgmVolume * 10).round().toString(),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Slider(
-                        value: settings.bgmVolume,
-                        min: 0,
-                        max: 1.0,
-                        divisions: 10,
-                        label: (settings.bgmVolume * 10).round().toString(),
-                        onChanged: (value) {
-                          settings.setBgmVolume(value);
-                        },
-                        onChangeEnd: (value) {
-                          SeService().play('button_buni.mp3');
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // SE設定
-                      Row(
-                        children: [
-                          const Icon(Icons.volume_up, color: Colors.grey),
-                          const SizedBox(width: 12),
-                          const Text('SE音量'),
-                          const Spacer(),
-                          Text(
-                            (settings.seVolume * 10).round().toString(),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Slider(
-                        value: settings.seVolume,
-                        min: 0,
-                        max: 1.0,
-                        divisions: 10,
-                        label: (settings.seVolume * 10).round().toString(),
-                        onChanged: (value) {
-                          settings.setSeVolume(value);
-                        },
-                        onChangeEnd: (value) {
-                          SeService().play('button_buni.mp3');
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 32),
+              _buildSectionHeader('サウンド設定'),
+              const SizedBox(height: 16),
+              _buildSoundSettings(context),
+              const SizedBox(height: 40),
 
-              // 保存ボタン
-              FilledButton.icon(
-                onPressed: _isSaving
-                    ? null
-                    : () {
-                        SeService().play('button_buni.mp3');
-                        _saveProfile();
-                      },
-                icon: _isSaving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.save),
-                label: Text(_isSaving ? '保存中...' : '保存する'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
+              // 開発者応援・広告非表示セクション（一番下に移動）
+              if (viewModel.shouldShowAds) ...[
+                _buildSupportSection(context, viewModel),
+                const SizedBox(height: 40),
+              ],
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _buildMainProfileCard(
+    BuildContext context,
+    HomeScreenViewModel viewModel,
+  ) {
+    final code = viewModel.userProfile?.friendCode ?? '---';
+    return StereoscopicContainer(
+      baseColor: Colors.white,
+      shadowColor: const Color(0xFFD7CCC8),
+      borderRadius: 24,
+      showDots: true,
+      showStripes: false,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    UserIcon.fromId(_selectedIconId ?? 'cat_orange').emoji,
+                    style: const TextStyle(fontSize: 48),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _nameController.text,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF4D331F),
+                        ),
+                      ),
+                      _buildCapsuleLabel('ユーザー名', color: Colors.grey.shade200),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildCapsuleLabel('フレンドコード', color: const Color(0xFFFFD54F)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    code,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                      color: Color(0xFF4D331F),
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: viewModel.userProfile?.friendCode == null
+                      ? null
+                      : () {
+                          SeService().play('button_buni.mp3');
+                          Clipboard.setData(ClipboardData(text: code));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('コピーしました')),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFCC80),
+                    foregroundColor: const Color(0xFF4D331F),
+                    elevation: 2,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  child: const Text(
+                    'コピー',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSupportSection(
+    BuildContext context,
+    HomeScreenViewModel viewModel,
+  ) {
+    return Column(
+      children: [
+        _buildSectionHeader('開発者を応援する'),
+        const SizedBox(height: 16),
+        StereoscopicContainer(
+          baseColor: const Color(0xFFFFF9C4), // 薄黄色
+          shadowColor: const Color(0xFFFBC02D).withOpacity(0.5),
+          borderRadius: 24,
+          showDots: true,
+          showStripes: false,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.volunteer_activism, color: Color(0xFFEC407A)),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '限定アイコン解放＆広告非表示',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF4D331F),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: StereoscopicButton(
+                    onPressed: () {
+                      SeService().play('button_buni.mp3');
+                      IapService().buySupporter();
+                    },
+                    baseColor: const Color(0xFF66BB6A),
+                    shadowColor: const Color(0xFF2E7D32),
+                    borderRadius: 24,
+                    depth: 4,
+                    child: const Center(
+                      child: Text(
+                        'サポーターになる (応援)',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1),
+                const SizedBox(height: 16),
+                Row(
+                  children: const [
+                    Icon(Icons.block, color: Color(0xFF90A4AE)),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '広告を非表示にする',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF4D331F),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: StereoscopicButton(
+                    onPressed: () {
+                      SeService().play('button_buni.mp3');
+                      IapService().buyRemoveAds();
+                    },
+                    baseColor: const Color(0xFF42A5F5), // 青
+                    shadowColor: const Color(0xFF1565C0),
+                    borderRadius: 24,
+                    depth: 4,
+                    child: const Center(
+                      child: Text(
+                        '広告非表示を購入',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconGrid(BuildContext context, HomeScreenViewModel viewModel) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: UserIcon.presets.length,
+      itemBuilder: (context, index) {
+        final icon = UserIcon.presets[index];
+        final isSelected = icon.id == _selectedIconId;
+        final isLocked =
+            icon.isPremium && !(viewModel.userProfile?.isSupporter ?? false);
+
+        return GestureDetector(
+          onTap: () async {
+            SeService().play('button_buni.mp3');
+            if (isLocked) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('このアイコンはサポーターになると解放されます')),
+              );
+              return;
+            }
+            if (icon.id == _selectedIconId) return;
+
+            setState(() => _selectedIconId = icon.id);
+
+            // 即座に保存
+            try {
+              await viewModel.updateProfile(iconId: icon.id);
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+              }
+            }
+          },
+          child: StereoscopicContainer(
+            baseColor: isSelected ? const Color(0xFFFFD54F) : Colors.white,
+            shadowColor: isSelected
+                ? const Color(0xFFF57F17)
+                : const Color(0xFFD7CCC8),
+            borderRadius: 16,
+            depth: isSelected ? 4 : 2,
+            showStripes: false,
+            showDots: !isSelected,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Opacity(
+                      opacity: isLocked ? 0.3 : 1.0,
+                      child: Text(
+                        icon.emoji,
+                        style: const TextStyle(fontSize: 32),
+                      ),
+                    ),
+                  ],
+                ),
+                if (isLocked)
+                  const Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Icon(Icons.lock, size: 16, color: Colors.grey),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSoundSettings(BuildContext context) {
+    return Consumer<SettingsService>(
+      builder: (context, settings, child) {
+        return StereoscopicContainer(
+          baseColor: Colors.white,
+          shadowColor: const Color(0xFFD7CCC8),
+          borderRadius: 24,
+          showDots: true,
+          showStripes: false,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildVolumeSlider(
+                  label: 'BGM音量',
+                  value: settings.bgmVolume,
+                  icon: Icons.music_note,
+                  onChanged: settings.setBgmVolume,
+                ),
+                const SizedBox(height: 16),
+                _buildVolumeSlider(
+                  label: 'SE音量',
+                  value: settings.seVolume,
+                  icon: Icons.volume_up,
+                  onChanged: settings.setSeVolume,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVolumeSlider({
+    required String label,
+    required double value,
+    required IconData icon,
+    required Function(double) onChanged,
+  }) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 20, color: const Color(0xFF4D331F)),
+            const SizedBox(width: 12),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            const Spacer(),
+            Text(
+              (value * 10).round().toString(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        Slider(
+          value: value,
+          min: 0,
+          max: 1.0,
+          divisions: 10,
+          activeColor: const Color(0xFFFFD54F),
+          inactiveColor: Colors.grey.shade200,
+          onChanged: onChanged,
+          onChangeEnd: (_) => SeService().play('button_buni.mp3'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w900,
+        color: Color(0xFF4D331F),
+      ),
+    );
+  }
+
+  Widget _buildCapsuleLabel(String text, {Color? color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color ?? Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          color: Color(0xFF4D331F),
+        ),
+      ),
+    );
+  }
+}
+
+class StripePainter extends CustomPainter {
+  final Color color;
+  final double stripeWidth;
+  final double gap;
+
+  StripePainter({required this.color, this.stripeWidth = 20, this.gap = 20});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = stripeWidth
+      ..style = PaintingStyle.stroke;
+
+    for (double i = -size.height; i < size.width; i += stripeWidth + gap) {
+      canvas.drawLine(
+        Offset(i, 0),
+        Offset(i + size.height, size.height),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
