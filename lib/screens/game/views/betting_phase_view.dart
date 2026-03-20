@@ -121,9 +121,9 @@ class BettingPhaseView extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: const Color.fromARGB(
                                 255,
-                                221,
-                                153,
-                                5,
+                                0,
+                                0,
+                                0,
                               ).withOpacity(isTarget ? 0.9 : 0.7),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(

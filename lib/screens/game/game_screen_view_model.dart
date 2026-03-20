@@ -64,6 +64,23 @@ class FinalResultCardInfo {
   });
 }
 
+/// 犬の効果による通知データ
+class DogEffectNotification {
+  final String cardName;
+  final String? imagePath;
+  final bool isMyAction; // 自分が追い出したか、相手に追い出されたか
+
+  const DogEffectNotification({
+    required this.cardName,
+    this.imagePath,
+    required this.isMyAction,
+  });
+
+  String get message => isMyAction
+      ? ' を追い出しました！'
+      : ' が逃げてしまいました、、';
+}
+
 /// ゲーム画面のViewModel
 class GameScreenViewModel extends ChangeNotifier {
   final GameService _gameService;
@@ -107,6 +124,9 @@ class GameScreenViewModel extends ChangeNotifier {
   // 戦績記録済みフラグ
   bool _hasRecordedFinalResult = false;
 
+  // 表示済みの犬の効果通知メッセージのハッシュ値または内容を保持
+  final Set<String> _shownDogNotificationIds = {};
+
   // ===== Getters (Viewから参照) =====
   GameScreenState get uiState => _uiState;
   bool get hasRolled => _hasRolled;
@@ -140,18 +160,18 @@ class GameScreenViewModel extends ChangeNotifier {
       final winner = result.getWinner(i);
       final cat = result.cats[i];
 
-      String label = '引き分け';
-      Color cardColor = Colors.grey.shade50;
+      String label = 'DRAW';
+      Color cardColor = Colors.grey.shade100;
       Color textColor = Colors.grey;
 
       if (winner == myRole) {
-        label = 'あなた獲得';
-        cardColor = Colors.green.shade50;
-        textColor = Colors.green;
+        label = 'GET!';
+        cardColor = const Color(0xFFFFCC80); // オレンジ系
+        textColor = const Color(0xFFE65100);
       } else if (winner == opponentRole) {
-        label = '相手獲得';
-        cardColor = Colors.red.shade50;
-        textColor = Colors.red;
+        label = 'LOST..';
+        cardColor = const Color(0xFF90CAF9); // 青系
+        textColor = const Color(0xFF0D47A1);
       }
 
       return RoundDisplayItem(
@@ -619,6 +639,7 @@ class GameScreenViewModel extends ChangeNotifier {
     _hasRolled = false;
     _hasPlacedBet = false;
     _bets = Bets.empty();
+    _shownDogNotificationIds.clear();
   }
 
   /// サーバーの状態とローカルの操作状態を同期する
@@ -887,20 +908,33 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
-  /// 犬の効果による通知メッセージリスト
-  List<String> get dogEffectNotifications {
+  /// 犬の効果による通知リスト
+  List<DogEffectNotification> get dogEffectNotifications {
     final data = playerData;
     if (data == null) return [];
 
-    return data.chasedCards.map((chased) {
-      if (chased.chaserPlayerId != playerId) {
-        // 相手が自分のカードを追い出した場合
-        return '🐶 $opponentDisplayName の犬によって「${chased.cardName}」が逃げてしまいました！';
-      } else {
-        // 自分が相手のカードを追い出した場合
-        return '🐶 $myDisplayName の犬が相手の「${chased.cardName}」を追い出しました！';
-      }
+    final notifications = data.chasedCards.map((chased) {
+      return DogEffectNotification(
+        cardName: chased.cardName,
+        imagePath: _getCatImagePath(chased.cardName),
+        isMyAction: chased.chaserPlayerId == playerId,
+      );
     }).toList();
+
+    // 未表示のものだけを返す（IDとして cardName + action を使用）
+    return notifications.where((n) {
+      final id = '${n.cardName}_${n.isMyAction}';
+      return !_shownDogNotificationIds.contains(id);
+    }).toList();
+  }
+
+  /// 全ての犬の通知を表示済みとしてマーク
+  void clearDogNotifications() {
+    final notifications = dogEffectNotifications;
+    for (var n in notifications) {
+      _shownDogNotificationIds.add('${n.cardName}_${n.isMyAction}');
+    }
+    notifyListeners();
   }
 
   @override
