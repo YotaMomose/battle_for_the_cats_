@@ -119,6 +119,9 @@ class GameScreenViewModel extends ChangeNotifier {
   // 退出処理中かどうか
   bool _isExiting = false;
 
+  // アイテム復活中かどうか
+  bool _isReviving = false;
+
   // 戦績記録済みフラグ
   bool _hasRecordedFinalResult = false;
 
@@ -164,8 +167,8 @@ class GameScreenViewModel extends ChangeNotifier {
 
       if (winner == myRole) {
         label = 'GET!';
-        cardColor = const Color(0xFFFFCC80); // オレンジ系
-        textColor = const Color(0xFFE65100);
+        cardColor = const Color.fromARGB(255, 243, 63, 9); // 薄い赤・ピンク系
+        textColor = const Color.fromARGB(255, 224, 12, 12); // 濃い赤
       } else if (winner == opponentRole) {
         label = 'LOST..';
         cardColor = const Color(0xFF90CAF9); // 青系
@@ -862,7 +865,8 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   /// 自分がアイテムを復活できる状態か
-  bool get canReviveItem => (playerData?.myPendingItemRevivals ?? 0) > 0;
+  bool get canReviveItem =>
+      (playerData?.myPendingItemRevivals ?? 0) > 0 && !_isReviving;
 
   /// 復活可能なアイテムリスト（所持していないアイテム）
   List<ItemType> get revivableItems {
@@ -877,12 +881,16 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// アイテム復活を実行
   Future<void> reviveItem(ItemType item) async {
+    if (_isReviving) return;
+    _isReviving = true;
     try {
       await _gameService.reviveItem(roomCode, playerId, item);
       notifyListeners();
     } catch (e) {
       _uiState = _uiState.copyWithError('アイテムの復活に失敗しました: $e');
       notifyListeners();
+    } finally {
+      _isReviving = false;
     }
   }
 

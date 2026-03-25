@@ -141,13 +141,16 @@ class BettingPhaseView extends StatelessWidget {
                                 child: FittedBox(
                                   fit: BoxFit.contain,
                                   child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start, // Changed to start for better alignment
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      _buildCatCard(
-                                        viewModel,
-                                        card,
-                                        isSmallScreen,
+                                      SizedBox(
+                                        height: isSmallScreen ? 110 : 150, // 余裕を持たせた高さに修正
+                                        child: _buildCatCard(
+                                          viewModel,
+                                          card,
+                                          isSmallScreen,
+                                        ),
                                       ),
                                       SizedBox(height: isSmallScreen ? 4 : 8),
                                       _buildDishArea(
@@ -938,7 +941,10 @@ class BettingPhaseView extends StatelessWidget {
               data: 'fish_from_hand',
               feedback: Material(
                 color: Colors.transparent,
-                child: _buildFishWithNumber('$remaining', size: fishSize * 1.3),
+                child: Text(
+                  '🐟',
+                  style: TextStyle(fontSize: fishSize * 1.3, height: 1.0),
+                ),
               ),
               childWhenDragging: Opacity(
                 opacity: 0.3,
@@ -960,7 +966,7 @@ Widget _buildCatCard(
   GameCard card,
   bool isSmallScreen,
 ) {
-  final avatarSize = isSmallScreen ? 60.0 : 100.0;
+  final avatarSize = isSmallScreen ? 55.0 : 90.0;
   return Container(
     width: isSmallScreen ? 80 : 110,
     padding: const EdgeInsets.all(4),
@@ -1058,10 +1064,13 @@ Widget _buildDishArea(
                       ? Draggable<String>(
                           data: 'fish_from_$catIndex',
                           feedback: Material(
-                            color: const Color.fromARGB(0, 141, 43, 43),
-                            child: _buildFishWithNumber(
-                              '$currentBet',
-                              size: fishSize * 1.3,
+                            color: Colors.transparent,
+                            child: Text(
+                              '🐟',
+                              style: TextStyle(
+                                fontSize: fishSize * 1.3,
+                                height: 1.0,
+                              ),
                             ),
                           ),
                           childWhenDragging: Opacity(
@@ -1303,7 +1312,7 @@ Widget _buildItemSlot(
   GameScreenViewModel viewModel, {
   bool isSmallScreen = false,
 }) {
-  final itemIconSize = isSmallScreen ? 30.0 : 48.0;
+  final itemIconSize = isSmallScreen ? 24.0 : 36.0; // 配置先を少し小さく
   final slotKey = GlobalObjectKey('item_slot_$catIndex');
 
   final color = placedItem != null ? _getItemColor(placedItem) : Colors.white;
@@ -1311,68 +1320,72 @@ Widget _buildItemSlot(
       ? _getItemColor(placedItem).withOpacity(0.8)
       : Colors.grey.shade300;
 
-  return StereoscopicContainer(
-    baseColor: placedItem != null ? color : Colors.white.withOpacity(0.5),
-    shadowColor: shadowColor,
-    borderRadius: 8,
-    depth: 4,
-    showStripes: placedItem != null,
-    showDots: placedItem == null,
-    child: Center(
-      child: placedItem != null
-          ? (!viewModel.hasPlacedBet
-                ? Builder(
-                    builder: (context) {
-                      return Draggable<String>(
-                        data: 'item_from_$catIndex',
-                        feedback: Material(
-                          color: Colors.transparent,
-                          child: _buildItemImage(
-                            placedItem,
-                            size: itemIconSize * 1.2,
+  return SizedBox(
+    width: itemIconSize + 16,
+    height: itemIconSize + 16,
+    child: StereoscopicContainer(
+      baseColor: placedItem != null ? color : Colors.white.withOpacity(0.5),
+      shadowColor: shadowColor,
+      borderRadius: 8,
+      depth: 4,
+      showStripes: placedItem != null,
+      showDots: placedItem == null,
+      child: Center(
+        child: placedItem != null
+            ? (!viewModel.hasPlacedBet
+                  ? Builder(
+                      builder: (context) {
+                        return Draggable<String>(
+                          data: 'item_from_$catIndex',
+                          feedback: Material(
+                            color: Colors.transparent,
+                            child: _buildItemImage(
+                              placedItem,
+                              size: itemIconSize * 1.2,
+                            ),
                           ),
-                        ),
-                        childWhenDragging: Opacity(
-                          opacity: 0.3,
-                          child: _buildItemImage(
-                            placedItem,
-                            size: itemIconSize,
+                          childWhenDragging: Opacity(
+                            opacity: 0.3,
+                            child: _buildItemImage(
+                              placedItem,
+                              size: itemIconSize,
+                            ),
                           ),
-                        ),
-                        child: GestureDetector(
-                          key: slotKey,
-                          onTap: () {
-                            final RenderBox? box =
-                                slotKey.currentContext?.findRenderObject()
-                                    as RenderBox?;
-                            if (box != null) {
-                              final center = box.localToGlobal(
-                                box.size.center(Offset.zero),
-                              );
-                              _flyItemAnimation(
-                                context,
-                                center,
-                                placedItem,
-                                size: itemIconSize,
-                              );
-                            }
-                            viewModel.updateItemPlacement(catIndex, null);
-                            SeService().play('button_buni.mp3');
-                          },
-                          child: _buildItemImage(
-                            placedItem,
-                            size: itemIconSize,
+                          child: GestureDetector(
+                            key: slotKey,
+                            onTap: () {
+                              final RenderBox? box =
+                                  slotKey.currentContext?.findRenderObject()
+                                      as RenderBox?;
+                              if (box != null) {
+                                final center = box.localToGlobal(
+                                  box.size.center(Offset.zero),
+                                );
+                                _flyItemAnimation(
+                                  context,
+                                  center,
+                                  placedItem,
+                                  size: itemIconSize,
+                                );
+                              }
+                              viewModel.updateItemPlacement(catIndex, null);
+                              SeService().play('button_buni.mp3');
+                            },
+                            child: _buildItemImage(
+                              placedItem,
+                              size: itemIconSize,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  )
-                : _buildItemImage(placedItem, size: itemIconSize))
-          : Icon(
-              Icons.add,
-              color: Colors.grey.shade400,
-              size: isSmallScreen ? 12 : 14,
-            ),
+                        );
+                      },
+                    )
+                  : _buildItemImage(placedItem, size: itemIconSize))
+            : Icon(
+                Icons.add,
+                color: Colors.grey.shade400,
+                size: isSmallScreen ? 14 : 18,
+              ),
+      ),
     ),
   );
 }
@@ -1628,61 +1641,6 @@ class _GuideItem {
     this.tagColor,
     this.tagTextColor,
   });
-}
-
-/// 待機中の「...」が順に跳ねるアニメーション
-class AnimatedWaitingDots extends StatefulWidget {
-  final TextStyle style;
-  const AnimatedWaitingDots({super.key, required this.style});
-
-  @override
-  State<AnimatedWaitingDots> createState() => _AnimatedWaitingDotsState();
-}
-
-class _AnimatedWaitingDotsState extends State<AnimatedWaitingDots>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            // 各ドットを時間差で跳ねさせる
-            final double progress = (_controller.value - (index * 0.2)) % 1.0;
-            double jump = 0;
-            if (progress > 0 && progress < 0.4) {
-              // 0.0〜0.4の間に放物線を描いて跳ねる
-              final double t = progress / 0.4;
-              jump = -6 * (t * (1 - t) * 4);
-            }
-            return Transform.translate(
-              offset: Offset(0, jump),
-              child: Text('.', style: widget.style),
-            );
-          },
-        );
-      }),
-    );
-  }
 }
 
 /// 背景のドット柄を描画するペインター

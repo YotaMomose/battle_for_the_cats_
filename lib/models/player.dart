@@ -1,3 +1,4 @@
+import '../constants/game_constants.dart';
 import '../models/bets.dart';
 import 'cat_inventory.dart';
 import 'item_inventory.dart';
@@ -140,6 +141,18 @@ class Player {
   /// 獲得した猫を記録する
   void addWonCat(String name, int cost) {
     catsWon.addCat(name, cost);
+  }
+
+  /// 獲得した猫を削除する（犬の効果などで使用）
+  void removeWonCat(String name) {
+    final beforeCount = catsWon.count;
+    catsWon.removeByName(name);
+    final afterCount = catsWon.count;
+
+    // 実際に削除された場合、漁師ならカウントを減らす
+    if (beforeCount > afterCount && name == GameConstants.fisherman) {
+      fishermanCount = (fishermanCount - 1).clamp(0, 99);
+    }
   }
 
   /// 現在の賭け金を支払い、リソースを消費する

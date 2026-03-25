@@ -33,53 +33,73 @@ class RoundResultView extends StatelessWidget {
       });
     }
 
+    // アイテム復活が1つの場合は自動復活（ポップアップ表示）
+    if (viewModel.canReviveItem && viewModel.revivableItems.length == 1) {
+      final item = viewModel.revivableItems.first;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // 先に復活処理を実行（再表示を防ぐ）
+        viewModel.reviveItem(item);
+        // ポップアップを表示
+        _showAutoRevivePopup(context, item, isSmallScreen);
+      });
+    }
+
+    final canRevive = viewModel.canReviveItem;
+    final canChase = viewModel.canChaseAway;
+    final shouldScroll = canRevive || canChase;
+
+    Widget mainContent = Column(
+      children: [
+        // ヘッダー
+        _buildHeader(displayTurn, isSmallScreen),
+
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: shouldScroll ? (isSmallScreen ? 12 : 20) : 8,
+          ),
+          child: Column(
+            children: [
+              // 累計結果
+              _buildCumulativeResult(context, viewModel, isSmallScreen),
+              SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+
+              // 猫カードの横並び
+              _buildCatCardRow(context, viewModel, isSmallScreen),
+              SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+
+              // 特殊効果UI (復活/追い出し) - ボタンの上に配置
+              if (canRevive && viewModel.revivableItems.length > 1) ...[
+                _buildReviveSection(context, viewModel, isSmallScreen),
+                SizedBox(height: isSmallScreen ? 12 : 20),
+              ],
+              if (canChase) ...[
+                _buildChaseAwaySection(context, viewModel, isSmallScreen),
+                SizedBox(height: isSmallScreen ? 12 : 20),
+              ],
+
+              // 次のターンへボタン
+              _buildNextButton(viewModel, isConfirmed, isSmallScreen),
+              if (shouldScroll)
+                const SizedBox(height: 120)
+              else
+                const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           SingleChildScrollView(
-            child: Column(
-              children: [
-                // ヘッダー
-                _buildHeader(displayTurn, isSmallScreen),
-
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: isSmallScreen ? 12 : 20,
-                  ),
-                  child: Column(
-                    children: [
-                      // 累計結果
-                      _buildCumulativeResult(context, viewModel, isSmallScreen),
-                      SizedBox(height: isSmallScreen ? 16 : 32),
-
-                      // 猫カードの横並び
-                      _buildCatCardRow(context, viewModel, isSmallScreen),
-                      SizedBox(height: isSmallScreen ? 16 : 32),
-
-                      // 特殊効果UI (復活/追い出し) - ボタンの上に配置
-                      if (viewModel.canReviveItem) ...[
-                        _buildReviveSection(context, viewModel, isSmallScreen),
-                        SizedBox(height: isSmallScreen ? 12 : 20),
-                      ],
-                      if (viewModel.canChaseAway) ...[
-                        _buildChaseAwaySection(
-                          context,
-                          viewModel,
-                          isSmallScreen,
-                        ),
-                        SizedBox(height: isSmallScreen ? 12 : 20),
-                      ],
-
-                      // 次のターンへボタン
-                      _buildNextButton(viewModel, isConfirmed, isSmallScreen),
-                      const SizedBox(height: 120), // 余裕を持たせる
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            // 特殊効果がない時はスクロールを極力発生させない
+            physics: shouldScroll
+                ? const BouncingScrollPhysics()
+                : const ClampingScrollPhysics(),
+            child: mainContent,
           ),
         ],
       ),
@@ -189,10 +209,106 @@ class RoundResultView extends StatelessWidget {
     );
   }
 
+  void _showAutoRevivePopup(
+    BuildContext context,
+    ItemType item,
+    bool isSmallScreen,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: StereoscopicContainer(
+              baseColor: Colors.white,
+              shadowColor: Colors.purple.shade200,
+              borderRadius: 24,
+              depth: 8,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      'assets/images/shop.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'アイテム屋の効果発動！',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.purple,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (item.imagePath != null)
+                          Image.asset(
+                            item.imagePath!,
+                            width: isSmallScreen ? 40 : 50,
+                            height: isSmallScreen ? 40 : 50,
+                            fit: BoxFit.contain,
+                          )
+                        else
+                          const Icon(Icons.refresh, color: Colors.purple),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            '${item.displayName} 復活！',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 18 : 22,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF4D331F),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    StereoscopicButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      baseColor: const Color(0xFFFFD54F),
+                      shadowColor: const Color(0xFFE58900),
+                      borderRadius: 16,
+                      depth: 4,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'OK',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                            color: Color(0xFF4D331F),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildHeader(int turn, bool isSmallScreen) {
     final headerHeight = isSmallScreen ? 30.0 : 50.0;
     final fontSize = isSmallScreen ? 20.0 : 30.0;
-    final starSize = isSmallScreen ? 24.0 : 36.0;
 
     return Container(
       height: headerHeight,
@@ -721,7 +837,7 @@ class RoundResultView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (hasItem) ...[
-                  _buildSmallItemIcon(item!, size: itemIconSize),
+                  _buildSmallItemIcon(item, size: itemIconSize),
                   const SizedBox(width: 4),
                 ],
                 _buildFishWithNumber(value, size: fishSize),
@@ -771,11 +887,12 @@ class RoundResultView extends StatelessWidget {
     bool isSmallScreen,
   ) {
     final canChase = viewModel.canChaseAway;
+    final canRevive = viewModel.canReviveItem;
     return SizedBox(
       width: double.infinity,
       height: isSmallScreen ? 50 : 72,
       child: StereoscopicButton(
-        onPressed: (isConfirmed || canChase)
+        onPressed: (isConfirmed || canChase || canRevive)
             ? null
             : () {
                 SeService().play('button_buni.mp3');
@@ -786,17 +903,41 @@ class RoundResultView extends StatelessWidget {
         borderRadius: 36,
         depth: 8,
         child: Center(
-          child: Text(
-            canChase
-                ? (isSmallScreen ? 'キャラ選択待ち' : 'キャラ選択待ち')
-                : (isConfirmed
-                      ? '確認待ち...'
-                      : (isSmallScreen ? '次へ ▶' : '次のターンへ ▶')),
-            style: TextStyle(
-              fontSize: isSmallScreen ? 20 : 36,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
+          child: Builder(
+            builder: (context) {
+              final String labelText;
+              bool showDots = false;
+
+              if (canChase) {
+                labelText = 'キャラ選択待ち';
+              } else if (canRevive) {
+                labelText = isSmallScreen ? 'アイテムを選択' : 'アイテムを選択してください';
+              } else if (isConfirmed) {
+                labelText = '確認待ち';
+                showDots = true;
+              } else {
+                labelText = isSmallScreen ? '次へ ▶' : '次のターンへ ▶';
+              }
+
+              final textStyle = TextStyle(
+                fontSize: (canChase || canRevive || showDots)
+                    ? (isSmallScreen ? 16 : 24)
+                    : (isSmallScreen ? 20 : 36),
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              );
+
+              if (showDots) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(labelText, style: textStyle),
+                    AnimatedWaitingDots(style: textStyle),
+                  ],
+                );
+              }
+              return Text(labelText, style: textStyle);
+            },
           ),
         ),
       ),
@@ -846,9 +987,16 @@ class RoundResultView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            offset: const Offset(0, 2),
+            blurRadius: 0,
+          ),
+        ],
       ),
       child: Text(
         text,

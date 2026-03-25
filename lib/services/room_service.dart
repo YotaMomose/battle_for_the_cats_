@@ -243,7 +243,7 @@ class RoomService {
 
       // 相手のインベントリから削除（ターゲットが指定されている場合のみ）
       if (targetCardName != null && targetCardName.isNotEmpty) {
-        opponent.catsWon.removeByName(targetCardName);
+        opponent.removeWonCat(targetCardName);
 
         // 通知用に記録
         room.chasedCards.add(

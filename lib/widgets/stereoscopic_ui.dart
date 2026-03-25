@@ -243,3 +243,58 @@ class DotPatternPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+
+/// 待機中の「...」が順に跳ねるアニメーション
+class AnimatedWaitingDots extends StatefulWidget {
+  final TextStyle style;
+  const AnimatedWaitingDots({super.key, required this.style});
+
+  @override
+  State<AnimatedWaitingDots> createState() => _AnimatedWaitingDotsState();
+}
+
+class _AnimatedWaitingDotsState extends State<AnimatedWaitingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            // 各ドットを時間差で跳ねさせる
+            final double progress = (_controller.value - (index * 0.2)) % 1.0;
+            double jump = 0;
+            if (progress > 0 && progress < 0.4) {
+              // 0.0〜0.4の間に放物線を描いて跳ねる
+              final double t = progress / 0.4;
+              jump = -6 * (t * (1 - t) * 4);
+            }
+            return Transform.translate(
+              offset: Offset(0, jump),
+              child: Text('.', style: widget.style),
+            );
+          },
+        );
+      }),
+    );
+  }
+}
