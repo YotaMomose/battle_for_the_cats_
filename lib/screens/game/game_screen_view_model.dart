@@ -76,9 +76,7 @@ class DogEffectNotification {
     required this.isMyAction,
   });
 
-  String get message => isMyAction
-      ? ' を追い出しました！'
-      : ' が逃げてしまいました、、';
+  String get message => isMyAction ? ' を追い出しました！' : ' が逃げてしまいました、、';
 }
 
 /// ゲーム画面のViewModel
@@ -352,7 +350,9 @@ class GameScreenViewModel extends ChangeNotifier {
   Color get opponentReadyStatusColor {
     final data = playerData;
     if (data == null) return Colors.grey;
-    return data.opponentReady ? Colors.green : Colors.orange;
+    return data.opponentReady
+        ? Colors.green
+        : const Color.fromARGB(255, 255, 38, 0);
   }
 
   /// 自分の表示名
@@ -379,7 +379,9 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 確定ボタンのラベル
   String get confirmBetsButtonLabel {
-    return _hasPlacedBet ? '確定済み' : '確定';
+    if (isMyReady) return '確定済み';
+    if (!hasPlacedBet) return '確定する';
+    return '確定する';
   }
 
   /// サイコロボタンのラベル

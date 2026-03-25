@@ -42,31 +42,6 @@ class _MainMenuViewState extends State<MainMenuView> {
         child: SafeArea(
           child: Stack(
             children: [
-              // 左上の自分のアイコン
-              if (viewModel.userProfile != null)
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: _buildCircleButton(
-                    onPressed: () {
-                      SeService().play('button_buni.mp3');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChangeNotifierProvider.value(
-                            value: viewModel,
-                            child: const ProfileScreen(),
-                          ),
-                        ),
-                      );
-                    },
-                    tooltip: 'プロフィール',
-                    child: Text(
-                      UserIcon.fromId(viewModel.userProfile!.iconId).emoji,
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ),
-                ),
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(

@@ -190,8 +190,8 @@ class RoundResultView extends StatelessWidget {
   }
 
   Widget _buildHeader(int turn, bool isSmallScreen) {
-    final headerHeight = isSmallScreen ? 50.0 : 80.0;
-    final fontSize = isSmallScreen ? 24.0 : 36.0;
+    final headerHeight = isSmallScreen ? 30.0 : 50.0;
+    final fontSize = isSmallScreen ? 20.0 : 30.0;
     final starSize = isSmallScreen ? 24.0 : 36.0;
 
     return Container(
@@ -219,23 +219,26 @@ class RoundResultView extends StatelessWidget {
                 Icon(
                   Icons.star,
                   color: const Color(0xFFE58900),
-                  size: starSize,
+                  size: isSmallScreen ? 16 : 24,
                 ),
-                const SizedBox(width: 16),
-                Text(
-                  'ターン $turn けっか！',
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF4D331F),
-                    letterSpacing: 1.2,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'ターン $turn けっか！',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF4D331F),
+                      letterSpacing: 1.2,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 8),
                 Icon(
                   Icons.star,
                   color: const Color(0xFFE58900),
-                  size: starSize,
+                  size: isSmallScreen ? 16 : 24,
                 ),
               ],
             ),
@@ -540,8 +543,11 @@ class RoundResultView extends StatelessWidget {
                 color: const Color(0xFF4D331F),
                 fontSize: isSmallScreen ? 16 : 20,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: 8),
           if (cards.isEmpty)
             Text(
               'なし',
@@ -552,7 +558,11 @@ class RoundResultView extends StatelessWidget {
               ),
             )
           else
-            _buildWonCardsIconListSmall(cards, isSmallScreen),
+            // カードリスト部分を一定の幅でスクロール可能にする
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: isSmallScreen ? 160 : 220),
+              child: _buildWonCardsIconListSmall(cards, isSmallScreen),
+            ),
         ],
       ),
     );
@@ -678,38 +688,47 @@ class RoundResultView extends StatelessWidget {
     ItemType? item,
     bool isSmallScreen,
   ) {
-    final fishSize = isSmallScreen ? 34.0 : 48.0;
-    final itemIconSize = isSmallScreen ? 18.0 : 26.0;
+    final hasItem = item != null && item != ItemType.unknown;
+    final fishSize = hasItem
+        ? (isSmallScreen ? 24.0 : 36.0)
+        : (isSmallScreen ? 34.0 : 48.0);
+    final itemIconSize = isSmallScreen ? 14.0 : 20.0;
+    // 表の高さがずれないように高さを固定する
+    final rowHeight = isSmallScreen ? 55.0 : 75.0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1段目: プレイヤー名
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: isSmallScreen ? 12 : 16,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF4D331F),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: SizedBox(
+        height: rowHeight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 1段目: プレイヤー名
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 11 : 14,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF4D331F),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          // 2段目: アイテムと魚
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (item != null && item != ItemType.unknown) ...[
-                _buildSmallItemIcon(item, size: itemIconSize),
-                const SizedBox(width: 8),
+            const SizedBox(height: 2),
+            // 2段目: アイテムと魚
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (hasItem) ...[
+                  _buildSmallItemIcon(item!, size: itemIconSize),
+                  const SizedBox(width: 4),
+                ],
+                _buildFishWithNumber(value, size: fishSize),
               ],
-              _buildFishWithNumber(value, size: fishSize),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -769,7 +788,7 @@ class RoundResultView extends StatelessWidget {
         child: Center(
           child: Text(
             canChase
-                ? (isSmallScreen ? 'カードを選択' : '追い出すカードを選択してください')
+                ? (isSmallScreen ? 'キャラ選択待ち' : 'キャラ選択待ち')
                 : (isConfirmed
                       ? '確認待ち...'
                       : (isSmallScreen ? '次へ ▶' : '次のターンへ ▶')),
@@ -861,12 +880,18 @@ class RoundResultView extends StatelessWidget {
     List<FinalResultCardInfo> cards,
     bool isSmallScreen,
   ) {
-    return Wrap(
-      alignment: WrapAlignment.end,
-      spacing: 4,
-      children: cards.map((card) {
-        return _buildCatAvatarFromCard(card, size: isSmallScreen ? 24 : 32);
-      }).toList(),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: cards.map((card) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: _buildCatAvatarFromCard(card, size: isSmallScreen ? 24 : 32),
+          );
+        }).toList(),
+      ),
     );
   }
 

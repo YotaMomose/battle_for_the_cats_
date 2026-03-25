@@ -189,93 +189,96 @@ class BettingPhaseView extends StatelessWidget {
               ),
 
               // 確定ボタン
-              if (!viewModel.isMyReady)
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: isSmallScreen ? 2.0 : 4.0,
-                    bottom: isSmallScreen ? 2.0 : 4.0,
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      height: (isSmallScreen ? 36.0 : 44.0) + 6.0,
-                      width: isSmallScreen ? 140.0 : 160.0,
-                      child: StereoscopicButton(
-                        onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
-                            ? null
-                            : () {
-                                SeService().play('button_buni.mp3');
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    alignment: Alignment.bottomCenter,
-                                    title: const Text(
-                                      '確定しますか？',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: isSmallScreen ? 2.0 : 4.0,
+                  bottom: isSmallScreen ? 2.0 : 4.0,
+                ),
+                child: Center(
+                  child: SizedBox(
+                    height: (isSmallScreen ? 36.0 : 44.0) + 6.0,
+                    width: isSmallScreen ? 140.0 : 160.0,
+                    child: StereoscopicButton(
+                      onPressed: viewModel.hasPlacedBet || viewModel.isMyReady
+                          ? null
+                          : () {
+                              SeService().play('button_buni.mp3');
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  alignment: Alignment.bottomCenter,
+                                  title: const Text(
+                                    '確定しますか？',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    content: const Text(
-                                      'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text(
-                                          'キャンセル',
-                                          style: TextStyle(color: Colors.grey),
-                                        ),
-                                      ),
-                                      StereoscopicButton(
-                                        baseColor: Colors.pink.shade400,
-                                        shadowColor: Colors.pink.shade900,
-                                        borderRadius: 12,
-                                        depth: 4,
-                                        onPressed: () {
-                                          SeService().play('button_buni.mp3');
-                                          Navigator.of(context).pop();
-                                          viewModel.placeBets();
-                                        },
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
-                                          ),
-                                          child: Text(
-                                            '確定する',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
                                   ),
-                                );
-                              },
-                        baseColor: Colors.pink.shade400,
-                        shadowColor: Colors.pink.shade900,
-                        borderRadius: 22,
-                        depth: 6,
-                        child: Center(
-                          child: Text(
-                            viewModel.confirmBetsButtonLabel,
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 14 : 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                                  content: const Text(
+                                    'この内容で確定しますか？\n（確定後は他のプレイヤーを待ちます）',
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text(
+                                        'キャンセル',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ),
+                                    StereoscopicButton(
+                                      baseColor: Colors.pink.shade400,
+                                      shadowColor: Colors.pink.shade900,
+                                      borderRadius: 12,
+                                      depth: 4,
+                                      onPressed: () {
+                                        SeService().play('button_buni.mp3');
+                                        Navigator.of(context).pop();
+                                        viewModel.placeBets();
+                                      },
+                                      child: const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 8,
+                                        ),
+                                        child: Text(
+                                          '確定する',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                      baseColor: viewModel.isMyReady
+                          ? Colors.grey.shade400
+                          : Colors.pink.shade400,
+                      shadowColor: viewModel.isMyReady
+                          ? Colors.grey.shade600
+                          : Colors.pink.shade900,
+                      borderRadius: 22,
+                      depth: viewModel.isMyReady ? 2 : 6,
+                      child: Center(
+                        child: Text(
+                          viewModel.confirmBetsButtonLabel,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 14 : 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),
@@ -811,25 +814,48 @@ class BettingPhaseView extends StatelessWidget {
                     ],
                     if (statusLabel != null)
                       Padding(
-                        padding: const EdgeInsets.only(top: 2.0),
-                        child: Text(
-                          statusLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: statusColor,
-                            fontWeight: FontWeight.bold,
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 2,
                           ),
-                        ),
-                      ),
-                    if (isReady && !isOpponent)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 2.0),
-                        child: Text(
-                          '準備完了：結果を待っています...',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFBF5F),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFF4D331F),
+                              width: 2,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0xFF4D331F),
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                statusLabel.endsWith('...')
+                                    ? statusLabel.replaceFirst('...', '')
+                                    : statusLabel,
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 12 : 14,
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              if (statusLabel.endsWith('...'))
+                                AnimatedWaitingDots(
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 12 : 14,
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -1602,6 +1628,61 @@ class _GuideItem {
     this.tagColor,
     this.tagTextColor,
   });
+}
+
+/// 待機中の「...」が順に跳ねるアニメーション
+class AnimatedWaitingDots extends StatefulWidget {
+  final TextStyle style;
+  const AnimatedWaitingDots({super.key, required this.style});
+
+  @override
+  State<AnimatedWaitingDots> createState() => _AnimatedWaitingDotsState();
+}
+
+class _AnimatedWaitingDotsState extends State<AnimatedWaitingDots>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            // 各ドットを時間差で跳ねさせる
+            final double progress = (_controller.value - (index * 0.2)) % 1.0;
+            double jump = 0;
+            if (progress > 0 && progress < 0.4) {
+              // 0.0〜0.4の間に放物線を描いて跳ねる
+              final double t = progress / 0.4;
+              jump = -6 * (t * (1 - t) * 4);
+            }
+            return Transform.translate(
+              offset: Offset(0, jump),
+              child: Text('.', style: widget.style),
+            );
+          },
+        );
+      }),
+    );
+  }
 }
 
 /// 背景のドット柄を描画するペインター
