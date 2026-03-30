@@ -28,7 +28,11 @@ class WaitingView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (!viewModel.hasGuest) ...[
-                  const CircularProgressIndicator(),
+                  Image.asset(
+                    'assets/images/neko3_walk.gif',
+                    height: 100,
+                    fit: BoxFit.contain,
+                  ),
                   const SizedBox(height: 24),
                   const Text('対戦相手を待っています...', style: TextStyle(fontSize: 20)),
                   const SizedBox(height: 16),
@@ -129,7 +133,11 @@ class WaitingView extends StatelessWidget {
                       ),
                     ),
                   ] else ...[
-                    const CircularProgressIndicator(),
+                    Image.asset(
+                      'assets/images/neko3_walk.gif',
+                      height: 100,
+                      fit: BoxFit.contain,
+                    ),
                     const SizedBox(height: 24),
                     const Text(
                       'ホストが開始するのを待っています...',
