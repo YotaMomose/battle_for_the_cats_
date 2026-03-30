@@ -8,6 +8,7 @@ import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
 import '../services/iap_service.dart';
 import '../widgets/stereoscopic_ui.dart';
+import '../widgets/user_icon_widget.dart';
 
 /// プロフィール設定画面
 ///
@@ -170,28 +171,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF4D331F),
-                      width: 3,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    UserIcon.fromId(_selectedIconId ?? 'cat_orange').emoji,
-                    style: const TextStyle(fontSize: 48),
-                  ),
+                UserIconPreview(
+                  icon: UserIcon.fromId(_selectedIconId ?? 'cat_orange'),
+                  size: 80,
                 ),
                 const SizedBox(width: 20),
                 Expanded(
@@ -367,80 +349,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildIconGrid(BuildContext context, HomeScreenViewModel viewModel) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: UserIcon.presets.length,
-      itemBuilder: (context, index) {
-        final icon = UserIcon.presets[index];
-        final isSelected = icon.id == _selectedIconId;
-        final isLocked =
-            icon.isPremium && !(viewModel.userProfile?.isSupporter ?? false);
+    return Center(
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 20,
+        alignment: WrapAlignment.center,
+        children: UserIcon.presets.map((icon) {
+          final isSelected = icon.id == _selectedIconId;
+          final isLocked =
+              icon.isPremium && !(viewModel.userProfile?.isSupporter ?? false);
 
-        return GestureDetector(
-          onTap: () async {
-            SeService().play('button_buni.mp3');
-            if (isLocked) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('このアイコンはサポーターになると解放されます')),
-              );
-              return;
-            }
-            if (icon.id == _selectedIconId) return;
-
-            setState(() => _selectedIconId = icon.id);
-
-            // 即座に保存
-            try {
-              await viewModel.updateProfile(iconId: icon.id);
-            } catch (e) {
-              if (mounted) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+          return GestureDetector(
+            onTap: () async {
+              SeService().play('button_buni.mp3');
+              if (isLocked) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('このアイコンはサポーターになると解放されます')),
+                );
+                return;
               }
-            }
-          },
-          child: StereoscopicContainer(
-            baseColor: isSelected ? const Color(0xFFFFD54F) : Colors.white,
-            shadowColor: isSelected
-                ? const Color(0xFFF57F17)
-                : const Color(0xFFD7CCC8),
-            borderRadius: 16,
-            depth: isSelected ? 4 : 2,
-            showStripes: false,
-            showDots: !isSelected,
-            child: Stack(
-              alignment: Alignment.center,
+              if (icon.id == _selectedIconId) return;
+
+              setState(() => _selectedIconId = icon.id);
+
+              // 即座に保存
+              try {
+                await viewModel.updateProfile(iconId: icon.id);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+                }
+              }
+            },
+            child: Column(
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Opacity(
-                      opacity: isLocked ? 0.3 : 1.0,
-                      child: Text(
-                        icon.emoji,
-                        style: const TextStyle(fontSize: 32),
-                      ),
-                    ),
-                  ],
-                ),
-                if (isLocked)
-                  const Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Icon(Icons.lock, size: 16, color: Colors.grey),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white : Colors.white70,
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(color: const Color(0xFFFFCE35), width: 3)
+                        : Border.all(color: Colors.black12, width: 1),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFFFFCE35).withOpacity(0.5),
+                              blurRadius: 8,
+                            ),
+                          ]
+                        : null,
                   ),
+                  padding: EdgeInsets.all(isSelected ? 2 : 6),
+                  child: UserIconWidget(icon: icon, size: 36, isLocked: isLocked),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  icon.label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        isSelected ? const Color(0xFF4D331F) : Colors.grey[700],
+                  ),
+                ),
               ],
             ),
-          ),
-        );
-      },
+          );
+        }).toList(),
+      ),
     );
   }
 

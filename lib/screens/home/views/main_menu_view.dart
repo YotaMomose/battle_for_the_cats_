@@ -9,6 +9,7 @@ import '../../../widgets/paw_background.dart';
 import '../../profile_screen.dart';
 import '../../friend_management/friend_management_screen.dart';
 import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/user_icon_widget.dart';
 
 /// メインメニュー画面
 class MainMenuView extends StatefulWidget {
@@ -323,9 +324,9 @@ class _MainMenuViewState extends State<MainMenuView> {
                         itemBuilder: (context, index) {
                           final invitation = invitations[index];
                           return ListTile(
-                            leading: Text(
-                              UserIcon.fromId(invitation.senderIconId).emoji,
-                              style: const TextStyle(fontSize: 32),
+                            leading: UserIconWidget(
+                              icon: UserIcon.fromId(invitation.senderIconId),
+                              size: 40,
                             ),
                             title: Text('${invitation.senderName} さん'),
                             subtitle: const Text('対戦に招待されています'),
@@ -445,9 +446,9 @@ class _MainMenuViewState extends State<MainMenuView> {
           children: [
             const Text('対戦相手:'),
             const SizedBox(height: 16),
-            Text(
-              UserIcon.fromId(host.iconId).emoji,
-              style: const TextStyle(fontSize: 48),
+            UserIconWidget(
+              icon: UserIcon.fromId(host.iconId),
+              size: 64,
             ),
             const SizedBox(height: 8),
             Text(

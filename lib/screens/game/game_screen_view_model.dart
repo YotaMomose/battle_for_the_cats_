@@ -50,6 +50,7 @@ class RoundDisplayItem {
 /// 最終結果でのカード表示用データ
 class FinalResultCardInfo {
   final String name;
+  final int cost;
   final Color color;
   final IconData icon;
   final String? imagePath;
@@ -57,6 +58,7 @@ class FinalResultCardInfo {
 
   const FinalResultCardInfo({
     required this.name,
+    required this.cost,
     required this.color,
     required this.icon,
     this.imagePath,
@@ -226,6 +228,7 @@ class GameScreenViewModel extends ChangeNotifier {
       final cat = inventory.all[i];
       return FinalResultCardInfo(
         name: cat.name,
+        cost: cat.cost,
         color: _getCatColor(cat.name),
         icon: _getCatIcon(cat.name),
         imagePath: _getCatImagePath(cat.name),
@@ -371,6 +374,12 @@ class GameScreenViewModel extends ChangeNotifier {
   /// 相手のアイコン（絵文字）
   String get opponentIconEmoji =>
       UserIcon.fromId(playerData?.opponentIconId ?? 'cat_orange').emoji;
+
+  /// 自分のアイコンID
+  String get myIconId => playerData?.myIconId ?? 'cat_orange';
+
+  /// 相手のアイコンID
+  String get opponentIconId => playerData?.opponentIconId ?? 'cat_orange';
 
   /// 残りの魚の表示ラベル
   String get myRemainingFishLabel {

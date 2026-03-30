@@ -99,12 +99,14 @@ class UserIcon {
   final String id;
   final String label;
   final String emoji;
+  final String? imagePath;
   final bool isPremium;
 
   const UserIcon({
     required this.id,
     required this.label,
     required this.emoji,
+    this.imagePath,
     this.isPremium = false,
   });
 
@@ -113,18 +115,59 @@ class UserIcon {
     id: 'cat_orange',
     label: '茶トラねこ',
     emoji: '🐱',
+    imagePath: 'assets/images/tyatoranekopng.png',
   );
 
   /// 選択可能なアイコン一覧
   static const List<UserIcon> presets = [
-    UserIcon(id: 'cat_orange', label: '茶トラねこ', emoji: '🐱'),
-    UserIcon(id: 'cat_white', label: '白ねこ', emoji: '🐈'),
-    UserIcon(id: 'cat_black', label: '黒ねこ', emoji: '🐈‍⬛'),
-    UserIcon(id: 'dog', label: '犬', emoji: '🐶'),
-    UserIcon(id: 'fish', label: 'さかな', emoji: '🐟'),
-    UserIcon(id: 'octopus', label: 'たこ', emoji: '🐙'),
-    UserIcon(id: 'penguin', label: 'ペンギン', emoji: '🐧'),
-    UserIcon(id: 'rabbit', label: 'うさぎ', emoji: '🐰'),
+    UserIcon(
+      id: 'cat_orange',
+      label: '茶トラ',
+      emoji: '🐱',
+      imagePath: 'assets/images/tyatoranekopng.png',
+    ),
+    UserIcon(
+      id: 'cat_white',
+      label: '白ねこ',
+      emoji: '🐈',
+      imagePath: 'assets/images/sironeko.png',
+    ),
+    UserIcon(
+      id: 'cat_black',
+      label: '黒ねこ',
+      emoji: '🐈‍⬛',
+      imagePath: 'assets/images/kuroneko.png',
+    ),
+    UserIcon(
+      id: 'dog',
+      label: 'いぬ',
+      emoji: '🐶',
+      imagePath: 'assets/images/inu.png',
+    ),
+    UserIcon(
+      id: 'fisherman',
+      label: '漁師',
+      emoji: '🎣',
+      imagePath: 'assets/images/ryousi.png',
+    ),
+    UserIcon(
+      id: 'shop',
+      label: 'お店',
+      emoji: '🏪',
+      imagePath: 'assets/images/shop.png',
+    ),
+    UserIcon(
+      id: 'toy',
+      label: 'じゃらし',
+      emoji: '🌿',
+      imagePath: 'assets/images/nekojarashi.png',
+    ),
+    UserIcon(
+      id: 'silver_vine',
+      label: 'またたび',
+      emoji: '💊',
+      imagePath: 'assets/images/matatabi.png',
+    ),
 
     // プレミアムアイコン
     UserIcon(id: 'cat_crown', label: '王冠ねこ', emoji: '🤴', isPremium: true),

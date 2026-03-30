@@ -11,6 +11,7 @@ import '../../repositories/friend_repository.dart';
 import '../../repositories/user_repository.dart';
 import '../../constants/game_constants.dart';
 import '../../widgets/stereoscopic_ui.dart';
+import '../../widgets/user_icon_widget.dart';
 import 'package:flutter/cupertino.dart';
 
 class FriendManagementScreen extends StatelessWidget {
@@ -512,25 +513,9 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF4D331F), width: 2.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                UserIcon.fromId(iconId).emoji,
-                style: const TextStyle(fontSize: 36),
-              ),
+            UserIconWidget(
+              icon: UserIcon.fromId(iconId),
+              size: 64,
             ),
             const SizedBox(width: 16),
             Expanded(

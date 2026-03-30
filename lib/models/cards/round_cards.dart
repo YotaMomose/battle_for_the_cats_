@@ -49,7 +49,7 @@ class RoundCards {
   static GameCard _randomCard(int index) {
     final rand = Random().nextDouble();
     // 10%の確率でアイテム屋が出現
-    if (rand < 1) {
+    if (rand < 0.1) {
       return ItemShop.random(index);
     }
     // 10%の確率で漁師が出現
