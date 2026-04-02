@@ -31,6 +31,27 @@ class _FinalResultViewState extends State<FinalResultView> {
     });
   }
 
+  bool _hasShownOpponentLeftDialog = false;
+
+  void _checkOpponentLeft() {
+    if (!mounted || _hasShownOpponentLeftDialog) return;
+    _hasShownOpponentLeftDialog = true; // タイミング制御のため即座にフラグを立てる
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('対戦相手が退出しました'),
+        content: const Text('相手がリタイアしたため、不戦勝となりました。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _playResultSound() {
     if (!mounted) return;
     final viewModel = Provider.of<GameScreenViewModel>(context, listen: false);
@@ -49,6 +70,14 @@ class _FinalResultViewState extends State<FinalResultView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<GameScreenViewModel>();
+
+    // 対戦相手の退出チェック（一回限り表示）
+    if (viewModel.uiState.isOpponentLeft && !_hasShownOpponentLeftDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkOpponentLeft();
+      });
+    }
+
     final resultColor = viewModel.finalWinnerColor;
 
     final screenSize = MediaQuery.of(context).size;
@@ -311,10 +340,7 @@ class _FinalResultViewState extends State<FinalResultView> {
                   ),
                 ),
                 const SizedBox(width: 2),
-                Text(
-                  '🐟',
-                  style: TextStyle(fontSize: isSmallScreen ? 10 : 12),
-                ),
+                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 10 : 12)),
               ],
             ),
           ),
@@ -669,12 +695,14 @@ class _FinalResultViewState extends State<FinalResultView> {
               onAdClosed: () {
                 if (context.mounted) {
                   viewModel.leaveRoom();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 }
               },
             );
           }
         } else {
           viewModel.leaveRoom();
+          Navigator.of(context).popUntil((route) => route.isFirst);
         }
       },
       child: Container(

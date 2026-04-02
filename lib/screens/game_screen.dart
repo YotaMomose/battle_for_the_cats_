@@ -11,6 +11,7 @@ import 'game/views/round_result_view.dart';
 import 'game/views/final_result_view.dart';
 import 'game/views/fat_cat_event_view.dart';
 import '../services/game_service.dart';
+import 'home_screen.dart';
 
 /// ゲーム画面（MVVM）
 class GameScreen extends StatelessWidget {
@@ -34,8 +35,22 @@ class GameScreen extends StatelessWidget {
         playerId: playerId,
         isHost: isHost,
         onOpponentLeft: () {
+          // 何もしない（ViewModel側でFinishedStateに遷移させるように変更）
+        },
+        onKicked: () {
           if (context.mounted) {
             Navigator.of(context).popUntil((route) => route.isFirst);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen(message: 'ホストに退出させられました')),
+            );
+          }
+        },
+        onRoomClosed: () {
+          if (context.mounted) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen(message: 'ルームが閉鎖されました')),
+            );
           }
         },
       ),
@@ -128,6 +143,9 @@ class _GameScreenContent extends StatelessWidget {
               SeService().play('button_buni.mp3');
               Navigator.pop(context);
               vm.leaveRoom();
+              if (context.mounted) {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }
             },
             child: const Text('退出', style: TextStyle(color: Colors.red)),
           ),
@@ -141,34 +159,17 @@ class _GameScreenContent extends StatelessWidget {
     GameScreenState state,
     GameScreenViewModel vm,
   ) {
+    // ホストにキックされた、またはルームが閉鎖された場合はボディを表示しない（即座にポップされるため）
+    if (state.isKicked || state.isRoomClosed) {
+      return const SizedBox.shrink();
+    }
+
     // エラー表示
     if (state.errorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
-      });
-    }
-
-    // 相手が退出した場合のポップアップ表示
-    // 最終画面(FinishedState)以外の場合のみ表示する
-    if (state.isOpponentLeft && state is! FinishedState) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showOpponentLeftDialog(context, vm);
-      });
-    }
-
-    // ホストに拒否された場合のポップアップ表示
-    if (state.isKicked) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showKickedDialog(context, vm);
-      });
-    }
-
-    // ホストがルームを閉じた場合のポップアップ表示
-    if (state.isRoomClosed) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showRoomClosedDialog(context, vm);
       });
     }
 
@@ -185,66 +186,5 @@ class _GameScreenContent extends StatelessWidget {
         onConfirm: vm.confirmFatCatEvent,
       ),
     };
-  }
-
-  void _showOpponentLeftDialog(BuildContext context, GameScreenViewModel vm) {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // 閉じられないようにする
-      builder: (context) => AlertDialog(
-        title: const Text('対戦相手が退出しました'),
-        content: const Text('対戦相手が退出したため、ゲームを終了します。'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              // ルームから退出してからホームに戻る
-              await vm.leaveRoom();
-              if (context.mounted) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            },
-            child: const Text('ホームに戻る'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showKickedDialog(BuildContext context, GameScreenViewModel vm) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('ルームから退出しました'),
-        content: const Text('ホストによりルームから退出させられました。'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            child: const Text('ホームに戻る'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRoomClosedDialog(BuildContext context, GameScreenViewModel vm) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('ルームが閉じられました'),
-        content: const Text('ホストがルームを閉じたため、ホームに戻ります。'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            child: const Text('ホームに戻る'),
-          ),
-        ],
-      ),
-    );
   }
 }

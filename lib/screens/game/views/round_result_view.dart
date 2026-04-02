@@ -19,7 +19,10 @@ class RoundResultView extends StatefulWidget {
 
 class _RoundResultViewState extends State<RoundResultView> {
   int _step = 0; // 0:初期, 1:左カウント, 2:左開示, 3:中カウント, 4:中開示, 5:右カウント, 6:右開示
+  Set<int> _revealedItemIndices = {}; // 各カードのアイテムが表示されたかどうかを管理
+  Set<int> _revealedMultiplierIndices = {}; // またたびの「x2」が表示されたかどうかを管理
   Timer? _revealTimer;
+  Timer? _itemTimer; // アイテム表示用のセカンドタイマー
 
   @override
   void initState() {
@@ -30,6 +33,7 @@ class _RoundResultViewState extends State<RoundResultView> {
   @override
   void dispose() {
     _revealTimer?.cancel();
+    _itemTimer?.cancel();
     super.dispose();
   }
 
@@ -40,12 +44,12 @@ class _RoundResultViewState extends State<RoundResultView> {
 
   void _playNextSequence() {
     _revealTimer?.cancel();
+    _itemTimer?.cancel();
     if (!mounted || _step >= 7) return;
 
     final viewModel = context.read<GameScreenViewModel>();
 
-    // 追加：すでに3枚目の判定が終わっており(step 6)、かつ全体の勝敗が決まっている場合
-    // 「次へ」を押したら一覧画面をスキップして最終結果画面へ
+    // step 6 (3枚目の判定が終わった後) の分岐はそのまま
     if (_step == 6 && viewModel.finalWinner != null) {
       viewModel.nextTurn();
       return;
@@ -62,33 +66,61 @@ class _RoundResultViewState extends State<RoundResultView> {
         maxBetForThisCard = val1 > val2 ? val1 : val2;
       }
 
-      // カウントアップのタイミング設定
-      // スライド完了まで待つ時間(800ms) + 枚数に応じた時間(1枚800ms) + 判定前の溜め(800ms)
+      // 第1段階: カウントアップ終了まで待つ
       final animationDuration = maxBetForThisCard * 800;
-      final totalWait = 800 + animationDuration + 800;
+      final countWait = 800 + animationDuration;
 
       setState(() {
-        _step++;
+        _step++; // カウント開始
       });
 
-      _revealTimer = Timer(Duration(milliseconds: totalWait), () {
+      _revealTimer = Timer(Duration(milliseconds: countWait), () {
         if (mounted) {
+          // 第2段階: アイテムをぽんっと出す
           setState(() {
-            _step++;
-            SeService().play('button_buni.mp3');
+            _revealedItemIndices.add(index);
           });
-          // 追加：3枚目の確定が終わった直後に全体の勝敗が決まっているなら、そのまま次へ進む
-          if (_step == 6 && viewModel.finalWinner != null) {
-            // 少しだけ待ってから最終画面へ（スタンプを見せる時間）
-            Timer(const Duration(milliseconds: 1000), () {
-              if (mounted) viewModel.nextTurn();
-            });
+
+          // またたびがある場合、少し遅れて ×2 を表示 (500ms後)
+          final items = viewModel.lastRoundDisplayItems;
+          if (index < items.length) {
+            final item = items[index];
+            if (item.myItem == ItemType.matatabi ||
+                item.opponentItem == ItemType.matatabi) {
+              Timer(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  setState(() {
+                    _revealedMultiplierIndices.add(index);
+                  });
+                }
+              });
+            }
           }
+
+          // 第3段階: 1秒後に判定スタンプを出す
+          _itemTimer = Timer(const Duration(milliseconds: 1000), () {
+            if (mounted) {
+              setState(() {
+                _step++; // 偶数になる(判定確定)
+                SeService().play('button_buni.mp3');
+              });
+
+              // 3枚目(Step 6)の判定後の自動遷移ロジックはここ
+              if (_step == 6 && viewModel.finalWinner != null) {
+                Timer(const Duration(milliseconds: 1000), () {
+                  if (mounted) viewModel.nextTurn();
+                });
+              }
+            }
+          });
         }
       });
     } else {
-      // カウントアップ中(奇数)なら、待たずに即座に結果開示(偶数)へ進める
+      // カウントアップ中(奇数)なら、待たずに即座に開示へ進める(アイテムと判定を一度に出す)
+      final index = (_step - 1) ~/ 2;
       setState(() {
+        _revealedItemIndices.add(index);
+        _revealedMultiplierIndices.add(index); // 即座にスキップした場合は倍率も出す
         _step++; // 偶数になる
         SeService().play('button_buni.mp3');
       });
@@ -106,7 +138,10 @@ class _RoundResultViewState extends State<RoundResultView> {
     if (mounted) {
       setState(() {
         _step = 7;
+        _revealedItemIndices = {0, 1, 2}; // すべて表示済みに
+        _revealedMultiplierIndices = {0, 1, 2};
         _revealTimer?.cancel();
+        _itemTimer?.cancel();
       });
     }
   }
@@ -977,6 +1012,29 @@ class _RoundResultViewState extends State<RoundResultView> {
                       ),
                       const SizedBox(width: 4),
                       const Text('🐟', style: TextStyle(fontSize: 14)),
+                      // またたびの演出：表示フラグが立っているか、判定完了後なら表示
+                      if (_revealedMultiplierIndices.contains(index) ||
+                          isRevealed)
+                        if (item.myItem == ItemType.matatabi ||
+                            item.opponentItem == ItemType.matatabi)
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.elasticOut,
+                            builder: (context, value, child) {
+                              return Transform.scale(
+                                scale: value,
+                                child: Text(
+                                  ' ×2',
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 14 : 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.redAccent,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                     ],
                   ),
                 ),
@@ -1111,6 +1169,18 @@ class _RoundResultViewState extends State<RoundResultView> {
                                   fontSize: isSmallScreen ? 10 : 12,
                                 ),
                               ),
+                              if (_revealedMultiplierIndices.contains(index) ||
+                                  isRevealed)
+                                if (item.myItem == ItemType.matatabi ||
+                                    item.opponentItem == ItemType.matatabi)
+                                  Text(
+                                    '×2',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 10 : 13,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.redAccent,
+                                    ),
+                                  ),
                             ],
                           ),
                         ),
@@ -1334,14 +1404,20 @@ class _RoundResultViewState extends State<RoundResultView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (hasItem && isRevealed) ...[
+                  if (hasItem &&
+                      (isRevealed ||
+                          _revealedItemIndices.contains(cardIndex))) ...[
                     // アイテムの登場を華やかにするためのスタック
                     Stack(
                       alignment: Alignment.center,
                       children: [
                         // 背後の光彩演出（Glow Aura）
                         AnimatedOpacity(
-                          opacity: isRevealed ? 1.0 : 0.0,
+                          opacity:
+                              (isRevealed ||
+                                  _revealedItemIndices.contains(cardIndex))
+                              ? 1.0
+                              : 0.0,
                           duration: const Duration(milliseconds: 500),
                           child: Container(
                             width: itemIconSize * 1.5,
@@ -1362,13 +1438,21 @@ class _RoundResultViewState extends State<RoundResultView> {
                         ),
                         // 弾むようなポップアップ（Elastic Pop）
                         AnimatedScale(
-                          scale: isRevealed ? 1.0 : 0.0,
+                          scale:
+                              (isRevealed ||
+                                  _revealedItemIndices.contains(cardIndex))
+                              ? 1.0
+                              : 0.0,
                           duration: const Duration(
                             milliseconds: 1000,
                           ), // 弾みの余韻のために長めに設定
                           curve: Curves.elasticOut,
                           child: AnimatedOpacity(
-                            opacity: isRevealed ? 1.0 : 0.0,
+                            opacity:
+                                (isRevealed ||
+                                    _revealedItemIndices.contains(cardIndex))
+                                ? 1.0
+                                : 0.0,
                             duration: const Duration(milliseconds: 300),
                             child: _buildSmallItemIcon(
                               item,

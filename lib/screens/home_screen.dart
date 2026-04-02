@@ -11,7 +11,8 @@ import 'home/views/matchmaking_view.dart';
 import 'profile_setup_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String? message;
+  const HomeScreen({super.key, this.message});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -20,12 +21,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   HomeScreenViewModel? _viewModel;
   bool _isNavigationPending = false;
-
-  @override
-  void dispose() {
-    // _viewModel は Provider が dispose するのでここでは何もしない
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
         );
+        
+        // メッセージがあればセットする
+        if (widget.message != null) {
+          _viewModel!.setNotification(widget.message);
+        }
+        
         return _viewModel!;
       },
       child: const _HomeScreenContent(),
@@ -82,6 +83,13 @@ class _HomeScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeScreenViewModel>();
+
+    // システムメッセージ（一回限りの通知）の表示
+    if (viewModel.notificationMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showInfoDialog(context, viewModel, viewModel.notificationMessage!);
+      });
+    }
 
     // エラーメッセージの表示
     final errorMessage = viewModel.state.errorMessage;
@@ -98,6 +106,30 @@ class _HomeScreenContent extends StatelessWidget {
       MatchmakingState() => const MatchmakingView(),
       _ => const MainMenuView(),
     };
+  }
+
+  void _showInfoDialog(
+    BuildContext context,
+    HomeScreenViewModel viewModel,
+    String message,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('通知'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              viewModel.clearNotification();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showErrorDialog(

@@ -29,10 +29,12 @@ class HomeScreenViewModel extends ChangeNotifier {
   List<Invitation> _invitations = [];
   final InvitationService _invitationService = InvitationService();
   bool _isLoading = false;
+  String? _notificationMessage;
 
   HomeScreenState get state => _state;
   UserProfile? get userProfile => _userProfile;
   List<Invitation> get invitations => _invitations;
+  String? get notificationMessage => _notificationMessage;
 
   /// 広告を表示すべきかどうか
   bool get shouldShowAds =>
@@ -160,6 +162,18 @@ class HomeScreenViewModel extends ChangeNotifier {
   /// 状態を更新して通知
   void _updateState(HomeScreenState newState) {
     _state = newState;
+    notifyListeners();
+  }
+
+  /// 通告メッセージをセット
+  void setNotification(String? message) {
+    _notificationMessage = message;
+    if (message != null) notifyListeners();
+  }
+
+  /// 通告メッセージをクリア
+  void clearNotification() {
+    _notificationMessage = null;
     notifyListeners();
   }
 

@@ -117,6 +117,8 @@ class GameScreenViewModel extends ChangeNotifier {
 
   // コールバック
   final VoidCallback? onOpponentLeft;
+  final VoidCallback? onKicked;
+  final VoidCallback? onRoomClosed;
 
   // 退出処理中かどうか
   bool _isExiting = false;
@@ -474,6 +476,8 @@ class GameScreenViewModel extends ChangeNotifier {
     required this.playerId,
     required this.isHost,
     this.onOpponentLeft,
+    this.onKicked,
+    this.onRoomClosed,
   }) : _gameService = gameService {
     _init();
   }
@@ -584,7 +588,13 @@ class GameScreenViewModel extends ChangeNotifier {
         }
         break;
       case GameStatus.finished:
-        _uiState = GameScreenState.finished(room);
+        var newState = GameScreenState.finished(room);
+        // 相手が退出（リタイア）済みの場合はフラグを付ける
+        final opponentAbandoned = isHost ? (room.guest?.abandoned ?? false) : room.host.abandoned;
+        if (opponentAbandoned) {
+          newState = newState.copyWithOpponentLeft();
+        }
+        _uiState = newState;
         _recordMatchResultIfFinished(room);
         break;
       case GameStatus.fatCatEvent:
@@ -602,18 +612,25 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   void _handleOpponentLeft() {
-    _uiState = _uiState.copyWithOpponentLeft();
+    if (_currentRoom != null) {
+      _uiState = FinishedState(_currentRoom!).copyWithOpponentLeft();
+    } else {
+      _uiState = _uiState.copyWithOpponentLeft();
+    }
     notifyListeners();
+    // onOpponentLeft は遷移を伴うため、ここでは呼ばない（最終結果画面で通知するため）
   }
 
   void _handleKicked() {
     _uiState = _uiState.copyWithKicked();
     notifyListeners();
+    onKicked?.call();
   }
 
   void _handleHostClosed() {
     _uiState = _uiState.copyWithRoomClosed();
     notifyListeners();
+    onRoomClosed?.call();
   }
 
   /// ゲーム終了時に戦績を記録する
@@ -804,7 +821,7 @@ class GameScreenViewModel extends ChangeNotifier {
       }
 
       await _gameService.leaveRoom(roomCode, playerId);
-      onOpponentLeft?.call();
+      // 自分自身の退出時は onOpponentLeft を呼ばない
     } catch (e) {
       _isExiting = false; // 失敗した場合はフラグを戻す
       _uiState = _uiState.copyWithError('退出に失敗しました: $e');
