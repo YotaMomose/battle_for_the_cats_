@@ -143,6 +143,7 @@ class GameScreenViewModel extends ChangeNotifier {
   bool get isFinished => _uiState is FinishedState;
   bool get isFatCatEvent => _uiState is FatCatEventState;
   ItemType? getPlacedItem(String catIndex) => _bets.getItem(catIndex);
+  Winner? get finalWinner => _currentRoom?.finalWinner;
 
   /// プレイヤーデータ（計算プロパティ）
   PlayerData? get playerData {
@@ -574,7 +575,13 @@ class GameScreenViewModel extends ChangeNotifier {
         _uiState = GameScreenState.playing(room);
         break;
       case GameStatus.roundResult:
-        _uiState = GameScreenState.roundResult(room);
+        // すでに勝敗が決まっており、自分が確認済みなら、相手を待たずに最終結果画面を表示する
+        if (room.finalWinner != null && isRoundResultConfirmed) {
+          _uiState = GameScreenState.finished(room);
+          _recordMatchResultIfFinished(room);
+        } else {
+          _uiState = GameScreenState.roundResult(room);
+        }
         break;
       case GameStatus.finished:
         _uiState = GameScreenState.finished(room);
@@ -612,7 +619,7 @@ class GameScreenViewModel extends ChangeNotifier {
   /// ゲーム終了時に戦績を記録する
   Future<void> _recordMatchResultIfFinished(GameRoom room) async {
     if (_hasRecordedFinalResult) return;
-    if (room.status != GameStatus.finished || room.finalWinner == null) return;
+    if (room.finalWinner == null) return;
 
     final myRole = isHost ? Winner.host : Winner.guest;
     final opponentId = isHost ? room.guestId : room.hostId;

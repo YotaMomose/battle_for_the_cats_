@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/se_service.dart';
@@ -7,10 +8,108 @@ import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 
 /// ラウンド結果画面
-class RoundResultView extends StatelessWidget {
+class RoundResultView extends StatefulWidget {
   final GameRoom room;
 
   const RoundResultView({super.key, required this.room});
+
+  @override
+  State<RoundResultView> createState() => _RoundResultViewState();
+}
+
+class _RoundResultViewState extends State<RoundResultView> {
+  int _step = 0; // 0:初期, 1:左カウント, 2:左開示, 3:中カウント, 4:中開示, 5:右カウント, 6:右開示
+  Timer? _revealTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startRevealAnimation();
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startRevealAnimation() {
+    // 最初のカードのカウントアップを開始する
+    _playNextSequence();
+  }
+
+  void _playNextSequence() {
+    _revealTimer?.cancel();
+    if (!mounted || _step >= 7) return;
+
+    final viewModel = context.read<GameScreenViewModel>();
+
+    // 追加：すでに3枚目の判定が終わっており(step 6)、かつ全体の勝敗が決まっている場合
+    // 「次へ」を押したら一覧画面をスキップして最終結果画面へ
+    if (_step == 6 && viewModel.finalWinner != null) {
+      viewModel.nextTurn();
+      return;
+    }
+
+    if (_step % 2 == 0) {
+      final index = (_step) ~/ 2;
+      final displayItems = viewModel.lastRoundDisplayItems;
+      int maxBetForThisCard = 0;
+      if (index < displayItems.length) {
+        final item = displayItems[index];
+        final val1 = item.myBet;
+        final val2 = item.opponentBet;
+        maxBetForThisCard = val1 > val2 ? val1 : val2;
+      }
+
+      // カウントアップのタイミング設定
+      // スライド完了まで待つ時間(800ms) + 枚数に応じた時間(1枚800ms) + 判定前の溜め(800ms)
+      final animationDuration = maxBetForThisCard * 800;
+      final totalWait = 800 + animationDuration + 800;
+
+      setState(() {
+        _step++;
+      });
+
+      _revealTimer = Timer(Duration(milliseconds: totalWait), () {
+        if (mounted) {
+          setState(() {
+            _step++;
+            SeService().play('button_buni.mp3');
+          });
+          // 追加：3枚目の確定が終わった直後に全体の勝敗が決まっているなら、そのまま次へ進む
+          if (_step == 6 && viewModel.finalWinner != null) {
+            // 少しだけ待ってから最終画面へ（スタンプを見せる時間）
+            Timer(const Duration(milliseconds: 1000), () {
+              if (mounted) viewModel.nextTurn();
+            });
+          }
+        }
+      });
+    } else {
+      // カウントアップ中(奇数)なら、待たずに即座に結果開示(偶数)へ進める
+      setState(() {
+        _step++; // 偶数になる
+        SeService().play('button_buni.mp3');
+      });
+
+      // 追加：3枚目の確定が終わった直後に全体の勝敗が決まっているなら、そのまま次へ
+      if (_step == 6 && viewModel.finalWinner != null) {
+        Timer(const Duration(milliseconds: 1000), () {
+          if (mounted) viewModel.nextTurn();
+        });
+      }
+    }
+  }
+
+  void _skipAllAnimation() {
+    if (mounted) {
+      setState(() {
+        _step = 7;
+        _revealTimer?.cancel();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +120,8 @@ class RoundResultView extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.height < 680;
 
-    // 犬の効果通知がある場合、ビルド後にポップアップを表示
-    if (viewModel.dogEffectNotifications.isNotEmpty) {
+    // 犬の効果通知がある場合、ビルド後にポップアップを表示（アニメーション終了後）
+    if (_step >= 7 && viewModel.dogEffectNotifications.isNotEmpty) {
       final notifications = List<DogEffectNotification>.from(
         viewModel.dogEffectNotifications,
       );
@@ -33,8 +132,10 @@ class RoundResultView extends StatelessWidget {
       });
     }
 
-    // アイテム復活が1つの場合は自動復活（ポップアップ表示）
-    if (viewModel.canReviveItem && viewModel.revivableItems.length == 1) {
+    // アイテム復活が1つの場合は自動復活（ポップアップ表示）（アニメーション終了後）
+    if (_step >= 7 &&
+        viewModel.canReviveItem &&
+        viewModel.revivableItems.length == 1) {
       final item = viewModel.revivableItems.first;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // 先に復活処理を実行（再表示を防ぐ）
@@ -60,26 +161,74 @@ class RoundResultView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // 累計結果
-              _buildCumulativeResult(context, viewModel, isSmallScreen),
-              SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+              if (_step < 7) ...[
+                // ステップ数から現在判定中のカードインデックスを計算
+                // 1,2 -> 0番目, 3,4 -> 1番目, 5,6 -> 2番目
+                ClipRect(
+                  // スライドが画面外に出ないように領域を制限
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 600),
+                    // 横にスライドしながら切り替わる
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                          final isEntering =
+                              (child.key as ValueKey<int>).value ==
+                              (_step == 0 ? 0 : (_step - 1) ~/ 2);
 
-              // 猫カードの横並び
-              _buildCatCardRow(context, viewModel, isSmallScreen),
-              SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+                          // 入る時は右から(1,0)、出る時は左へ(-1,0)
+                          final offsetAnimation = Tween<Offset>(
+                            begin: isEntering
+                                ? const Offset(1.2, 0.0)
+                                : const Offset(-1.2, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation);
 
-              // 特殊効果UI (復活/追い出し) - ボタンの上に配置
-              if (canRevive && viewModel.revivableItems.length > 1) ...[
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                    child: Container(
+                      key: ValueKey<int>(_step == 0 ? 0 : (_step - 1) ~/ 2),
+                      child: _buildSingleLargeCard(
+                        context,
+                        viewModel,
+                        isSmallScreen,
+                        _step == 0 ? 0 : (_step - 1) ~/ 2,
+                        _step,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+              ] else ...[
+                // 累計結果
+                _buildCumulativeResult(context, viewModel, isSmallScreen),
+                SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+
+                // 猫カードの横並び一覧
+                _buildCatCardRow(context, viewModel, isSmallScreen, _step),
+                SizedBox(height: shouldScroll ? (isSmallScreen ? 12 : 24) : 8),
+              ],
+
+              // 特殊効果UI (復活/追い出し) - すべての結果が出た後に表示
+              if (_step >= 7 &&
+                  canRevive &&
+                  viewModel.revivableItems.length > 1) ...[
                 _buildReviveSection(context, viewModel, isSmallScreen),
                 SizedBox(height: isSmallScreen ? 12 : 20),
               ],
-              if (canChase) ...[
+              if (_step >= 7 && canChase) ...[
                 _buildChaseAwaySection(context, viewModel, isSmallScreen),
                 SizedBox(height: isSmallScreen ? 12 : 20),
               ],
 
-              // 次のターンへボタン
-              _buildNextButton(viewModel, isConfirmed, isSmallScreen),
+              // アニメーション中のみアクションボタンを表示
+              if (_step < 7)
+                _buildRevealActionButtons(isSmallScreen)
+              else
+                _buildNextButton(viewModel, isConfirmed, isSmallScreen),
+
               if (shouldScroll)
                 const SizedBox(height: 120)
               else
@@ -548,7 +697,10 @@ class RoundResultView extends StatelessWidget {
           if (viewModel.availableTargetsForDog.isEmpty)
             const Text(
               '追い出せる相手のキャラクターがいません',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Color(0xFF4D331F),
+                fontWeight: FontWeight.bold,
+              ),
             )
           else
             Wrap(
@@ -599,35 +751,40 @@ class RoundResultView extends StatelessWidget {
                 );
               }).toList(),
             ),
-          const SizedBox(height: 16),
-          StereoscopicButton(
-            onPressed: () {
-              SeService().play('button_buni.mp3');
-              viewModel.chaseAwayCard(null);
-            },
-            baseColor: Colors.grey.shade200,
-            shadowColor: Colors.grey.shade400,
-            borderRadius: 12,
-            depth: 4,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.skip_next, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  Text(
-                    'スキップする',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w900,
-                      fontSize: isSmallScreen ? 14 : 18,
+          if (viewModel.availableTargetsForDog.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            StereoscopicButton(
+              onPressed: () {
+                SeService().play('button_buni.mp3');
+                viewModel.chaseAwayCard(null);
+              },
+              baseColor: Colors.grey.shade200,
+              shadowColor: Colors.grey.shade400,
+              borderRadius: 12,
+              depth: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.skip_next, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Text(
+                      'スキップする',
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.w900,
+                        fontSize: isSmallScreen ? 14 : 18,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -684,10 +841,182 @@ class RoundResultView extends StatelessWidget {
     );
   }
 
+  Widget _buildSingleLargeCard(
+    BuildContext context,
+    GameScreenViewModel viewModel,
+    bool isSmallScreen,
+    int index,
+    int step,
+  ) {
+    if (index >= viewModel.lastRoundDisplayItems.length)
+      return const SizedBox();
+
+    final item = viewModel.lastRoundDisplayItems[index];
+    final isCounting = step == index * 2 + 1;
+    final isRevealed = step >= index * 2 + 2;
+    // シングル表示中は常に true 扱いにして表を表示しつつ、Fishの数だけを数える
+    final showStats = isCounting || isRevealed;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: isSmallScreen ? 240 : 320),
+        child: AnimatedScale(
+          // カード自体のサイズは変えない
+          scale: 1.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: StereoscopicContainer(
+            baseColor: isRevealed
+                ? item.cardColor.withOpacity(0.9)
+                : Colors.grey.shade100,
+            shadowColor: Colors.black12,
+            borderRadius: 24,
+            depth: isCounting ? 12 : 6,
+            showDots: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // カード名（大きく）
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD54F),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(22),
+                    ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: const Color(0xFF4D331F).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    item.catName,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 18 : 28,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF4D331F),
+                    ),
+                  ),
+                ),
+                SizedBox(height: isSmallScreen ? 12 : 20),
+                // 猫アバター（大きく）と勝敗の全体スタンプ
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    _buildCatAvatar(item, size: isSmallScreen ? 100 : 160),
+                    // ドン！と表示される巨大な勝敗テキスト（スタンプ風）
+                    AnimatedScale(
+                      scale: isRevealed ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.elasticOut,
+                      child: Transform.rotate(
+                        angle: -0.15,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: item.winnerTextColor,
+                              width: 4,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: item.winnerTextColor.withOpacity(0.5),
+                                blurRadius: 12,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            item.winnerLabel,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 40 : 56,
+                              fontWeight: FontWeight.w900,
+                              color: item.winnerTextColor,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // 必要コストの表示（猫アバターの下）
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${item.catCost}',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 14 : 18,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF4D331F),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('🐟', style: TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 詳細スコアテーブルとの間隔
+                SizedBox(height: isSmallScreen ? 16 : 24),
+
+                // 詳細スコアテーブル（アイテム画像は常に表示）
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: _buildSmallStatsTable(
+                    viewModel.myDisplayName,
+                    item.myBet,
+                    item.myItem,
+                    viewModel.opponentDisplayName,
+                    item.opponentBet,
+                    item.opponentItem,
+                    isSmallScreen,
+                    showStats,
+                    index,
+                    isCounting,
+                    isRevealed,
+                    false, // isImmediate
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCatCardRow(
     BuildContext context,
     GameScreenViewModel viewModel,
     bool isSmallScreen,
+    int step,
   ) {
     return IntrinsicHeight(
       child: Row(
@@ -696,67 +1025,133 @@ class RoundResultView extends StatelessWidget {
           index,
         ) {
           final item = viewModel.lastRoundDisplayItems[index];
+          final isCounting = step == index * 2 + 1;
+          final isRevealed = step >= 7 || step >= index * 2 + 2;
+          final showStats = isCounting || isRevealed;
+
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: StereoscopicContainer(
-                baseColor: item.cardColor.withOpacity(0.9),
-                shadowColor: Colors.black12,
-                borderRadius: 20,
-                depth: 4,
-                showDots: true,
-                child: Column(
-                  children: [
-                    // カード名
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFD54F),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(18),
-                        ),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: const Color(0xFF4D331F).withOpacity(0.3),
-                            width: 1,
+              child: AnimatedScale(
+                scale: isCounting ? 1.05 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: Opacity(
+                  opacity: (step < 7 && !showStats) ? 0.7 : 1.0,
+                  child: StereoscopicContainer(
+                    baseColor: isRevealed
+                        ? item.cardColor.withOpacity(0.9)
+                        : Colors.grey.shade100,
+                    shadowColor: Colors.black12,
+                    borderRadius: 20,
+                    depth: isCounting ? 8 : 4,
+                    showDots: true,
+                    child: Column(
+                      children: [
+                        // カード名
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD54F),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(18),
+                            ),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: const Color(0xFF4D331F).withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            item.catName,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 12 : 18,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF4D331F),
+                            ),
                           ),
                         ),
-                      ),
-                      child: Text(
-                        item.catName,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 12 : 18,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF4D331F),
+                        SizedBox(height: isSmallScreen ? 6 : 10),
+                        // 猫アバター
+                        _buildCatAvatar(item, size: isSmallScreen ? 56 : 80),
+
+                        const SizedBox(height: 4),
+                        // 必要コストの表示（猫アバターの下）
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFF4D331F),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${item.catCost}',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 10 : 12,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFF4D331F),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '🐟',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 10 : 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        const Spacer(),
+                        // 結果ラベル
+                        AnimatedOpacity(
+                          opacity: isRevealed ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 300),
+                          child: _buildCapsuleLabel(
+                            isRevealed ? item.winnerLabel : '?',
+                            color: isRevealed ? item.cardColor : Colors.grey,
+                            textColor: isRevealed
+                                ? item.winnerTextColor
+                                : Colors.white,
+                            isSmallScreen: isSmallScreen,
+                          ),
+                        ),
+                        SizedBox(height: isSmallScreen ? 8 : 12),
+                        // 詳細スコアテーブル
+                        AnimatedOpacity(
+                          opacity: showStats ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 300),
+                          child: _buildSmallStatsTable(
+                            viewModel.myDisplayName,
+                            item.myBet,
+                            item.myItem,
+                            viewModel.opponentDisplayName,
+                            item.opponentBet,
+                            item.opponentItem,
+                            isSmallScreen,
+                            showStats,
+                            index,
+                            isCounting,
+                            isRevealed,
+                            true, // isImmediate
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
-                    SizedBox(height: isSmallScreen ? 8 : 12),
-                    // 猫アバター
-                    _buildCatAvatar(item, size: isSmallScreen ? 56 : 80),
-                    const Spacer(),
-                    // 結果ラベル
-                    _buildCapsuleLabel(
-                      item.winnerLabel,
-                      color: item.cardColor,
-                      textColor: item.winnerTextColor,
-                      isSmallScreen: isSmallScreen,
-                    ),
-                    SizedBox(height: isSmallScreen ? 8 : 12),
-                    // 詳細スコアテーブル
-                    _buildSmallStatsTable(
-                      viewModel.myDisplayName,
-                      item.myBet.toString(),
-                      item.myItem,
-                      viewModel.opponentDisplayName,
-                      item.opponentBet.toString(),
-                      item.opponentItem,
-                      isSmallScreen,
-                    ),
-                    const SizedBox(height: 8),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -766,15 +1161,81 @@ class RoundResultView extends StatelessWidget {
     );
   }
 
+  Widget _buildRevealActionButtons(bool isSmallScreen) {
+    return Column(
+      children: [
+        // 次へボタン
+        SizedBox(
+          width: double.infinity,
+          height: isSmallScreen ? 50 : 72,
+          child: StereoscopicButton(
+            onPressed: () {
+              SeService().play('button_buni.mp3');
+              _playNextSequence();
+            },
+            baseColor: Colors.orange,
+            shadowColor: Colors.orange.shade700,
+            borderRadius: 36,
+            depth: 8,
+            child: Center(
+              child: Text(
+                '次へ ▶',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 20 : 32,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // 全部スキップボタン
+        SizedBox(
+          width: 180, // スキップボタンは少し小さく中央に
+          height: isSmallScreen ? 36 : 48,
+          child: StereoscopicButton(
+            onPressed: () {
+              SeService().play('button_buni.mp3');
+              _skipAllAnimation();
+            },
+            baseColor: Colors.grey.shade300,
+            shadowColor: Colors.grey.shade500,
+            borderRadius: 24,
+            depth: 4,
+            child: Center(
+              child: Text(
+                '全部スキップ ⏩',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 14 : 18,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSmallStatsTable(
     String name1,
-    String val1,
+    int val1,
     ItemType? item1,
     String name2,
-    String val2,
+    int val2,
     ItemType? item2,
     bool isSmallScreen,
+    bool startCounting,
+    int cardIndex,
+    bool isCounting,
+    bool isRevealed,
+    bool isImmediate,
   ) {
+    // 両プレイヤーの最大値を計算（同期カウントアップ用）
+    final maxTargetValue = [val1, val2].reduce((a, b) => a > b ? a : b);
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -786,13 +1247,35 @@ class RoundResultView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildStatRow(name1, val1, item1, isSmallScreen),
+          _buildStatRow(
+            name1,
+            val1,
+            item1,
+            isSmallScreen,
+            startCounting,
+            cardIndex,
+            isCounting,
+            isRevealed,
+            isImmediate,
+            maxTargetValue,
+          ),
           Divider(
             height: isSmallScreen ? 8 : 12,
             thickness: 1,
             color: const Color(0xFF4D331F).withOpacity(0.2),
           ),
-          _buildStatRow(name2, val2, item2, isSmallScreen),
+          _buildStatRow(
+            name2,
+            val2,
+            item2,
+            isSmallScreen,
+            startCounting,
+            cardIndex,
+            isCounting,
+            isRevealed,
+            isImmediate,
+            maxTargetValue,
+          ),
         ],
       ),
     );
@@ -800,14 +1283,25 @@ class RoundResultView extends StatelessWidget {
 
   Widget _buildStatRow(
     String label,
-    String value,
+    int targetValue,
     ItemType? item,
     bool isSmallScreen,
+    bool startCounting,
+    int cardIndex,
+    bool isCounting,
+    bool isRevealed,
+    bool isImmediate,
+    int maxTargetValue,
   ) {
     final hasItem = item != null && item != ItemType.unknown;
-    final fishSize = hasItem
-        ? (isSmallScreen ? 24.0 : 36.0)
-        : (isSmallScreen ? 34.0 : 48.0);
+
+    // カウントアップ中は大きく、それ以外は通常サイズ
+    final fishSize = isCounting
+        ? (isSmallScreen ? 40.0 : 52.0) // 1.2倍程度の大きさに緩和
+        : (hasItem
+              ? (isSmallScreen ? 24.0 : 36.0)
+              : (isSmallScreen ? 34.0 : 48.0));
+
     final itemIconSize = isSmallScreen ? 14.0 : 20.0;
     // 表の高さがずれないように高さを固定する
     final rowHeight = isSmallScreen ? 55.0 : 75.0;
@@ -832,16 +1326,86 @@ class RoundResultView extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
-            // 2段目: アイテムと魚
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (hasItem) ...[
-                  _buildSmallItemIcon(item, size: itemIconSize),
-                  const SizedBox(width: 4),
+            // 2段目: アイテムと魚（カウント中のみ拡大）
+            AnimatedScale(
+              scale: (isCounting && !isImmediate) ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (hasItem && isRevealed) ...[
+                    // アイテムの登場を華やかにするためのスタック
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 背後の光彩演出（Glow Aura）
+                        AnimatedOpacity(
+                          opacity: isRevealed ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 500),
+                          child: Container(
+                            width: itemIconSize * 1.5,
+                            height: itemIconSize * 1.5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFFFFD54F,
+                                  ).withOpacity(0.6),
+                                  blurRadius: 15,
+                                  spreadRadius: 8,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // 弾むようなポップアップ（Elastic Pop）
+                        AnimatedScale(
+                          scale: isRevealed ? 1.0 : 0.0,
+                          duration: const Duration(
+                            milliseconds: 1000,
+                          ), // 弾みの余韻のために長めに設定
+                          curve: Curves.elasticOut,
+                          child: AnimatedOpacity(
+                            opacity: isRevealed ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 300),
+                            child: _buildSmallItemIcon(
+                              item,
+                              size: itemIconSize,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  TweenAnimationBuilder<double>(
+                    key: ValueKey('bet_anim_${cardIndex}_$label'),
+                    tween: Tween<double>(
+                      begin: -1.0, // スライド完了まで 0 を維持するための遊び
+                      // maxTargetValueまでアニメーションさせ、表示時に自身の目標値で止める
+                      end: startCounting ? maxTargetValue.toDouble() : 0,
+                    ),
+                    duration: isImmediate
+                        ? Duration.zero
+                        : Duration(milliseconds: 800 + (maxTargetValue * 800)),
+                    builder: (context, val, child) {
+                      // マイナスの間は 0 にクランプ
+                      int displayValue = val.toInt();
+                      if (displayValue < 0) displayValue = 0;
+                      // 自分の本来の目標値でさらにクランプ
+                      if (displayValue > targetValue)
+                        displayValue = targetValue;
+
+                      return _buildFishWithNumber(
+                        displayValue.toString(),
+                        size: fishSize,
+                      );
+                    },
+                  ),
                 ],
-                _buildFishWithNumber(value, size: fishSize),
-              ],
+              ),
             ),
           ],
         ),
@@ -892,11 +1456,18 @@ class RoundResultView extends StatelessWidget {
       width: double.infinity,
       height: isSmallScreen ? 50 : 72,
       child: StereoscopicButton(
-        onPressed: (isConfirmed || canChase || canRevive)
+        onPressed:
+            (isConfirmed ||
+                (canChase && viewModel.availableTargetsForDog.isNotEmpty) ||
+                canRevive)
             ? null
             : () {
                 SeService().play('button_buni.mp3');
-                viewModel.nextTurn();
+                if (canChase && viewModel.availableTargetsForDog.isEmpty) {
+                  viewModel.chaseAwayCard(null);
+                } else {
+                  viewModel.nextTurn();
+                }
               },
         baseColor: const Color(0xFFF57C00),
         shadowColor: const Color(0xFFBF360C),
@@ -909,7 +1480,11 @@ class RoundResultView extends StatelessWidget {
               bool showDots = false;
 
               if (canChase) {
-                labelText = 'キャラ選択待ち';
+                if (viewModel.availableTargetsForDog.isEmpty) {
+                  labelText = '次へ進む';
+                } else {
+                  labelText = 'キャラ選択待ち';
+                }
               } else if (canRevive) {
                 labelText = isSmallScreen ? 'アイテムを選択' : 'アイテムを選択してください';
               } else if (isConfirmed) {
@@ -982,10 +1557,14 @@ class RoundResultView extends StatelessWidget {
     required Color color,
     Color textColor = const Color(0xFF4D331F),
     bool isSmallScreen = false,
+    double fontSizeScale = 1.0,
   }) {
-    final fontSize = isSmallScreen ? 12.0 : 18.0;
+    final fontSize = (isSmallScreen ? 12.0 : 18.0) * fontSizeScale;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: 12 * fontSizeScale,
+        vertical: 4 * fontSizeScale,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

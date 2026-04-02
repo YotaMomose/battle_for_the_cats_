@@ -56,11 +56,16 @@ class RoundResolver {
     if (!room.bothConfirmedRoundResult) return;
     if (room.status != GameStatus.roundResult) return;
 
-    // 太っちょネコイベント発生
+    // 1. 最終勝者が決まっている場合は、finished ステータスへ遷移
+    if (room.finalWinner != null) {
+      room.status = GameStatus.finished;
+      return;
+    }
+
+    // 2. まだ継続中の場合は、次のターンやイベントを抽選
     if (_random.nextDouble() < GameConstants.fatCatEventProbability) {
       room.triggerFatCatEvent(RoundCards.random());
     } else {
-      // 通常通り次へ
       room.prepareNextTurn(RoundCards.random());
     }
   }

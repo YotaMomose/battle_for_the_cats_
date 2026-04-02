@@ -181,11 +181,8 @@ class GameRoom {
     required bool hasPendingEffects,
   }) {
     finalWinner = newFinalWinner;
-    if (finalWinner != null) {
-      status = GameStatus.finished;
-    } else {
-      status = GameStatus.roundResult;
-    }
+    // 勝敗に関わらず、まずはラウンド結果画面を表示させる
+    status = GameStatus.roundResult;
   }
 
   /// 指定されたプレイヤーのラウンド結果確認フラグを立てる

@@ -290,6 +290,34 @@ class _FinalResultViewState extends State<FinalResultView> {
           SizedBox(height: isSmallScreen ? 4 : 8),
           // 猫アバター
           _buildCatAvatar(item, size: isSmallScreen ? 45 : 60),
+          const SizedBox(height: 2),
+          // 必要コストの表示（猫アバターの下）
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFF4D331F), width: 1.0),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${item.catCost}',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 10 : 12,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF4D331F),
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '🐟',
+                  style: TextStyle(fontSize: isSmallScreen ? 10 : 12),
+                ),
+              ],
+            ),
+          ),
           const Spacer(),
           // 結果ラベル
           _buildCapsuleLabel(
