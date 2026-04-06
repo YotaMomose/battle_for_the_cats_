@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/se_service.dart';
@@ -21,6 +22,7 @@ class _RoundResultViewState extends State<RoundResultView> {
   int _step = 0; // 0:初期, 1:左カウント, 2:左開示, 3:中カウント, 4:中開示, 5:右カウント, 6:右開示
   Set<int> _revealedItemIndices = {}; // 各カードのアイテムが表示されたかどうかを管理
   Set<int> _revealedMultiplierIndices = {}; // またたびの「x2」が表示されたかどうかを管理
+  Set<int> _blownAwayIndices = {}; // びっくりホーンで吹き飛んだかどうかを管理
   Timer? _revealTimer;
   Timer? _itemTimer; // アイテム表示用のセカンドタイマー
 
@@ -95,6 +97,18 @@ class _RoundResultViewState extends State<RoundResultView> {
                 }
               });
             }
+
+            // びっくりホーンがある場合、少し遅れて魚を吹き飛ばす (300ms後)
+            if (item.myItem == ItemType.surpriseHorn ||
+                item.opponentItem == ItemType.surpriseHorn) {
+              Timer(const Duration(milliseconds: 300), () {
+                if (mounted) {
+                  setState(() {
+                    _blownAwayIndices.add(index);
+                  });
+                }
+              });
+            }
           }
 
           // 第3段階: 1秒後に判定スタンプを出す
@@ -116,18 +130,40 @@ class _RoundResultViewState extends State<RoundResultView> {
         }
       });
     } else {
-      // カウントアップ中(奇数)なら、待たずに即座に開示へ進める(アイテムと判定を一度に出す)
+      // 演出途中（奇数ステップ）で押された場合、即座に現在のカードを確定させ、
+      // まだ次のカードがあるならそのまま次のカードの演出を開始する
       final index = (_step - 1) ~/ 2;
+      final items = viewModel.lastRoundDisplayItems;
+
       setState(() {
         _revealedItemIndices.add(index);
-        _revealedMultiplierIndices.add(index); // 即座にスキップした場合は倍率も出す
-        _step++; // 偶数になる
+
+        // 実際にアイテムがある場合のみフラグを立てる
+        if (index < items.length) {
+          final item = items[index];
+          if (item.myItem == ItemType.matatabi ||
+              item.opponentItem == ItemType.matatabi) {
+            _revealedMultiplierIndices.add(index);
+          }
+          if (item.myItem == ItemType.surpriseHorn ||
+              item.opponentItem == ItemType.surpriseHorn) {
+            _blownAwayIndices.add(index);
+          }
+        }
+
+        _step++; // 一旦「確定」状態にする（偶数になる）
         SeService().play('button_buni.mp3');
       });
 
-      // 追加：3枚目の確定が終わった直後に全体の勝敗が決まっているなら、そのまま次へ
-      if (_step == 6 && viewModel.finalWinner != null) {
-        Timer(const Duration(milliseconds: 1000), () {
+      // まだ3枚目（Step 6）に達していない、かつ次のカードがあるなら即座に次へ進める
+      // 判定スタンプ（WinningStampなど）を確認できるよう、少し長めのディレイ(800ms)を置く
+      if (_step < 6) {
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (mounted) _playNextSequence();
+        });
+      } else if (_step == 6 && viewModel.finalWinner != null) {
+        // 最終勝者が決まっている場合は結果画面へ
+        Future.delayed(const Duration(milliseconds: 1000), () {
           if (mounted) viewModel.nextTurn();
         });
       }
@@ -1058,7 +1094,8 @@ class _RoundResultViewState extends State<RoundResultView> {
                     index,
                     isCounting,
                     isRevealed,
-                    false, // isImmediate
+                    isRevealed, // 判定確定時(偶数ステップ)はカウントをスキップして即座に表示
+                    true, // canBlowAway
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -1216,6 +1253,7 @@ class _RoundResultViewState extends State<RoundResultView> {
                             isCounting,
                             isRevealed,
                             true, // isImmediate
+                            false, // canBlowAway: 一覧時は吹き飛ばさない
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1302,6 +1340,7 @@ class _RoundResultViewState extends State<RoundResultView> {
     bool isCounting,
     bool isRevealed,
     bool isImmediate,
+    bool canBlowAway,
   ) {
     // 両プレイヤーの最大値を計算（同期カウントアップ用）
     final maxTargetValue = [val1, val2].reduce((a, b) => a > b ? a : b);
@@ -1328,6 +1367,7 @@ class _RoundResultViewState extends State<RoundResultView> {
             isRevealed,
             isImmediate,
             maxTargetValue,
+            canBlowAway,
           ),
           Divider(
             height: isSmallScreen ? 8 : 12,
@@ -1345,6 +1385,7 @@ class _RoundResultViewState extends State<RoundResultView> {
             isRevealed,
             isImmediate,
             maxTargetValue,
+            canBlowAway,
           ),
         ],
       ),
@@ -1362,6 +1403,7 @@ class _RoundResultViewState extends State<RoundResultView> {
     bool isRevealed,
     bool isImmediate,
     int maxTargetValue,
+    bool canBlowAway,
   ) {
     final hasItem = item != null && item != ItemType.unknown;
 
@@ -1465,28 +1507,91 @@ class _RoundResultViewState extends State<RoundResultView> {
                     const SizedBox(width: 6),
                   ],
                   TweenAnimationBuilder<double>(
-                    key: ValueKey('bet_anim_${cardIndex}_$label'),
-                    tween: Tween<double>(
-                      begin: -1.0, // スライド完了まで 0 を維持するための遊び
-                      // maxTargetValueまでアニメーションさせ、表示時に自身の目標値で止める
-                      end: startCounting ? maxTargetValue.toDouble() : 0,
+                    tween: Tween(
+                      begin: 0.0,
+                      end:
+                          (canBlowAway && _blownAwayIndices.contains(cardIndex))
+                          ? 1.0
+                          : 0.0,
                     ),
-                    duration: isImmediate
-                        ? Duration.zero
-                        : Duration(milliseconds: 800 + (maxTargetValue * 800)),
-                    builder: (context, val, child) {
-                      // マイナスの間は 0 にクランプ
-                      int displayValue = val.toInt();
-                      if (displayValue < 0) displayValue = 0;
-                      // 自分の本来の目標値でさらにクランプ
-                      if (displayValue > targetValue)
-                        displayValue = targetValue;
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutCirc,
+                    builder: (context, blowValue, child) {
+                      if (blowValue == 0) return child!;
 
-                      return _buildFishWithNumber(
-                        displayValue.toString(),
-                        size: fishSize,
+                      final int numFish = targetValue.clamp(1, 8);
+                      final opacity = (1.0 - blowValue).clamp(0.0, 1.0);
+
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
+                        children: [
+                          // 元の数値（早めにフェードアウト）
+                          Opacity(
+                            opacity: (1.0 - blowValue * 2).clamp(0.0, 1.0),
+                            child: child,
+                          ),
+                          // 四方八方に散る魚たち
+                          for (int i = 0; i < numFish; i++)
+                            Builder(
+                              builder: (context) {
+                                final double angle =
+                                    (2 * 3.14159 * i / numFish) - (3.14159 / 2);
+                                // 吹き飛ぶ距離
+                                final double dist = blowValue * 120;
+                                final double simpleDx =
+                                    math.cos(angle) * dist * 1.8;
+                                final double simpleDy =
+                                    math.sin(angle) * dist * 1.8;
+
+                                return Transform.translate(
+                                  offset: Offset(simpleDx, simpleDy),
+                                  child: Transform.rotate(
+                                    angle: angle + (3.14159 / 2),
+                                    child: Opacity(
+                                      opacity: opacity,
+                                      child: Text(
+                                        '🐟',
+                                        style: TextStyle(
+                                          fontSize: isSmallScreen ? 20 : 30,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
                       );
                     },
+                    child: TweenAnimationBuilder<double>(
+                      key: ValueKey(
+                        'bet_anim_${cardIndex}_${label}_$isImmediate',
+                      ),
+                      tween: Tween<double>(
+                        begin: -1.0, // スライド完了まで 0 を維持するための遊び
+                        // maxTargetValueまでアニメーションさせ、表示時に自身の目標値で止める
+                        end: startCounting ? maxTargetValue.toDouble() : 0,
+                      ),
+                      duration: isImmediate
+                          ? Duration.zero
+                          : Duration(
+                              milliseconds: 800 + (maxTargetValue * 800),
+                            ),
+                      builder: (context, val, child) {
+                        // マイナスの間は 0 にクランプ
+                        int displayValue = val.toInt();
+                        if (displayValue < 0) displayValue = 0;
+                        // 自分の本来の目標値でさらにクランプ
+                        if (displayValue > targetValue)
+                          displayValue = targetValue;
+
+                        return _buildFishWithNumber(
+                          displayValue.toString(),
+                          size: fishSize,
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
