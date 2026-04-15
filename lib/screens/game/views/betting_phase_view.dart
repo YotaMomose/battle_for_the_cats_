@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/se_service.dart';
@@ -14,6 +16,17 @@ final Map<ItemType, GlobalKey> _itemTypeKeys = {
   ItemType.catTeaser: GlobalKey(),
   ItemType.surpriseHorn: GlobalKey(),
   ItemType.matatabi: GlobalKey(),
+};
+final Map<String, GlobalKey> _dishKeys = {
+  '0': GlobalKey(),
+  '1': GlobalKey(),
+  '2': GlobalKey(),
+};
+
+final Map<String, GlobalKey> _itemSlotKeys = {
+  '0': GlobalKey(),
+  '1': GlobalKey(),
+  '2': GlobalKey(),
 };
 
 /// 賭けフェーズ画面
@@ -105,70 +118,90 @@ class BettingPhaseView extends StatelessWidget {
                     final placedItem = viewModel.getPlacedItem(catIndex);
 
                     return Expanded(
-                      child: DragTarget<Object>(
-                        onWillAccept: (data) => !viewModel.hasPlacedBet,
-                        onAccept: (data) {
-                          _handleDrop(viewModel, catIndex, data, currentBet);
+                      child: GestureDetector(
+                        onTap: () {
+                          SeService().play('button_buni.mp3');
+                          viewModel.selectCat(catIndex);
                         },
-                        builder: (context, candidateData, rejectedData) {
-                          final isTarget = candidateData.isNotEmpty;
-                          return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                            padding: EdgeInsets.symmetric(
-                              vertical: isSmallScreen ? 2.0 : 8.0,
-                              horizontal: 2.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(
-                                255,
-                                0,
-                                0,
-                                0,
-                              ).withOpacity(isTarget ? 0.9 : 0.7),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isTarget
-                                    ? Colors.yellow
-                                    : Colors.grey.shade300,
-                                width: isTarget ? 3 : 1,
+                        child: DragTarget<Object>(
+                          onWillAccept: (data) => !viewModel.hasPlacedBet,
+                          onAccept: (data) {
+                            _handleDrop(viewModel, catIndex, data, currentBet);
+                          },
+                          builder: (context, candidateData, rejectedData) {
+                            final isTarget = candidateData.isNotEmpty;
+                            final isSelected =
+                                viewModel.selectedCatIndex == catIndex;
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 4.0,
                               ),
-                            ),
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 2.0,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 2.0 : 8.0,
+                                horizontal: 2.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 0, 0, 0)
+                                    .withOpacity(
+                                      (isTarget || isSelected) ? 0.9 : 0.7,
+                                    ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: (isTarget || isSelected)
+                                      ? Colors.yellow
+                                      : Colors.grey.shade300,
+                                  width: (isTarget || isSelected) ? 3 : 1,
                                 ),
-                                child: FittedBox(
-                                  fit: BoxFit.contain,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start, // Changed to start for better alignment
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        height: isSmallScreen ? 110 : 150, // 余裕を持たせた高さに修正
-                                        child: _buildCatCard(
-                                          viewModel,
-                                          card,
-                                          isSmallScreen,
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.yellow.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          spreadRadius: 2,
                                         ),
-                                      ),
-                                      SizedBox(height: isSmallScreen ? 4 : 8),
-                                      _buildDishArea(
-                                        context,
-                                        viewModel: viewModel,
-                                        catIndex: catIndex,
-                                        currentBet: currentBet,
-                                        placedItem: placedItem,
-                                        isSmallScreen: isSmallScreen,
-                                        isTarget: isTarget,
-                                      ),
-                                    ],
+                                      ]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2.0,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start, // Changed to start for better alignment
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          height: isSmallScreen
+                                              ? 110
+                                              : 150, // 余裕を持たせた高さに修正
+                                          child: _buildCatCard(
+                                            viewModel,
+                                            card,
+                                            isSmallScreen,
+                                          ),
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 4 : 8),
+                                        _buildDishArea(
+                                          context,
+                                          viewModel: viewModel,
+                                          catIndex: catIndex,
+                                          currentBet: currentBet,
+                                          placedItem: placedItem,
+                                          isSmallScreen: isSmallScreen,
+                                          isTarget: isTarget,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     );
                   }),
@@ -715,7 +748,12 @@ class BettingPhaseView extends StatelessWidget {
           const SizedBox(width: 4),
           // 魚の数 (自分ならドラッグ＆ドロップ用)
           if (!isOpponent)
-            _buildMyFishDraggableArea(fishCount, viewModel, isSmallScreen)
+            _buildMyFishDraggableArea(
+              context,
+              fishCount,
+              viewModel,
+              isSmallScreen,
+            )
           else
             Container(
               padding: EdgeInsets.symmetric(
@@ -765,6 +803,7 @@ class BettingPhaseView extends StatelessWidget {
                           iconSize: isSmallScreen ? 22 : 32,
                         )
                       : _buildMyItemsList(
+                          context,
                           viewModel,
                           isSmallScreen: isSmallScreen,
                         ),
@@ -918,6 +957,7 @@ class BettingPhaseView extends StatelessWidget {
 
   /// 自分の魚表示エリア (ドラッグ＆ドロップ対応)
   Widget _buildMyFishDraggableArea(
+    BuildContext context,
     int totalFish,
     GameScreenViewModel viewModel,
     bool isSmallScreen,
@@ -935,34 +975,66 @@ class BettingPhaseView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.blue.shade200),
       ),
-      child: canDrag
-          ? Draggable<String>(
-              data: 'fish_from_hand',
-              feedback: Material(
-                color: Colors.transparent,
-                child: Text(
-                  '🐟',
-                  style: TextStyle(fontSize: fishSize * 1.3, height: 1.0),
+      child: GestureDetector(
+        onTap: () {
+          if (viewModel.selectedCatIndex != null && remaining > 0) {
+            final catIndex = viewModel.selectedCatIndex!;
+            final dishKey = _dishKeys[catIndex];
+
+            // 手元の位置からターゲット（お皿）へアニメーション
+            if (dishKey != null) {
+              final RenderBox? handBox =
+                  _myHandFishKey.currentContext?.findRenderObject()
+                      as RenderBox?;
+              if (handBox != null) {
+                final center = handBox.localToGlobal(
+                  handBox.size.center(Offset.zero),
+                );
+                _flyFishAnimation(
+                  context,
+                  center,
+                  '1',
+                  targetKey: dishKey,
+                  size: fishSize,
+                  onComplete: () {
+                    final currentAmount = viewModel.bets[catIndex] ?? 0;
+                    viewModel.updateBet(catIndex, currentAmount + 1);
+                  },
+                );
+              }
+            }
+            SeService().play('button_buni.mp3');
+          }
+        },
+        child: canDrag
+            ? Draggable<String>(
+                data: 'fish_from_hand',
+                feedback: Material(
+                  color: Colors.transparent,
+                  child: Text(
+                    '🐟',
+                    style: TextStyle(fontSize: fishSize * 1.3, height: 1.0),
+                  ),
+                ),
+                childWhenDragging: Opacity(
+                  opacity: 0.3,
+                  child: _buildFishWithNumber('$remaining', size: fishSize),
+                ),
+                child: _buildFishWithNumber(
+                  '$remaining',
+                  size: fishSize,
+                  key: _myHandFishKey,
+                ),
+              )
+            : Opacity(
+                opacity: 0.5,
+                child: _buildFishWithNumber(
+                  '$remaining',
+                  size: fishSize,
+                  key: _myHandFishKey,
                 ),
               ),
-              childWhenDragging: Opacity(
-                opacity: 0.3,
-                child: _buildFishWithNumber('$remaining', size: fishSize),
-              ),
-              child: _buildFishWithNumber(
-                '$remaining',
-                size: fishSize,
-                key: _myHandFishKey,
-              ),
-            )
-          : Opacity(
-              opacity: 0.5,
-              child: _buildFishWithNumber(
-                '$remaining',
-                size: fishSize,
-                key: _myHandFishKey,
-              ),
-            ),
+      ),
     );
   }
 }
@@ -1035,7 +1107,7 @@ Widget _buildDishArea(
 }) {
   final dishWidth = isSmallScreen ? 60.0 : 100.0;
   final fishSize = isSmallScreen ? 35.0 : 50.0;
-  final dishKey = GlobalObjectKey('dish_fish_$catIndex');
+  final dishKey = _dishKeys[catIndex]!;
 
   return Column(
     mainAxisSize: MainAxisSize.min,
@@ -1065,6 +1137,7 @@ Widget _buildDishArea(
           ),
           // 魚の賭け数表示
           Transform.translate(
+            key: dishKey,
             offset: Offset(0, isSmallScreen ? -10 : -15),
             child: (!viewModel.isMyReady)
                 ? (currentBet > 0 && !viewModel.hasPlacedBet
@@ -1088,7 +1161,6 @@ Widget _buildDishArea(
                             ),
                           ),
                           child: GestureDetector(
-                            key: dishKey,
                             onTap: () {
                               if (currentBet > 0) {
                                 final RenderBox? box =
@@ -1102,10 +1174,16 @@ Widget _buildDishArea(
                                     context,
                                     center,
                                     '1',
+                                    targetKey: _myHandFishKey,
                                     size: fishSize,
+                                    onComplete: () {
+                                      viewModel.updateBet(
+                                        catIndex,
+                                        currentBet - 1,
+                                      );
+                                    },
                                   );
                                 }
-                                viewModel.updateBet(catIndex, currentBet - 1);
                                 SeService().play('button_buni.mp3');
                               }
                             },
@@ -1176,6 +1254,7 @@ void _handleDrop(
 
 /// 自分のアイテムリスト
 Widget _buildMyItemsList(
+  BuildContext context,
   GameScreenViewModel viewModel, {
   bool isSmallScreen = false,
 }) {
@@ -1185,16 +1264,19 @@ Widget _buildMyItemsList(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     children: [
       _buildDraggableItem(
+        context,
         ItemType.catTeaser,
         viewModel,
         isSmallScreen: isSmallScreen,
       ),
       _buildDraggableItem(
+        context,
         ItemType.surpriseHorn,
         viewModel,
         isSmallScreen: isSmallScreen,
       ),
       _buildDraggableItem(
+        context,
         ItemType.matatabi,
         viewModel,
         isSmallScreen: isSmallScreen,
@@ -1232,6 +1314,7 @@ Widget _buildOpponentItems(
 }
 
 Widget _buildDraggableItem(
+  BuildContext context,
   ItemType type,
   GameScreenViewModel viewModel, {
   bool isSmallScreen = false,
@@ -1252,27 +1335,51 @@ Widget _buildDraggableItem(
           opacity: 0.3,
           child: _buildItemIcon(type, isPlaced: true, size: itemSize),
         )
-      : IndexedStack(
-          index: 0,
-          children: [
-            Draggable<ItemType>(
-              key: _itemTypeKeys[type],
-              data: type,
-              feedback: Material(
-                color: Colors.transparent,
-                child: _buildItemIcon(
+      : GestureDetector(
+          onTap: () {
+            if (viewModel.selectedCatIndex != null) {
+              final catIndex = viewModel.selectedCatIndex!;
+              // すでに同じアイテムがどこかにあったら配置をリセットされる仕様はviewModel側で吸収
+              // アニメーション実行
+              final itemKey = _itemTypeKeys[type];
+              final RenderBox? itemBox =
+                  itemKey?.currentContext?.findRenderObject() as RenderBox?;
+              if (itemBox != null) {
+                final center = itemBox.localToGlobal(
+                  itemBox.size.center(Offset.zero),
+                );
+                final slotKey = _itemSlotKeys[catIndex]!;
+                _flyItemAnimation(
+                  context,
+                  center,
                   type,
-                  isFeedback: true,
-                  size: itemSize * 1.2,
-                ),
+                  targetKey: slotKey,
+                  size: itemSize,
+                  onComplete: () {
+                    viewModel.updateItemPlacement(catIndex, type);
+                  },
+                );
+              }
+              SeService().play('button_buni.mp3');
+            }
+          },
+          child: Draggable<ItemType>(
+            key: _itemTypeKeys[type],
+            data: type,
+            feedback: Material(
+              color: Colors.transparent,
+              child: _buildItemIcon(
+                type,
+                isFeedback: true,
+                size: itemSize * 1.2,
               ),
-              childWhenDragging: Opacity(
-                opacity: 0.5,
-                child: _buildItemIcon(type, size: itemSize),
-              ),
+            ),
+            childWhenDragging: Opacity(
+              opacity: 0.5,
               child: _buildItemIcon(type, size: itemSize),
             ),
-          ],
+            child: _buildItemIcon(type, size: itemSize),
+          ),
         );
 }
 
@@ -1320,7 +1427,7 @@ Widget _buildItemSlot(
   bool isSmallScreen = false,
 }) {
   final itemIconSize = isSmallScreen ? 24.0 : 36.0; // 配置先を少し小さく
-  final slotKey = GlobalObjectKey('item_slot_$catIndex');
+  final slotKey = _itemSlotKeys[catIndex]!;
 
   final color = placedItem != null ? _getItemColor(placedItem) : Colors.white;
   final shadowColor = placedItem != null
@@ -1328,6 +1435,7 @@ Widget _buildItemSlot(
       : Colors.grey.shade300;
 
   return SizedBox(
+    key: slotKey,
     width: itemIconSize + 16,
     height: itemIconSize + 16,
     child: StereoscopicContainer(
@@ -1359,7 +1467,6 @@ Widget _buildItemSlot(
                             ),
                           ),
                           child: GestureDetector(
-                            key: slotKey,
                             onTap: () {
                               final RenderBox? box =
                                   slotKey.currentContext?.findRenderObject()
@@ -1372,6 +1479,7 @@ Widget _buildItemSlot(
                                   context,
                                   center,
                                   placedItem,
+                                  targetKey: _itemTypeKeys[placedItem]!,
                                   size: itemIconSize,
                                 );
                               }
@@ -1517,7 +1625,9 @@ void _flyFishAnimation(
   BuildContext context,
   Offset start,
   String number, {
+  required GlobalKey targetKey,
   double size = 48,
+  VoidCallback? onComplete,
 }) {
   final overlay = Overlay.of(context);
   final RenderBox? overlayBox =
@@ -1532,19 +1642,20 @@ void _flyFishAnimation(
     builder: (context) {
       return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutQuad,
         onEnd: () {
           entry.remove();
+          onComplete?.call();
         },
         builder: (context, value, child) {
           // ターゲットの位置をリアルタイムに取得（移動に追従させる）
-          final RenderBox? handBox =
-              _myHandFishKey.currentContext?.findRenderObject() as RenderBox?;
+          final RenderBox? targetBox =
+              targetKey.currentContext?.findRenderObject() as RenderBox?;
           Offset endLocal;
-          if (handBox != null) {
-            final Offset endGlobal = handBox.localToGlobal(
-              handBox.size.center(Offset.zero),
+          if (targetBox != null) {
+            final Offset endGlobal = targetBox.localToGlobal(
+              targetBox.size.center(Offset.zero),
             );
             endLocal = overlayBox.globalToLocal(endGlobal);
           } else {
@@ -1552,14 +1663,37 @@ void _flyFishAnimation(
             endLocal = startLocal;
           }
 
-          final pos = Offset.lerp(startLocal, endLocal, value)!;
+          // 放物線を描くためのオフセット計算 (上に膨らむ)
+          final jumpHeight = -40.0;
+          final dyOffset = math.sin(value * math.pi) * jumpHeight;
+
+          final pos = Offset.lerp(
+            startLocal,
+            endLocal,
+            value,
+          )!.translate(0, dyOffset);
+
+          // 移動中のスケール（中間で少し大きくなる）
+          final scale = 1.0 + math.sin(value * math.pi) * 0.3;
+          // 移動中の回転
+          final rotation = math.sin(value * math.pi) * 0.1;
+
           return Positioned(
             left: pos.dx,
             top: pos.dy,
             child: FractionalTranslation(
               translation: const Offset(-0.5, -0.5),
               child: IgnorePointer(
-                child: _buildFishWithNumber(number, size: size),
+                child: Transform.translate(
+                  offset: Offset.zero,
+                  child: Transform.rotate(
+                    angle: rotation,
+                    child: Transform.scale(
+                      scale: scale,
+                      child: _buildFishWithNumber(number, size: size),
+                    ),
+                  ),
+                ),
               ),
             ),
           );
@@ -1574,7 +1708,9 @@ void _flyItemAnimation(
   BuildContext context,
   Offset start,
   ItemType type, {
+  required GlobalKey targetKey,
   double size = 32,
+  VoidCallback? onComplete,
 }) {
   final overlay = Overlay.of(context);
   final RenderBox? overlayBox =
@@ -1589,20 +1725,20 @@ void _flyItemAnimation(
     builder: (context) {
       return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutQuad,
         onEnd: () {
           entry.remove();
+          onComplete?.call();
         },
         builder: (context, value, child) {
-          // ターゲットの位置をリアルタイムに取得
-          final targetKey = _itemTypeKeys[type];
-          final RenderBox? itemBox =
-              targetKey?.currentContext?.findRenderObject() as RenderBox?;
+          // ターゲットの位置をリアルタイムに取得（移動に追従させる）
+          final RenderBox? targetBox =
+              targetKey.currentContext?.findRenderObject() as RenderBox?;
           final RenderBox? fallBackBox =
               _myItemsKey.currentContext?.findRenderObject() as RenderBox?;
 
-          final targetRenderBox = itemBox ?? fallBackBox;
+          final targetRenderBox = targetBox ?? fallBackBox;
           Offset endLocal;
 
           if (targetRenderBox != null) {
@@ -1614,13 +1750,35 @@ void _flyItemAnimation(
             endLocal = startLocal;
           }
 
-          final pos = Offset.lerp(startLocal, endLocal, value)!;
+          // 放物線を描くためのオフセット計算
+          final jumpHeight = -40.0;
+          final dyOffset = math.sin(value * math.pi) * jumpHeight;
+
+          final pos = Offset.lerp(
+            startLocal,
+            endLocal,
+            value,
+          )!.translate(0, dyOffset);
+
+          // 移動中のスケール
+          final scale = 1.0 + math.sin(value * math.pi) * 0.3;
+          // 移動中の回転
+          final rotation = math.sin(value * math.pi) * 0.1;
+
           return Positioned(
             left: pos.dx,
             top: pos.dy,
             child: FractionalTranslation(
               translation: const Offset(-0.5, -0.5),
-              child: IgnorePointer(child: _buildItemImage(type, size: size)),
+              child: IgnorePointer(
+                child: Transform.rotate(
+                  angle: rotation,
+                  child: Transform.scale(
+                    scale: scale,
+                    child: _buildItemImage(type, size: size),
+                  ),
+                ),
+              ),
             ),
           );
         },
@@ -1630,11 +1788,7 @@ void _flyItemAnimation(
   overlay.insert(entry);
 }
 
-Widget _buildFishWithNumber(
-  String number, {
-  double size = 48,
-  Key? key,
-}) {
+Widget _buildFishWithNumber(String number, {double size = 48, Key? key}) {
   return Stack(
     key: key,
     alignment: Alignment.center,

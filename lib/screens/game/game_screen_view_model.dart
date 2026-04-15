@@ -136,6 +136,10 @@ class GameScreenViewModel extends ChangeNotifier {
   bool _isFishingEffect = false;
   bool get isFishingEffect => _isFishingEffect;
 
+  // カード選択状態（賭け用）
+  String? _selectedCatIndex;
+  String? get selectedCatIndex => _selectedCatIndex;
+
   // ===== Getters (Viewから参照) =====
   GameScreenState get uiState => _uiState;
   bool get hasRolled => _hasRolled;
@@ -686,6 +690,7 @@ class GameScreenViewModel extends ChangeNotifier {
     _hasPlacedBet = false;
     _bets = Bets.empty();
     _shownDogNotificationIds.clear();
+    _selectedCatIndex = null;
   }
 
   /// サーバーの状態とローカルの操作状態を同期する
@@ -993,6 +998,17 @@ class GameScreenViewModel extends ChangeNotifier {
     final notifications = dogEffectNotifications;
     for (var n in notifications) {
       _shownDogNotificationIds.add('${n.cardName}_${n.isMyAction}');
+    }
+    notifyListeners();
+  }
+
+  /// カード（お皿）を選択する
+  void selectCat(String? index) {
+    if (_hasPlacedBet) return;
+    if (_selectedCatIndex == index) {
+      _selectedCatIndex = null; // 同じものをタップしたら解除
+    } else {
+      _selectedCatIndex = index;
     }
     notifyListeners();
   }
