@@ -1415,8 +1415,8 @@ class _RoundResultViewState extends State<RoundResultView> {
               : (isSmallScreen ? 34.0 : 48.0));
 
     final itemIconSize = isSmallScreen ? 14.0 : 20.0;
-    // 表の高さがずれないように高さを固定する
-    final rowHeight = isSmallScreen ? 55.0 : 75.0;
+    // 表の高さがずれないように高さを固定する（カウントアップ時の拡大に対応）
+    final rowHeight = isSmallScreen ? 60.0 : 80.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),

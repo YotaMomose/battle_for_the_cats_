@@ -5,7 +5,7 @@ import '../services/se_service.dart';
 import 'game/game_screen_view_model.dart';
 import 'game/game_screen_state.dart';
 import 'game/views/waiting_view.dart';
-import 'game/views/rolling_phase_view.dart';
+import 'game/views/fishing_phase_view.dart';
 import 'game/views/betting_phase_view.dart';
 import 'game/views/round_result_view.dart';
 import 'game/views/final_result_view.dart';
@@ -177,7 +177,7 @@ class _GameScreenContent extends StatelessWidget {
     return switch (state) {
       LoadingState() => const Center(child: CircularProgressIndicator()),
       WaitingState() => WaitingView(roomCode: vm.roomCode),
-      RollingState(:final room) => RollingPhaseView(room: room),
+      RollingState(:final room) => FishingPhaseView(room: room),
       PlayingState(:final room) => BettingPhaseView(room: room),
       RoundResultState(:final room) => RoundResultView(room: room),
       FinishedState(:final room) => FinalResultView(room: room),

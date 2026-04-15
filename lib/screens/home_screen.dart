@@ -9,6 +9,8 @@ import '../repositories/user_repository.dart';
 import 'home/views/main_menu_view.dart';
 import 'home/views/matchmaking_view.dart';
 import 'profile_setup_screen.dart';
+import 'tutorial/tutorial_screen.dart';
+import 'tutorial/tutorial_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? message;
@@ -63,13 +65,27 @@ class _HomeScreenState extends State<HomeScreen> {
               ).then((_) => _isNavigationPending = false);
             });
           },
+          onNavigateToTutorial: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider(create: (_) => TutorialViewModel()),
+                    ChangeNotifierProvider.value(value: _viewModel!),
+                  ],
+                  child: const TutorialScreen(),
+                ),
+              ),
+            );
+          },
         );
-        
+
         // メッセージがあればセットする
         if (widget.message != null) {
           _viewModel!.setNotification(widget.message);
         }
-        
+
         return _viewModel!;
       },
       child: const _HomeScreenContent(),
@@ -96,6 +112,13 @@ class _HomeScreenContent extends StatelessWidget {
     if (errorMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showErrorDialog(context, viewModel, errorMessage);
+      });
+    }
+
+    // チュートリアルプロンプトの表示
+    if (viewModel.shouldShowTutorialPrompt) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showTutorialDialog(context, viewModel);
       });
     }
 
@@ -152,6 +175,42 @@ class _HomeScreenContent extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showTutorialDialog(
+    BuildContext context,
+    HomeScreenViewModel viewModel,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'チュートリアル',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text('猫争奪戦へようこそ！\n最初に遊び方のチュートリアルをプレイしますか？'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                viewModel.completeTutorial(); // 完了フラグを立ててスキップ
+                Navigator.pop(context);
+              },
+              child: const Text('スキップ', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.completeTutorial(); // 先にフラグを立てておく（戻ってきた時に出ないよう）
+                Navigator.pop(context);
+                viewModel.onNavigateToTutorial();
+              },
+              child: const Text('開始する'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

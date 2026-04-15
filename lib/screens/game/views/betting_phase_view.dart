@@ -929,7 +929,6 @@ class BettingPhaseView extends StatelessWidget {
     // 魚エリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
     return Container(
-      key: _myHandFishKey,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
@@ -950,11 +949,19 @@ class BettingPhaseView extends StatelessWidget {
                 opacity: 0.3,
                 child: _buildFishWithNumber('$remaining', size: fishSize),
               ),
-              child: _buildFishWithNumber('$remaining', size: fishSize),
+              child: _buildFishWithNumber(
+                '$remaining',
+                size: fishSize,
+                key: _myHandFishKey,
+              ),
             )
           : Opacity(
               opacity: 0.5,
-              child: _buildFishWithNumber('$remaining', size: fishSize),
+              child: _buildFishWithNumber(
+                '$remaining',
+                size: fishSize,
+                key: _myHandFishKey,
+              ),
             ),
     );
   }
@@ -1512,13 +1519,13 @@ void _flyFishAnimation(
   String number, {
   double size = 48,
 }) {
-  final RenderBox? handBox =
-      _myHandFishKey.currentContext?.findRenderObject() as RenderBox?;
-  if (handBox == null) return;
-
-  final Offset end = handBox.localToGlobal(handBox.size.center(Offset.zero));
-
   final overlay = Overlay.of(context);
+  final RenderBox? overlayBox =
+      overlay.context.findRenderObject() as RenderBox?;
+  if (overlayBox == null) return;
+
+  final Offset startLocal = overlayBox.globalToLocal(start);
+
   late OverlayEntry entry;
 
   entry = OverlayEntry(
@@ -1526,12 +1533,26 @@ void _flyFishAnimation(
       return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInCubic,
+        curve: Curves.easeOutCubic,
         onEnd: () {
           entry.remove();
         },
         builder: (context, value, child) {
-          final pos = Offset.lerp(start, end, value)!;
+          // ターゲットの位置をリアルタイムに取得（移動に追従させる）
+          final RenderBox? handBox =
+              _myHandFishKey.currentContext?.findRenderObject() as RenderBox?;
+          Offset endLocal;
+          if (handBox != null) {
+            final Offset endGlobal = handBox.localToGlobal(
+              handBox.size.center(Offset.zero),
+            );
+            endLocal = overlayBox.globalToLocal(endGlobal);
+          } else {
+            // 見つからない場合は開始位置に留める
+            endLocal = startLocal;
+          }
+
+          final pos = Offset.lerp(startLocal, endLocal, value)!;
           return Positioned(
             left: pos.dx,
             top: pos.dy,
@@ -1555,22 +1576,13 @@ void _flyItemAnimation(
   ItemType type, {
   double size = 32,
 }) {
-  final targetKey = _itemTypeKeys[type];
-  final RenderBox? itemBox =
-      targetKey?.currentContext?.findRenderObject() as RenderBox?;
-
-  // 指定のアイテムが見つからない場合は従来の _myItemsKey をフォールバックに使用
-  final RenderBox? fallBackBox =
-      _myItemsKey.currentContext?.findRenderObject() as RenderBox?;
-
-  final targetRenderBox = itemBox ?? fallBackBox;
-  if (targetRenderBox == null) return;
-
-  final Offset end = targetRenderBox.localToGlobal(
-    targetRenderBox.size.center(Offset.zero),
-  );
-
   final overlay = Overlay.of(context);
+  final RenderBox? overlayBox =
+      overlay.context.findRenderObject() as RenderBox?;
+  if (overlayBox == null) return;
+
+  final Offset startLocal = overlayBox.globalToLocal(start);
+
   late OverlayEntry entry;
 
   entry = OverlayEntry(
@@ -1578,12 +1590,31 @@ void _flyItemAnimation(
       return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInCubic,
+        curve: Curves.easeOutCubic,
         onEnd: () {
           entry.remove();
         },
         builder: (context, value, child) {
-          final pos = Offset.lerp(start, end, value)!;
+          // ターゲットの位置をリアルタイムに取得
+          final targetKey = _itemTypeKeys[type];
+          final RenderBox? itemBox =
+              targetKey?.currentContext?.findRenderObject() as RenderBox?;
+          final RenderBox? fallBackBox =
+              _myItemsKey.currentContext?.findRenderObject() as RenderBox?;
+
+          final targetRenderBox = itemBox ?? fallBackBox;
+          Offset endLocal;
+
+          if (targetRenderBox != null) {
+            final Offset endGlobal = targetRenderBox.localToGlobal(
+              targetRenderBox.size.center(Offset.zero),
+            );
+            endLocal = overlayBox.globalToLocal(endGlobal);
+          } else {
+            endLocal = startLocal;
+          }
+
+          final pos = Offset.lerp(startLocal, endLocal, value)!;
           return Positioned(
             left: pos.dx,
             top: pos.dy,
@@ -1599,8 +1630,13 @@ void _flyItemAnimation(
   overlay.insert(entry);
 }
 
-Widget _buildFishWithNumber(String number, {double size = 48}) {
+Widget _buildFishWithNumber(
+  String number, {
+  double size = 48,
+  Key? key,
+}) {
   return Stack(
+    key: key,
     alignment: Alignment.center,
     children: [
       Text('🐟', style: TextStyle(fontSize: size, height: 1.0)),

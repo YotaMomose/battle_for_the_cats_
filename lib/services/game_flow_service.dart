@@ -20,8 +20,8 @@ class GameFlowService {
        _dice = dice ?? StandardDice(),
        _roundResolver = roundResolver ?? RoundResolver();
 
-  /// サイコロを振る
-  Future<void> rollDice(String roomCode, String playerId) async {
+  /// 魚を釣る
+  Future<void> catchFish(String roomCode, String playerId) async {
     await _repository.runTransaction((Transaction transaction) async {
       final room = await _repository.getRoomInTransaction(
         transaction,

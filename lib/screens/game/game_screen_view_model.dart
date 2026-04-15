@@ -132,6 +132,10 @@ class GameScreenViewModel extends ChangeNotifier {
   // 表示済みの犬の効果通知メッセージのハッシュ値または内容を保持
   final Set<String> _shownDogNotificationIds = {};
 
+  // つり演出中フラグ
+  bool _isFishingEffect = false;
+  bool get isFishingEffect => _isFishingEffect;
+
   // ===== Getters (Viewから参照) =====
   GameScreenState get uiState => _uiState;
   bool get hasRolled => _hasRolled;
@@ -399,17 +403,18 @@ class GameScreenViewModel extends ChangeNotifier {
     return '確定する';
   }
 
-  /// サイコロボタンのラベル
-  String get rollButtonLabel {
-    return _hasRolled ? '振りました' : 'サイコロを振る';
+  /// つりボタンのラベル
+  String get fishButtonLabel {
+    if (_isFishingEffect) return 'つり中...';
+    return _hasRolled ? 'つりました' : 'つりをはじめる';
   }
 
-  /// サイコロボタンの色
-  Color get rollButtonColor {
-    return _hasRolled ? Colors.grey : Colors.orange;
+  /// つりボタンの色
+  Color get fishButtonColor {
+    return (_hasRolled || _isFishingEffect) ? Colors.grey : Colors.blue;
   }
 
-  /// 相手のサイコロ結果ステータスラベル
+  /// 相手のつり結果ステータスラベル
   String get opponentRollStatusLabel {
     final data = playerData;
     if (data == null) return '';
@@ -417,14 +422,14 @@ class GameScreenViewModel extends ChangeNotifier {
       final totalFish = data.opponentDiceRoll! + data.opponentFishermanCount;
       return '$opponentDisplayName は 魚を $totalFish 匹獲得しました！';
     }
-    return '$opponentDisplayName がサイコロを振っています...';
+    return '$opponentDisplayName がつりをしています...';
   }
 
-  /// 相手のサイコロ結果ステータスラベルの色
+  /// 相手のつり結果ステータスラベルの色
   Color get opponentRollStatusColor {
     final data = playerData;
     if (data == null) return Colors.grey;
-    return data.opponentRolled ? Colors.green : Colors.orange;
+    return data.opponentRolled ? Colors.green : Colors.blue;
   }
 
   /// 猫のアイコン色を取得（外部View用）
@@ -718,13 +723,22 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   // ===== ユーザーアクション（Viewから呼ばれる） =====
-  Future<void> rollDice() async {
+  Future<void> catchFish() async {
+    if (_isFishingEffect || _hasRolled) return;
+
     try {
-      await _gameService.rollDice(roomCode, playerId);
-      _hasRolled = true;
+      _isFishingEffect = true;
       notifyListeners();
+
+      // 溜め演出（1.5秒待機）
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      await _gameService.catchFish(roomCode, playerId);
+      _hasRolled = true;
     } catch (e) {
-      _uiState = _uiState.copyWithError('サイコロを振れませんでした: $e');
+      _uiState = _uiState.copyWithError('つりができませんでした: $e');
+    } finally {
+      _isFishingEffect = false;
       notifyListeners();
     }
   }

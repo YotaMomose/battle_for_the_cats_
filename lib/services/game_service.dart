@@ -102,8 +102,8 @@ class GameService {
     String? targetCardName,
   ) => _roomService.chaseAwayCard(roomCode, playerId, targetCardName);
 
-  Future<void> rollDice(String roomCode, String playerId) =>
-      _gameFlowService.rollDice(roomCode, playerId);
+  Future<void> catchFish(String roomCode, String playerId) =>
+      _gameFlowService.catchFish(roomCode, playerId);
   Future<void> placeBets(
     String roomCode,
     String playerId,

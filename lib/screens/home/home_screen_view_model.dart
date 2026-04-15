@@ -21,6 +21,7 @@ class HomeScreenViewModel extends ChangeNotifier {
   final Function(String roomCode, String playerId, bool isHost)
   onNavigateToGame;
   final VoidCallback onNavigateToProfileSetup;
+  final VoidCallback onNavigateToTutorial;
 
   HomeScreenState _state = HomeScreenState.idle();
   StreamSubscription? _matchmakingSubscription;
@@ -42,10 +43,15 @@ class HomeScreenViewModel extends ChangeNotifier {
       !_userProfile!.isSupporter &&
       !_userProfile!.adsRemoved;
 
+  // チュートリアルポップアップ表示フラグ
+  bool _shouldShowTutorialPrompt = false;
+  bool get shouldShowTutorialPrompt => _shouldShowTutorialPrompt;
+
   HomeScreenViewModel({
     required GameService gameService,
     required this.onNavigateToGame,
     required this.onNavigateToProfileSetup,
+    required this.onNavigateToTutorial,
     AuthService? authService,
     UserRepository? userRepository,
   }) : _gameService = gameService {
@@ -101,6 +107,11 @@ class HomeScreenViewModel extends ChangeNotifier {
 
       _userProfile = profile;
 
+      // チュートリアルが未完了であれば表示フラグを立てる
+      if (!_userProfile!.hasCompletedTutorial) {
+        _shouldShowTutorialPrompt = true;
+      }
+
       // 招待の監視を開始
       _startInvitationMonitoring(uid);
 
@@ -113,12 +124,26 @@ class HomeScreenViewModel extends ChangeNotifier {
     }
   }
 
+  /// チュートリアル完了（またはスキップ）を保存する
+  Future<void> completeTutorial() async {
+    if (_userProfile == null) return;
+    await updateProfile(hasCompletedTutorial: true);
+    clearTutorialPrompt();
+  }
+
+  /// チュートリアルプロンプトの表示フラグをクリアする
+  void clearTutorialPrompt() {
+    _shouldShowTutorialPrompt = false;
+    notifyListeners();
+  }
+
   /// プロフィールを更新する
   Future<void> updateProfile({
     String? displayName,
     String? iconId,
     bool? isSupporter,
     bool? adsRemoved,
+    bool? hasCompletedTutorial,
   }) async {
     final uid = _authService.currentUserId;
     if (uid == null) return;
@@ -142,15 +167,16 @@ class HomeScreenViewModel extends ChangeNotifier {
         iconId: iconId,
         isSupporter: isSupporter,
         adsRemoved: adsRemoved,
+        hasCompletedTutorial: hasCompletedTutorial,
       );
       await _userRepository.saveProfile(_userProfile!);
 
       // 再取得してフレンドコードなどを含めた最新状態にする
       _userProfile = await _userRepository.getProfile(uid);
 
-      // 初回設定後の場合は招待監視を開始
-      if (_invitationSubscription == null) {
-        _startInvitationMonitoring(uid);
+      // プロフィール更新後、チュートリアル未完了であればプロンプトを表示
+      if (_userProfile != null && !_userProfile!.hasCompletedTutorial) {
+        _shouldShowTutorialPrompt = true;
       }
 
       notifyListeners();

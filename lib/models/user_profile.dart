@@ -8,6 +8,7 @@ class UserProfile {
   final String? friendCode;
   final bool isSupporter;
   final bool adsRemoved;
+  final bool hasCompletedTutorial;
 
   const UserProfile({
     required this.uid,
@@ -16,6 +17,7 @@ class UserProfile {
     this.friendCode,
     this.isSupporter = false,
     this.adsRemoved = false,
+    this.hasCompletedTutorial = false,
   });
 
   /// デフォルトのプロフィール（初回ログイン時に使用）
@@ -26,6 +28,7 @@ class UserProfile {
       iconId: UserIcon.defaultIcon.id,
       isSupporter: false,
       adsRemoved: false,
+      hasCompletedTutorial: false,
     );
   }
 
@@ -35,6 +38,7 @@ class UserProfile {
     String? friendCode,
     bool? isSupporter,
     bool? adsRemoved,
+    bool? hasCompletedTutorial,
   }) {
     return UserProfile(
       uid: uid,
@@ -43,6 +47,7 @@ class UserProfile {
       friendCode: friendCode ?? this.friendCode,
       isSupporter: isSupporter ?? this.isSupporter,
       adsRemoved: adsRemoved ?? this.adsRemoved,
+      hasCompletedTutorial: hasCompletedTutorial ?? this.hasCompletedTutorial,
     );
   }
 
@@ -53,6 +58,7 @@ class UserProfile {
       'iconId': iconId,
       'isSupporter': isSupporter,
       'adsRemoved': adsRemoved,
+      'hasCompletedTutorial': hasCompletedTutorial,
       if (friendCode != null) 'friendCode': friendCode,
     };
   }
@@ -65,6 +71,7 @@ class UserProfile {
       friendCode: map['friendCode'],
       isSupporter: map['isSupporter'] ?? false,
       adsRemoved: map['adsRemoved'] ?? false,
+      hasCompletedTutorial: map['hasCompletedTutorial'] ?? false,
     );
   }
 
@@ -77,7 +84,8 @@ class UserProfile {
           iconId == other.iconId &&
           friendCode == other.friendCode &&
           isSupporter == other.isSupporter &&
-          adsRemoved == other.adsRemoved;
+          adsRemoved == other.adsRemoved &&
+          hasCompletedTutorial == other.hasCompletedTutorial;
 
   @override
   int get hashCode => Object.hash(
@@ -87,11 +95,12 @@ class UserProfile {
     friendCode,
     isSupporter,
     adsRemoved,
+    hasCompletedTutorial,
   );
 
   @override
   String toString() =>
-      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode, isSupporter: $isSupporter, adsRemoved: $adsRemoved)';
+      'UserProfile(uid: $uid, displayName: $displayName, iconId: $iconId, friendCode: $friendCode, isSupporter: $isSupporter, adsRemoved: $adsRemoved, hasCompletedTutorial: $hasCompletedTutorial)';
 }
 
 /// プリセットアイコンの定義

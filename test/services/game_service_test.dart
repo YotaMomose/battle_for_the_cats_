@@ -91,10 +91,10 @@ void main() {
     });
 
     group('ゲーム進行メソッド', () {
-      test('rollDice をリクエストすると GameFlowService に委譲される', () async {
-        await gameService.rollDice('ROOM_CODE', 'player_001');
+      test('catchFish をリクエストすると GameFlowService に委譲される', () async {
+        await gameService.catchFish('ROOM_CODE', 'player_001');
         verify(
-          mockGameFlowService.rollDice('ROOM_CODE', 'player_001'),
+          mockGameFlowService.catchFish('ROOM_CODE', 'player_001'),
         ).called(1);
       });
 

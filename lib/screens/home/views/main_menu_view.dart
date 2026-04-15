@@ -189,6 +189,32 @@ class _MainMenuViewState extends State<MainMenuView> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      // チュートリアルボタン (テスト用)
+                      SizedBox(
+                        height: 52,
+                        child: StereoscopicButton(
+                          onPressed: isNotIdle
+                              ? null
+                              : () {
+                                  FocusScope.of(context).unfocus();
+                                  SeService().play('button_buni.mp3');
+                                  viewModel.onNavigateToTutorial();
+                                },
+                          baseColor: Colors.teal.shade400,
+                          shadowColor: Colors.teal.shade900,
+                          child: const Center(
+                            child: Text(
+                              'チュートリアルをプレイ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
