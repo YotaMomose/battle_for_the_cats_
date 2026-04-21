@@ -8,6 +8,7 @@ import '../../widgets/stereoscopic_ui.dart';
 import '../../widgets/tutorial/tutorial_dialogue_widget.dart';
 import 'tutorial_view_model.dart';
 import '../home/home_screen_view_model.dart';
+import 'views/tutorial_round_result_view.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
@@ -106,13 +107,17 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
                             final card = cards[index];
                             final currentBet = viewModel.bets[catIndex] ?? 0;
-                            final placedItem = viewModel.getPlacedItem(catIndex);
+                            final placedItem = viewModel.getPlacedItem(
+                              catIndex,
+                            );
 
                             // ステップに応じたハイライト
                             bool isHighlighted = false;
                             if (viewModel.currentStep == 3 && index == 0)
                               isHighlighted = true;
-                            if (viewModel.currentStep == 7 && index == 1)
+                            if (viewModel.currentStep == 5 && index == 1)
+                              isHighlighted = true;
+                            if (viewModel.currentStep == 8 && index == 2)
                               isHighlighted = true;
 
                             return Expanded(
@@ -128,74 +133,79 @@ class _TutorialScreenState extends State<TutorialScreen> {
                                 },
                                 builder:
                                     (context, candidateData, rejectedData) {
-                                  final isTarget = candidateData.isNotEmpty;
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 4.0,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4.0,
-                                      horizontal: 2.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        0,
-                                        0,
-                                        0,
-                                      ).withOpacity(isTarget ? 0.9 : 0.7),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: isHighlighted
-                                            ? Colors.yellow
-                                            : (isTarget
-                                                ? Colors.yellow.withOpacity(0.5)
-                                                : Colors.grey.shade300),
-                                        width: isHighlighted
-                                            ? 4
-                                            : (isTarget ? 2 : 1),
-                                      ),
-                                      boxShadow: isHighlighted
-                                          ? [
-                                              BoxShadow(
-                                                color: Colors.yellow
-                                                    .withOpacity(0.5),
-                                                blurRadius: 10,
-                                                spreadRadius: 2,
-                                              ),
-                                            ]
-                                          : null,
-                                    ),
-                                    child: Center(
-                                      child: FittedBox(
-                                        fit: BoxFit.contain,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            SizedBox(
-                                              height: isSmallScreen ? 110 : 150,
-                                              child: _buildCatCard(
-                                                viewModel,
-                                                card,
-                                                isSmallScreen,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            _buildDishArea(
-                                              context,
-                                              viewModel: viewModel,
-                                              catIndex: catIndex,
-                                              currentBet: currentBet,
-                                              placedItem: placedItem,
-                                              isSmallScreen: isSmallScreen,
-                                              isTarget: isTarget,
-                                            ),
-                                          ],
+                                      final isTarget = candidateData.isNotEmpty;
+                                      return Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 4.0,
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                },
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4.0,
+                                          horizontal: 2.0,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            0,
+                                            0,
+                                            0,
+                                          ).withOpacity(isTarget ? 0.9 : 0.7),
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          border: Border.all(
+                                            color: isHighlighted
+                                                ? Colors.yellow
+                                                : (isTarget
+                                                      ? Colors.yellow
+                                                            .withOpacity(0.5)
+                                                      : Colors.grey.shade300),
+                                            width: isHighlighted
+                                                ? 4
+                                                : (isTarget ? 2 : 1),
+                                          ),
+                                          boxShadow: isHighlighted
+                                              ? [
+                                                  BoxShadow(
+                                                    color: Colors.yellow
+                                                        .withOpacity(0.5),
+                                                    blurRadius: 10,
+                                                    spreadRadius: 2,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                        child: Center(
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(
+                                                  height: isSmallScreen
+                                                      ? 110
+                                                      : 150,
+                                                  child: _buildCatCard(
+                                                    viewModel,
+                                                    card,
+                                                    isSmallScreen,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                _buildDishArea(
+                                                  context,
+                                                  viewModel: viewModel,
+                                                  catIndex: catIndex,
+                                                  currentBet: currentBet,
+                                                  placedItem: placedItem,
+                                                  isSmallScreen: isSmallScreen,
+                                                  isTarget: isTarget,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                               ),
                             );
                           }),
@@ -227,6 +237,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
             ),
           ),
 
+          // 判定演出画面
+          if (viewModel.isResultPhase) const TutorialRoundResultView(),
+
           // チュートリアル・ダイアログ (上部)
           if (!_isDialogueDismissed)
             Positioned(
@@ -237,7 +250,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 child: TutorialDialogueWidget(
                   message: viewModel.currentMessage,
                   onNext: () async {
-                    if (viewModel.currentStep == 11) {
+                    if (viewModel.currentStep == 19) {
                       setState(() {
                         _isDialogueDismissed = true;
                       });
@@ -250,8 +263,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       viewModel.nextStep();
                     }
                   },
-                  isLast: viewModel.currentStep == 11,
-                  isEnabled: viewModel.canProgress || viewModel.currentStep == 11,
+                  isLast: viewModel.currentStep == 19,
+                  isEnabled:
+                      viewModel.canProgress || viewModel.currentStep == 19,
                   characterImagePath: 'assets/images/kuroneko.png', // 長老ねこ
                 ),
               ),
@@ -693,7 +707,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                               size: fishSize,
                             );
                           }
-                          viewModel.updateBet(catIndex, currentBet - 1);
+                          viewModel.updateBet(catIndex, -1);
                         },
                         child: _buildFishWithNumber(
                           '$currentBet',
@@ -928,8 +942,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildActionArea(TutorialViewModel viewModel, bool isSmallScreen) {
     if (viewModel.currentStep <= 7) return const SizedBox(height: 50);
 
-    // ステップ8で確定ボタンをハイライト
-    final bool isConfirmHighlighted = viewModel.currentStep == 8;
+    // ステップ9で確定ボタンをハイライト
+    final bool isConfirmHighlighted = viewModel.currentStep == 9;
     // ステップ10でつりボタンをハイライト
     final bool isFishHighlighted = viewModel.currentStep == 10;
 
@@ -939,7 +953,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           width: 200,
           height: 50,
           child: StereoscopicButton(
-            onPressed: viewModel.currentStep == 8 ? viewModel.placeBets : null,
+            onPressed: viewModel.currentStep == 9 ? viewModel.placeBets : null,
             baseColor: isConfirmHighlighted
                 ? Colors.yellow
                 : (viewModel.hasPlacedBet ? Colors.grey : Colors.pink.shade400),
@@ -965,26 +979,28 @@ class _TutorialScreenState extends State<TutorialScreen> {
       );
     }
 
-    if (viewModel.currentStep >= 10) {
+    if (viewModel.currentStep >= 18) {
       return Center(
         child: SizedBox(
           width: 200,
           height: 50,
           child: StereoscopicButton(
-            onPressed: viewModel.currentStep == 10 ? viewModel.catchFish : null,
+            onPressed: viewModel.currentStep == 18 ? viewModel.rollDice : null,
             baseColor: isFishHighlighted
                 ? Colors.yellow
-                : (viewModel.isMyRolled ? Colors.grey : Colors.blue),
+                : (viewModel.isMyRolled
+                      ? Colors.grey
+                      : const Color(0xFFF06292)),
             shadowColor: isFishHighlighted
                 ? Colors.yellow.shade800
                 : (viewModel.isMyRolled
                       ? Colors.grey.shade700
-                      : Colors.blue.shade900),
+                      : const Color(0xFFAD1457)),
             borderRadius: 12,
             depth: 4,
             child: Center(
               child: Text(
-                viewModel.isMyRolled ? 'つりました' : 'つりをはじめる',
+                viewModel.isMyRolled ? '振りました' : 'サイコロを振る',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -1034,7 +1050,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     int currentBet,
   ) {
     if (data == 'fish_from_hand') {
-      viewModel.updateBet(catIndex, currentBet + 1);
+      viewModel.updateBet(catIndex, 1);
       SeService().play('button_buni.mp3');
     } else if (data is ItemType) {
       viewModel.updateItemPlacement(catIndex, data);

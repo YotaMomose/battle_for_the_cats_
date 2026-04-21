@@ -472,10 +472,7 @@ class _MainMenuViewState extends State<MainMenuView> {
           children: [
             const Text('対戦相手:'),
             const SizedBox(height: 16),
-            UserIconWidget(
-              icon: UserIcon.fromId(host.iconId),
-              size: 64,
-            ),
+            UserIconWidget(icon: UserIcon.fromId(host.iconId), size: 64),
             const SizedBox(height: 8),
             Text(
               '${host.displayName} さん',
