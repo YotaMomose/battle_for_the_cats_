@@ -258,20 +258,6 @@ class WaitingView extends StatelessWidget {
             ),
           ),
         ),
-        // 画面下部の猫アニメーション (対戦相手がまだいない時のみ表示)
-        if (!viewModel.hasGuest)
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: Image.asset(
-                'assets/images/neko3_walk.gif',
-                height: 120,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -332,6 +318,9 @@ class WaitingView extends StatelessWidget {
               SeService().play('button_buni.mp3');
               Navigator.pop(context);
               vm.leaveRoom();
+              if (context.mounted) {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }
             },
             child: const Text('退出', style: TextStyle(color: Colors.red)),
           ),

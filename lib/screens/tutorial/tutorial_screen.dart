@@ -9,6 +9,8 @@ import '../../widgets/tutorial/tutorial_dialogue_widget.dart';
 import 'tutorial_view_model.dart';
 import '../home/home_screen_view_model.dart';
 import 'views/tutorial_round_result_view.dart';
+import 'views/tutorial_final_result_view.dart';
+import 'views/tutorial_characters_dialog.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
@@ -48,209 +50,190 @@ class _TutorialScreenState extends State<TutorialScreen> {
             ),
           ),
 
-          SafeArea(
-            child: Column(
-              children: [
-                // ターン情報 (最上部)
-                _buildTurnHeader(isSmallScreen),
+          if (viewModel.isFinalResultPhase)
+            const SafeArea(child: TutorialFinalResultView())
+          else if (viewModel.isResultPhase)
+            const SafeArea(child: TutorialRoundResultView())
+          else
+            SafeArea(
+              child: Column(
+                children: [
+                  // ターン情報 (最上部)
+                  _buildTurnHeader(isSmallScreen),
 
-                // 対戦相手セクション
-                Expanded(
-                  flex: isSmallScreen ? 4 : 4,
-                  child: _buildPlayerSection(
-                    context,
-                    isOpponent: true,
-                    displayName: viewModel.opponentDisplayName,
-                    iconEmoji: viewModel.opponentIconEmoji,
-                    fishCount: viewModel.playerData.opponentFishCount,
-                    inventory: viewModel.playerData.opponentCatsWon,
-                    viewModel: viewModel,
-                    statusLabel: viewModel.opponentReadyStatusLabel,
-                    statusColor: viewModel.opponentReadyStatusColor,
-                    isSmallScreen: isSmallScreen,
+                  // 対戦相手セクション
+                  Expanded(
+                    flex: isSmallScreen ? 4 : 4,
+                    child: _buildPlayerSection(
+                      context,
+                      isOpponent: true,
+                      displayName: viewModel.opponentDisplayName,
+                      iconEmoji: viewModel.opponentIconEmoji,
+                      fishCount: viewModel.playerData.opponentFishCount,
+                      inventory: viewModel.playerData.opponentCatsWon,
+                      viewModel: viewModel,
+                      statusLabel: viewModel.opponentReadyStatusLabel,
+                      statusColor: viewModel.opponentReadyStatusColor,
+                      isSmallScreen: isSmallScreen,
+                    ),
                   ),
-                ),
 
-                // 3匹の猫カードとお皿のエリア (中央)
-                Expanded(
-                  flex: isSmallScreen ? 6 : 5,
-                  child: viewModel.currentStep >= 9
-                      ? Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              '獲得フェーズ終了',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF4D331F),
-                              ),
-                            ),
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(3, (index) {
-                            final catIndex = index.toString();
-                            final cards =
-                                viewModel.room.currentRound?.toList() ?? [];
-                            if (cards.isEmpty || index >= cards.length) {
-                              return const Expanded(child: SizedBox());
-                            }
+                  // 3匹の猫カードとお皿のエリア (中央)
+                  Expanded(
+                    flex: isSmallScreen ? 6 : 5,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(3, (index) {
+                        final catIndex = index.toString();
+                        final cards =
+                            viewModel.room.currentRound?.toList() ?? [];
+                        if (cards.isEmpty || index >= cards.length) {
+                          return const Expanded(child: SizedBox());
+                        }
 
-                            final card = cards[index];
-                            final currentBet = viewModel.bets[catIndex] ?? 0;
-                            final placedItem = viewModel.getPlacedItem(
-                              catIndex,
-                            );
+                        final card = cards[index];
+                        final currentBet = viewModel.bets[catIndex] ?? 0;
+                        final placedItem = viewModel.getPlacedItem(catIndex);
 
-                            // ステップに応じたハイライト
-                            bool isHighlighted = false;
-                            if (viewModel.currentStep == 3 && index == 0)
-                              isHighlighted = true;
-                            if (viewModel.currentStep == 5 && index == 1)
-                              isHighlighted = true;
-                            if (viewModel.currentStep == 8 && index == 2)
-                              isHighlighted = true;
+                        // ステップに応じたハイライト
+                        bool isHighlighted = false;
+                        if (viewModel.currentStep == 3 && index == 0)
+                          isHighlighted = true;
+                        if (viewModel.currentStep == 5 && index == 1)
+                          isHighlighted = true;
+                        if (viewModel.currentStep == 8 && index == 2)
+                          isHighlighted = true;
+                        if (viewModel.currentStep == 23 && index == 0)
+                          isHighlighted = true;
+                        if (viewModel.currentStep == 25 && index == 1)
+                          isHighlighted = true;
+                        if (viewModel.currentStep == 27 && index == 2)
+                          isHighlighted = true;
 
-                            return Expanded(
-                              child: DragTarget<Object>(
-                                onWillAccept: (data) => !viewModel.hasPlacedBet,
-                                onAccept: (data) {
-                                  _handleDrop(
-                                    viewModel,
-                                    catIndex,
-                                    data,
-                                    currentBet,
-                                  );
-                                },
-                                builder:
-                                    (context, candidateData, rejectedData) {
-                                      final isTarget = candidateData.isNotEmpty;
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 4.0,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0,
-                                          horizontal: 2.0,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                            255,
-                                            0,
-                                            0,
-                                            0,
-                                          ).withOpacity(isTarget ? 0.9 : 0.7),
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                          border: Border.all(
-                                            color: isHighlighted
-                                                ? Colors.yellow
-                                                : (isTarget
-                                                      ? Colors.yellow
-                                                            .withOpacity(0.5)
-                                                      : Colors.grey.shade300),
-                                            width: isHighlighted
-                                                ? 4
-                                                : (isTarget ? 2 : 1),
-                                          ),
-                                          boxShadow: isHighlighted
-                                              ? [
-                                                  BoxShadow(
-                                                    color: Colors.yellow
-                                                        .withOpacity(0.5),
-                                                    blurRadius: 10,
-                                                    spreadRadius: 2,
-                                                  ),
-                                                ]
-                                              : null,
-                                        ),
-                                        child: Center(
-                                          child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                SizedBox(
-                                                  height: isSmallScreen
-                                                      ? 110
-                                                      : 150,
-                                                  child: _buildCatCard(
-                                                    viewModel,
-                                                    card,
-                                                    isSmallScreen,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                _buildDishArea(
-                                                  context,
-                                                  viewModel: viewModel,
-                                                  catIndex: catIndex,
-                                                  currentBet: currentBet,
-                                                  placedItem: placedItem,
-                                                  isSmallScreen: isSmallScreen,
-                                                  isTarget: isTarget,
-                                                ),
-                                              ],
+                        return Expanded(
+                          child: DragTarget<Object>(
+                            onWillAccept: (data) => !viewModel.hasPlacedBet,
+                            onAccept: (data) {
+                              _handleDrop(
+                                viewModel,
+                                catIndex,
+                                data,
+                                currentBet,
+                              );
+                            },
+                            builder: (context, candidateData, rejectedData) {
+                              final isTarget = candidateData.isNotEmpty;
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4.0,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                  horizontal: 2.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    0,
+                                    0,
+                                    0,
+                                  ).withOpacity(isTarget ? 0.9 : 0.7),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isHighlighted
+                                        ? Colors.yellow
+                                        : (isTarget
+                                              ? Colors.yellow.withOpacity(0.5)
+                                              : Colors.grey.shade300),
+                                    width: isHighlighted
+                                        ? 4
+                                        : (isTarget ? 2 : 1),
+                                  ),
+                                  boxShadow: isHighlighted
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.yellow.withOpacity(
+                                              0.5,
                                             ),
+                                            blurRadius: 10,
+                                            spreadRadius: 2,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          height: isSmallScreen ? 110 : 150,
+                                          child: _buildCatCard(
+                                            viewModel,
+                                            card,
+                                            isSmallScreen,
                                           ),
                                         ),
-                                      );
-                                    },
-                              ),
-                            );
-                          }),
-                        ),
-                ),
-
-                // 自分セクション
-                Expanded(
-                  flex: isSmallScreen ? 4 : 4,
-                  child: _buildPlayerSection(
-                    context,
-                    isOpponent: false,
-                    displayName: viewModel.myDisplayName,
-                    iconEmoji: viewModel.myIconEmoji,
-                    fishCount: viewModel.playerData.myFishCount,
-                    inventory: viewModel.playerData.myCatsWon,
-                    viewModel: viewModel,
-                    isReady: viewModel.isMyReady,
-                    isSmallScreen: isSmallScreen,
+                                        const SizedBox(height: 8),
+                                        _buildDishArea(
+                                          context,
+                                          viewModel: viewModel,
+                                          catIndex: catIndex,
+                                          currentBet: currentBet,
+                                          placedItem: placedItem,
+                                          isSmallScreen: isSmallScreen,
+                                          isTarget: isTarget,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }),
+                    ),
                   ),
-                ),
 
-                // アクションボタン
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: _buildActionArea(viewModel, isSmallScreen),
-                ),
-              ],
+                  // 自分セクション
+                  Expanded(
+                    flex: isSmallScreen ? 4 : 4,
+                    child: _buildPlayerSection(
+                      context,
+                      isOpponent: false,
+                      displayName: viewModel.myDisplayName,
+                      iconEmoji: viewModel.myIconEmoji,
+                      fishCount: viewModel.playerData.myFishCount,
+                      inventory: viewModel.playerData.myCatsWon,
+                      viewModel: viewModel,
+                      isReady: viewModel.isMyReady,
+                      isSmallScreen: isSmallScreen,
+                    ),
+                  ),
+
+                  // アクションボタン
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: _buildActionArea(viewModel, isSmallScreen),
+                  ),
+                ],
+              ),
             ),
-          ),
-
-          // 判定演出画面
-          if (viewModel.isResultPhase) const TutorialRoundResultView(),
 
           // チュートリアル・ダイアログ (上部)
           if (!_isDialogueDismissed)
             Positioned(
               left: 0,
               right: 0,
-              top: 10,
+              top: (viewModel.isResultPhase || viewModel.isFinalResultPhase) ? null : 10,
+              bottom: (viewModel.isResultPhase || viewModel.isFinalResultPhase) ? 10 : null,
               child: SafeArea(
                 child: TutorialDialogueWidget(
                   message: viewModel.currentMessage,
                   onNext: () async {
-                    if (viewModel.currentStep == 19) {
+                    if (viewModel.currentStep == 39) {
                       setState(() {
                         _isDialogueDismissed = true;
                       });
@@ -263,11 +246,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       viewModel.nextStep();
                     }
                   },
-                  isLast: viewModel.currentStep == 19,
+                  isLast: viewModel.currentStep == 39,
                   isEnabled:
-                      viewModel.canProgress || viewModel.currentStep == 19,
+                      viewModel.canProgress || viewModel.currentStep == 39,
                   characterImagePath: 'assets/images/kuroneko.png', // 長老ねこ
                 ),
+              ),
+            ),
+            
+          // キャラクター紹介ポップアップ
+          if (viewModel.showCharacterIntro)
+            const Positioned.fill(
+              child: SafeArea(
+                child: TutorialCharactersDialog(),
               ),
             ),
         ],
@@ -866,9 +857,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
     final bool isUnavailable = count <= 0 || isPlaced;
     final itemSize = isSmallScreen ? 28.0 : 40.0;
 
-    // ステップ7でねこじゃらしをハイライト
-    final bool isHighlighted =
-        viewModel.currentStep == 7 && type == ItemType.catTeaser;
+    // アイテムをハイライト
+    bool isHighlighted = false;
+    if (viewModel.currentStep == 5 && type == ItemType.catTeaser)
+      isHighlighted = true;
+    if (viewModel.currentStep == 23 && type == ItemType.surpriseHorn)
+      isHighlighted = true;
 
     final content = _buildItemIcon(
       type,
@@ -942,18 +936,23 @@ class _TutorialScreenState extends State<TutorialScreen> {
   Widget _buildActionArea(TutorialViewModel viewModel, bool isSmallScreen) {
     if (viewModel.currentStep <= 7) return const SizedBox(height: 50);
 
-    // ステップ9で確定ボタンをハイライト
-    final bool isConfirmHighlighted = viewModel.currentStep == 9;
+    // ステップ9または29で確定ボタンをハイライト
+    final bool isConfirmHighlighted =
+        viewModel.currentStep == 9 || viewModel.currentStep == 28;
     // ステップ10でつりボタンをハイライト
     final bool isFishHighlighted = viewModel.currentStep == 10;
 
-    if (viewModel.currentStep <= 9 && !viewModel.isMyRolled) {
+    if ((viewModel.currentStep <= 9 ||
+            (viewModel.currentStep >= 20 && viewModel.currentStep <= 29)) &&
+        !viewModel.isMyRolled) {
       return Center(
         child: SizedBox(
           width: 200,
           height: 50,
           child: StereoscopicButton(
-            onPressed: viewModel.currentStep == 9 ? viewModel.placeBets : null,
+            onPressed: (viewModel.currentStep == 9 || viewModel.currentStep == 28)
+                ? viewModel.placeBets
+                : null,
             baseColor: isConfirmHighlighted
                 ? Colors.yellow
                 : (viewModel.hasPlacedBet ? Colors.grey : Colors.pink.shade400),
