@@ -191,7 +191,7 @@ class _HomeScreenContent extends StatelessWidget {
             'チュートリアル',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          content: const Text('猫争奪戦へようこそ！\n最初に遊び方のチュートリアルをプレイしますか？'),
+          content: const Text('にゃんこホイホイ！へようこそ！\n最初に遊び方のチュートリアルをプレイしますか？'),
           actions: [
             TextButton(
               onPressed: () {

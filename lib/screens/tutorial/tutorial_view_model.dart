@@ -126,7 +126,7 @@ class TutorialViewModel extends ChangeNotifier {
   }
 
   PlayerData get playerData {
-    final bool isAcquisitionComplete = _currentStep >= 16;
+    final bool isAcquisitionComplete = _currentStep >= 17;
     final int fishAfterBet = 10 - 4; // 3 + 0 + 1 = 4匹消費
     final myCurrentFish = _isDiceRolled
         ? (fishAfterBet + (_randomDiceResult ?? 0))
@@ -171,7 +171,7 @@ class TutorialViewModel extends ChangeNotifier {
       myBets: (_isResultPhase)
           ? _bets
           : (_round == 1
-                ? (_currentStep >= 11 && _currentStep < 16
+                ? (_currentStep >= 11 && _currentStep < 17
                       ? _bets
                       : Bets.empty())
                 : _bets),
@@ -208,85 +208,89 @@ class TutorialViewModel extends ChangeNotifier {
   String get currentMessage {
     switch (_currentStep) {
       case 0:
-        return 'ほっほっほ。ようこそ、猫争奪戦へ！ワシがルールを教えてやろう。';
+        return 'ほっほっほ。ようこそ、にゃんこほいほい！へ！ワシがルールを教えてやろう。';
       case 1:
-        return 'このゲームは、お魚をあげて猫たちの信頼を勝ち取るゲームじゃ。';
+        return 'このゲームは、お魚をあげてにゃんこをゲットするゲームじゃ。';
       case 2:
-        return '真ん中に3匹の猫がおるじゃろう？まずは左の「しろねこ」からじゃ。';
+        return '先に３匹の同じ種類のにゃんこを集めるか、３匹の違う種類のにゃんこを集めれば勝利じゃ。';
       case 3:
-        return '「しろ」にお魚を3匹置いておくれ。下の魚をドラッグ、もしくはお皿を数回タップするのじゃ。';
+        return '真ん中に3匹の猫がおるじゃろう？この3匹から欲しいにゃんこをゲットするのじゃ。';
       case 4:
-        return 'よしよし、上手じゃ！次は真ん中の「くろねこ」じゃな。';
+        return 'まずは左の「しろねこ」にお魚を3匹置いておくれ。下の魚をドラッグ、もしくはお皿を数回タップするのじゃ。';
       case 5:
-        return 'ここではアイテムを使ってみよう。「ねこじゃらし」を「くろ」のお皿にドラッグするのじゃ。';
+        return 'よしよし、上手じゃ！次は真ん中の「くろねこ」じゃな。';
       case 6:
-        return '「ねこじゃらし」は相手がお魚を置いていなければ、お魚を使わずに仲間にできる優れものじゃ。';
+        return 'ここではアイテムを使ってみよう。「ねこじゃらし」を「くろ」のお皿にドラッグするのじゃ。';
       case 7:
-        return 'バッチリじゃ！最後に右の「茶トラねこ」じゃな。';
+        return '「ねこじゃらし」は相手がお魚を置いていなければ、お魚を使わずに仲間にできる優れものじゃ。';
       case 8:
-        return '「茶トラ」はコスト1じゃから、お魚を1匹だけ置いてみるのじゃ。';
+        return 'アイテムは使うとなくなるからタイミングが大事じゃ。最後に右の「茶トラねこ」じゃな。';
       case 9:
-        return 'よし、これですべての準備が整った！それじゃあ右下の「確定する」ボタンを押してみるのじゃ。';
+        return '「茶トラ」はコスト1じゃから、お魚を1匹だけ置いてみるのじゃ。';
       case 10:
-        return '判定が始まるぞ！わくわくするのう。';
+        return 'よし、これですべての準備が整った！それじゃあ右下の「確定する」ボタンを押してみるのじゃ。';
       case 11:
-        return 'まずは「しろ」じゃな。相手（ワシ）は0匹。お主の勝ちじゃ！';
+        return '判定が始まるぞ！わくわくするのう。';
       case 12:
-        return '次は「くろ」じゃな。「ねこじゃらし」のおかげでお魚0匹で仲間にできたぞ。';
+        return 'まずは「しろ」じゃな。相手（ワシ）は0匹。お主の勝ちじゃ！';
       case 13:
-        return '最後は「茶トラ」じゃが...おっと！ワシが「またたび」を置いたようじゃ。';
+        return '次は「くろ」じゃな。「ねこじゃらし」のおかげでお魚0匹で仲間にできたぞ。';
       case 14:
-        return '「またたび」はカードの必要コストを2倍にする！コスト1が2になったようじゃな。';
+        return '最後は「茶トラ」じゃが...おっと！ワシが「またたび」を置いたようじゃ。';
       case 15:
-        return 'お主は1匹しか置いておらんから、コスト不足で仲間にできなかったようじゃ。ワシも魚は0匹じゃから誰も仲間にできんかったがの。';
+        return '「またたび」はカードの必要コストを2倍にする！コスト1が2になったようじゃな。';
       case 16:
-        return '負けることもあるが、次がある！しかし、お魚が少なくなってきたのう。';
+        return 'お主は1匹しか置いておらんから、コスト不足で仲間にできなかったようじゃ。ワシも魚は0匹じゃから誰も仲間にできんかったがの。';
       case 17:
-        return 'お魚がなくなったらサイコロを振るのじゃ。出た目の数だけお魚が補充されるぞ。';
+        return '負けることもあるが、次がある！しかし、お魚が少なくなってきたのう。';
       case 18:
-        return '右下の「サイコロを振る」を押して、お魚を補充するのじゃ！';
+        return 'お魚がなくなったらサイコロを振るのじゃ。出た目の数だけお魚が補充されるぞ。';
       case 19:
-        return 'ほっほっほ、これでまた戦えるな！さあ、このまま第2ターンへ進むぞ。';
+        return '右下の「サイコロを振る」を押して、お魚を補充するのじゃ！';
       case 20:
-        return '2ターン目じゃ！ここでお主を勝利に導く秘策を伝授しようかの。';
+        return 'ほっほっほ、これでまた戦えるな！さあ、このまま第2ターンへ進むぞ。';
       case 21:
-        return '新しいアイテム「びっくりホーン」を授けるぞ。';
+        return '2ターン目じゃ！ここでお主を勝利に導く秘策を伝授しようかの。';
       case 22:
-        return 'これは「自分も相手も魚を0にする」という特殊なアイテムじゃ。取られたくないカードに置くのが吉じゃな。';
+        return '新しいアイテム「びっくりホーン」を授けるぞ。';
       case 23:
-        return 'まずは一番左の「しろねこ」に「びっくりホーン」を置いてみるのじゃ。';
+        return 'これは「自分も相手も魚を0にする」という特殊なアイテムじゃ。取られたくないカードに置くのが吉じゃな。';
       case 24:
-        return 'よし！これでワシとお主、どちらが魚を置いても驚いて逃げ出してしまうぞ。';
+        return 'まずは一番左の「しろねこ」に「びっくりホーン」を置いてみるのじゃ。';
       case 25:
-        return '次に、真ん中の「しろねこ」に魚を3匹置いてみるのじゃ。コストぴったりじゃな。';
+        return 'よし！これでワシとお主、どちらが魚を置いても驚いて逃げ出してしまうぞ。';
       case 26:
-        return 'ふむ、魚を置いても安心はできんぞ。相手の方が多くの魚を置いた場合は、そちらに取られてしまうのじゃ。';
+        return '次に、真ん中の「しろねこ」に魚を3匹置いてみるのじゃ。コストぴったりじゃな。';
       case 27:
-        return '最後に、右の「茶トラ」を確実に取るために、魚を2匹置いておくのじゃ！';
+        return 'ふむ、魚を置いても安心はできんぞ。相手の方が多くの魚を置いた場合は、そちらに取られてしまうのじゃ。';
       case 28:
-        return 'ほっほっほ、完璧な布陣じゃな。それでは右下の「確定する」ボタンを押してみるのじゃ。';
+        return '最後に、右の「茶トラ」を確実に取るために、魚を2匹置いておくのじゃ！';
       case 29:
-        return 'ワシも準備完了じゃ。さあ、2ターン目の判定、いってみようかの！';
+        return 'ほっほっほ、完璧な布陣じゃな。それでは右下の「確定する」ボタンを押してみるのじゃ。';
       case 30:
-        return 'まずは一番左の「しろ」からじゃな。判定、いってみようかの！';
+        return 'ワシも準備完了じゃ。さあ、2ターン目の判定、いってみようかの！';
       case 31:
-        return 'びっくりホーンでお互いの魚が逃げ出した！誰も仲間にできんかったのう。';
+        return 'まずは一番左の「しろ」からじゃな。判定、いってみようかの！';
       case 32:
-        return '次は真ん中の「しろ」じゃ。お主も3匹置いたが、ワシはどうしたかのう？';
+        return 'びっくりホーンでお互いの魚が逃げ出した！誰も仲間にできんかったのう。';
       case 33:
-        return 'ワシは4匹置いた。ワシの勝ちじゃな！';
+        return '次は真ん中の「しろ」じゃ。お主も3匹置いたが、ワシはどうしたかのう？';
       case 34:
-        return 'このように、コストを満たしていても相手より少ないと取られてしまう。駆け引きが重要じゃ。';
+        return 'ワシは4匹置いた。ワシの勝ちじゃな！';
       case 35:
-        return '最後は右の「茶トラ」！お主は2匹、ワシは1匹。結果は...？';
+        return 'このように、コストを満たしていても相手より少ないと取られてしまう。駆け引きが重要じゃ。';
       case 36:
-        return 'お主の勝ちじゃ！「茶トラ」が仲間に加わったぞ。';
+        return '最後は右の「茶トラ」！お主は2匹、ワシは1匹。結果は...？';
       case 37:
-        return 'これで「しろ」「くろ」「茶トラ」の3種類が揃ったな！';
+        return 'お主の勝ちじゃ！「茶トラ」が仲間に加わったぞ。';
       case 38:
-        return 'お見事！3種類揃ったのでお主の完全勝利じゃ！';
+        return 'これで「しろ」「くろ」「茶トラ」の3種類が揃ったな！';
       case 39:
-        return 'これでチュートリアルは終了じゃ。立派な猫争奪戦プレイヤーになるのじゃぞ！';
+        return 'お見事！3種類揃ったのでお主の完全勝利じゃ！';
+      case 40:
+        return '今回は登場しなかったが、実際のゲームでは他にも様々なキャラクターが登場するぞ。紹介しておこう。';
+      case 41:
+        return 'よし、これでチュートリアルは終了じゃ。立派なにゃんこホイホイ！プレイヤーになるのじゃぞ！';
       default:
         return '';
     }
@@ -298,29 +302,29 @@ class TutorialViewModel extends ChangeNotifier {
     // 判定フェーズ中は演出が終わるまで進めない
     if (_isResultPhase && !_isAnimationFinished) return false;
 
-    if (_currentStep == 3) return _bets.getBet('0') >= 3;
-    if (_currentStep == 5) return _bets.getItem('1') != null;
-    if (_currentStep == 8)
+    if (_currentStep == 4) return _bets.getBet('0') >= 3;
+    if (_currentStep == 6) return _bets.getItem('1') != null;
+    if (_currentStep == 9)
       return _bets.getBet('2') >= 1 || _bets.getItem('2') != null;
-    if (_currentStep == 9) return _hasPlacedBet;
+    if (_currentStep == 10) return _hasPlacedBet;
 
     // 第2ターン
-    if (_currentStep == 23) return _bets.getItem('0') == ItemType.surpriseHorn;
-    if (_currentStep == 25) return _bets.getBet('1') >= 3;
-    if (_currentStep == 27) return _bets.getBet('2') >= 2;
-    if (_currentStep == 28) return _hasPlacedBet;
+    if (_currentStep == 24) return _bets.getItem('0') == ItemType.surpriseHorn;
+    if (_currentStep == 26) return _bets.getBet('1') >= 3;
+    if (_currentStep == 28) return _bets.getBet('2') >= 2;
+    if (_currentStep == 29) return _hasPlacedBet;
 
-    if (_currentStep == 18) return _isDiceRolled;
+    if (_currentStep == 19) return _isDiceRolled;
     return true;
   }
 
   // --- アクション ---
   void updateBet(String catIndex, int delta) {
-    if ((_currentStep == 3 && catIndex == '0') ||
-        (_currentStep == 8 && catIndex == '2') ||
-        (_currentStep == 25 && catIndex == '1') ||
-        (_currentStep == 27 && catIndex == '2') ||
-        (_currentStep == 28 && catIndex == '2')) {
+    if ((_currentStep == 4 && catIndex == '0') ||
+        (_currentStep == 9 && catIndex == '2') ||
+        (_currentStep == 26 && catIndex == '1') ||
+        (_currentStep == 28 && catIndex == '2') ||
+        (_currentStep == 29 && catIndex == '2')) {
       final currentAmount = _bets.getBet(catIndex);
       final newAmount = (currentAmount + delta).clamp(0, 50);
 
@@ -331,37 +335,37 @@ class TutorialViewModel extends ChangeNotifier {
         ),
       );
 
-      if (_currentStep == 3 && newAmount >= 3) {
-        _currentStep = 4;
-      } else if (_currentStep == 8 && newAmount >= 1) {
-        _currentStep = 9;
-      } else if (_currentStep == 25 && catIndex == '1' && newAmount >= 3) {
-        _currentStep = 26;
-      } else if (_currentStep == 27 && catIndex == '2' && newAmount >= 2) {
-        _currentStep = 28;
+      if (_currentStep == 4 && newAmount >= 3) {
+        _currentStep = 5;
+      } else if (_currentStep == 9 && newAmount >= 1) {
+        _currentStep = 10;
+      } else if (_currentStep == 26 && catIndex == '1' && newAmount >= 3) {
+        _currentStep = 27;
+      } else if (_currentStep == 28 && catIndex == '2' && newAmount >= 2) {
+        _currentStep = 29;
       }
       notifyListeners();
     }
   }
 
   void placeBets() {
-    if (_currentStep == 9 || _currentStep == 28) {
+    if (_currentStep == 10 || _currentStep == 29) {
       _hasPlacedBet = true;
-      if (_currentStep == 9) {
+      if (_currentStep == 10) {
         _isResultPhase = true;
-        _currentStep = 10;
+        _currentStep = 11;
         _isAnimationFinished = false;
       } else {
-        _currentStep = 29; // セリフ「ワシも準備完了じゃ」へ
+        _currentStep = 30; // セリフ「ワシも準備完了じゃ」へ
       }
       notifyListeners();
     }
   }
 
   void updateItemPlacement(String catIndex, ItemType? item) {
-    if ((_currentStep == 5 && catIndex == '1' && item == ItemType.catTeaser) ||
-        (_currentStep == 8 && catIndex == '2' && item != null) ||
-        (_currentStep == 23 &&
+    if ((_currentStep == 6 && catIndex == '1' && item == ItemType.catTeaser) ||
+        (_currentStep == 9 && catIndex == '2' && item != null) ||
+        (_currentStep == 24 &&
             catIndex == '0' &&
             item == ItemType.surpriseHorn)) {
       final newItemsMap = _bets.itemsToMap().map(
@@ -371,12 +375,12 @@ class TutorialViewModel extends ChangeNotifier {
 
       _bets = Bets(_bets.toMap(), newItemsMap);
 
-      if (_currentStep == 5) {
-        _currentStep = 6;
-      } else if (_currentStep == 8) {
-        _currentStep = 9;
-      } else if (_currentStep == 23) {
-        _currentStep = 24;
+      if (_currentStep == 6) {
+        _currentStep = 7;
+      } else if (_currentStep == 9) {
+        _currentStep = 10;
+      } else if (_currentStep == 24) {
+        _currentStep = 25;
       }
       notifyListeners();
     } else if (item == null) {
@@ -390,30 +394,23 @@ class TutorialViewModel extends ChangeNotifier {
   }
 
   void rollDice() {
-    if (_currentStep == 18) {
+    if (_currentStep == 19) {
       _randomDiceResult = 4;
       _isDiceRolled = true;
-      _currentStep = 19;
+      _currentStep = 20;
       notifyListeners();
     }
   }
 
   void nextStep() {
     if (canProgress) {
-      if (_currentStep == 19) {
+      if (_currentStep == 20) {
         startRound2();
         return;
       }
-      if (_currentStep == 15) {
+      if (_currentStep == 16) {
         _isResultPhase = false;
-        _currentStep = 16;
-        notifyListeners();
-        return;
-      }
-      if (_currentStep == 29) {
-        _isResultPhase = true;
-        _currentStep = 30;
-        _isAnimationFinished = false;
+        _currentStep = 17;
         notifyListeners();
         return;
       }
@@ -424,20 +421,19 @@ class TutorialViewModel extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      if (_currentStep == 36) {
+      if (_currentStep == 37) {
         _isResultPhase = false;
         _isFinalResultPhase = true;
-        _currentStep = 37;
+        _currentStep = 38;
         notifyListeners();
         return;
       }
-      if (_currentStep == 38) {
-        // ステップ39の直前でキャラクター紹介ダイアログを表示
+      if (_currentStep == 40) {
         _showCharacterIntro = true;
         notifyListeners();
         return;
       }
-      if (_currentStep == 39) {
+      if (_currentStep == 41) {
         // 完了
         return;
       }
@@ -454,12 +450,12 @@ class TutorialViewModel extends ChangeNotifier {
 
   void completeCharacterIntro() {
     _showCharacterIntro = false;
-    _currentStep = 39;
+    _currentStep = 41;
     notifyListeners();
   }
 
   void startRound2() {
-    _currentStep = 20;
+    _currentStep = 21;
     _round = 2;
     _hasPlacedBet = false;
     _isDiceRolled = false;
@@ -485,9 +481,9 @@ class TutorialViewModel extends ChangeNotifier {
 
   void finishResultPhase() {
     if (_round == 1) {
-      _currentStep = 16;
+      _currentStep = 17;
     } else {
-      _currentStep = 35; // 勝利宣言
+      _currentStep = 36; // 勝利宣言
     }
     _isResultPhase = false;
     _isAnimationFinished = true;

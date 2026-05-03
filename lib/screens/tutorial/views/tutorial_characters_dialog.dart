@@ -20,6 +20,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
     {
       'name': '漁師',
       'icon': Icons.phishing,
+      'image': 'assets/images/ryousi.png',
       'color': Colors.blue,
       'description':
           '仲間にすると、毎ターンの『つり（サイコロ）』のたびに、お魚を1匹追加で獲ってきてくれる頼もしい味方じゃ！たくさん集めれば魚に困ることはなくなるぞ。',
@@ -27,6 +28,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
     {
       'name': '犬',
       'icon': Icons.pets,
+      'image': 'assets/images/inu.png',
       'color': Colors.brown,
       'description':
           '仲間にすると、相手の陣地に乗り込み、相手がすでに獲得している猫を1匹追い出してしまう恐ろしいヤツじゃ。逆転のチャンスに狙ってみるのじゃ！',
@@ -34,6 +36,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
     {
       'name': 'アイテム屋',
       'icon': Icons.storefront,
+      'image': 'assets/images/shop.png',
       'color': Colors.purple,
       'description':
           '勝負に勝って仲間に引き入れると、ランダムで便利なアイテムを1つくれるぞ。戦いを有利に進めるために、見かけたらぜひ狙いたいところじゃな。',
@@ -79,20 +82,23 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
         depth: 8,
         child: Container(
           width: double.infinity,
-          height: 400,
           padding: const EdgeInsets.all(20),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // タイトル
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFD54F),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFF4D331F), width: 2),
                 ),
                 child: const Text(
-                  'これから出会う仲間たち',
+                  'キャラ紹介',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -103,7 +109,8 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
               const SizedBox(height: 16),
 
               // カルーセル (PageView)
-              Expanded(
+              SizedBox(
+                height: 280,
                 child: PageView.builder(
                   controller: _pageController,
                   onPageChanged: (index) {
@@ -195,10 +202,13 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
               ),
             ],
           ),
-          child: Icon(
-            char['icon'],
-            size: 60,
-            color: char['color'],
+          child: ClipOval(
+            child: char.containsKey('image')
+                ? Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Image.asset(char['image'], fit: BoxFit.contain),
+                  )
+                : Icon(char['icon'], size: 60, color: char['color']),
           ),
         ),
         const SizedBox(height: 16),

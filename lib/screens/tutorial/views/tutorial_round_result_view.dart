@@ -46,69 +46,65 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
 
     setState(() {
       // ステップに応じた演出の「開始」トリガーのみを管理
-      if (step == 10) {
+      if (step == 11) {
         // カード1の演出開始
         _startCardAnimation(0, viewModel);
-      } else if (step == 11) {
+      } else if (step == 12) {
         // カード1を完了、カード2はまだ開始しない（表示切り替え待ち）
         _forceCompleteCard(0);
         viewModel.setAnimationFinished(true);
-      } else if (step == 12) {
+      } else if (step == 13) {
         // カード2を表示し、演出開始
         _forceCompleteCard(0);
         _startCardAnimation(1, viewModel);
-      } else if (step == 13) {
+      } else if (step == 14) {
         // カード3を表示し、演出開始（スタンプ前で止める）
         _forceCompleteCard(0);
         _forceCompleteCard(1);
         _startCardAnimation(2, viewModel, pauseBeforeStamp: true);
-      } else if (step == 14) {
+      } else if (step == 15) {
         // カード3のアイテム解説中にスタンプを表示
         _forceCompleteCard(1);
         _revealedItemIndices.add(2);
         _revealedMultiplierIndices.add(2);
         _startStampOnly(2, viewModel);
-      } else if (step == 15) {
+      } else if (step == 16) {
         // カード3の結果解説
         _forceCompleteCard(1);
         _forceCompleteCard(2);
         viewModel.setAnimationFinished(true);
-      } else if (step >= 16 && step < 30) {
+      } else if (step >= 17 && step < 30) {
         _forceCompleteCard(0);
         _forceCompleteCard(1);
         _forceCompleteCard(2);
         viewModel.setAnimationFinished(true);
-      } else if (step == 30) {
-        // カード0 演出開始
+      } else if (step == 31) {
+        // カード0 演出開始 (しろねこ・びっくりホーン)
         _revealedItemIndices.clear();
         _revealedMultiplierIndices.clear();
         _stampedIndices.clear();
         _startCardAnimation(0, viewModel);
-      } else if (step == 31) {
+      } else if (step == 32) {
         // カード0 結果確認
         _forceCompleteCard(0);
         viewModel.setAnimationFinished(true);
-      } else if (step == 32) {
-        // カード1 演出開始
+      } else if (step == 33) {
+        // カード1 演出開始 (しろねこ・自分3 vs 相手4)
         _forceCompleteCard(0);
         _startCardAnimation(1, viewModel);
-      } else if (step == 33) {
-        // カード1 結果確認
+      } else if (step == 34 || step == 35) {
+        // カード1 結果確認・解説
         _forceCompleteCard(1);
         viewModel.setAnimationFinished(true);
-      } else if (step == 34) {
-        // カード1 解説
-        _forceCompleteCard(1);
-        viewModel.setAnimationFinished(true);
-      } else if (step == 35) {
-        // カード2 演出開始
+      } else if (step == 36) {
+        // カード2 演出開始 (茶トラ)
         _forceCompleteCard(1);
         _startCardAnimation(2, viewModel);
-      } else if (step == 36) {
+      } else if (step == 37) {
         // カード2 結果確認
         _forceCompleteCard(2);
         viewModel.setAnimationFinished(true);
-      } else if (step >= 37) {
+      } else if (step >= 38) {
         _forceCompleteCard(0);
         _forceCompleteCard(1);
         _forceCompleteCard(2);
@@ -239,7 +235,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
               child: Column(
                 children: [
                   const SizedBox(height: 12),
-                  if (step < 16 || (step >= 30 && step <= 36))
+                  if (step < 16 || (step >= 31 && step <= 36))
                     ClipRect(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 600),
@@ -284,13 +280,13 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
 
   int _getCurrentDisplayIndex(int step) {
     if (step <= 11) return 0;
-    if (step == 12) return 1;
-    if (step >= 13 && step <= 15) return 2;
+    if (step == 13) return 1;
+    if (step >= 14 && step <= 15) return 2;
 
     // 第2ラウンド
-    if (step == 30 || step == 31) return 0;
-    if (step >= 32 && step <= 34) return 1;
-    if (step >= 35) return 2;
+    if (step == 31 || step == 32) return 0;
+    if (step >= 33 && step <= 34) return 1;
+    if (step >= 36) return 2;
 
     return 0;
   }
@@ -544,11 +540,15 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
               ? const Color.fromARGB(255, 243, 63, 9)
               : Colors.grey.shade100;
 
+          final isRevealed = _stampedIndices.contains(index);
+
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: StereoscopicContainer(
-                baseColor: cardColor.withOpacity(0.9),
+                baseColor: isRevealed
+                    ? cardColor.withOpacity(0.9)
+                    : Colors.grey.shade100,
                 shadowColor: Colors.black12,
                 borderRadius: 20,
                 depth: 4,
@@ -587,11 +587,20 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
                       ),
                     ),
                     const Spacer(),
-                    _buildCapsuleLabel(
-                      isWin ? 'GET!' : 'LOST..',
-                      color: isWin ? cardColor : Colors.grey,
-                      isSmallScreen: isSmallScreen,
-                    ),
+                    if (isRevealed)
+                      _buildCapsuleLabel(
+                        item.winStatus == 'win'
+                            ? 'GET!'
+                            : (item.winStatus == 'lose' ? 'LOST..' : 'DRAW'),
+                        color: item.winStatus == 'win'
+                            ? const Color.fromARGB(255, 243, 63, 9)
+                            : (item.winStatus == 'lose'
+                                ? Colors.blue
+                                : Colors.grey),
+                        isSmallScreen: isSmallScreen,
+                      )
+                    else
+                      const SizedBox(height: 24),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -717,7 +726,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
                     begin: 0,
                     end: start ? target.toDouble() : 0,
                   ),
-                  duration: Duration(milliseconds: 800 + (max * 800)),
+                  duration: Duration(milliseconds: 800 + (target * 800)),
                   builder: (context, val, child) {
                     final bool isStillCounting =
                         val < target.toDouble() && start;
