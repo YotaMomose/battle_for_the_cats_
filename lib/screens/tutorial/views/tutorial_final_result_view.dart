@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 import '../../../widgets/user_icon_widget.dart';
+import '../../../widgets/fish_icon.dart';
 import '../../../models/user_profile.dart';
 import '../tutorial_view_model.dart';
 import '../../../services/se_service.dart';
@@ -238,13 +239,20 @@ class _TutorialFinalResultViewState extends State<TutorialFinalResultView> {
                       width: 2,
                     ),
                   ),
-                  child: Text(
-                    '🐟 ${cards.fold<int>(0, (sum, card) => sum + card.cost)}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF4D331F),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const FishIcon(size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${cards.fold<int>(0, (sum, card) => sum + card.cost)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF4D331F),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -296,15 +304,21 @@ class _TutorialFinalResultViewState extends State<TutorialFinalResultView> {
               children: [
                 _buildCatAvatarFromCard(card, size: 28),
                 const SizedBox(height: 2),
-                Text(
-                  '🐟${card.cost}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: card.isWinningCard
-                        ? const Color(0xFF4D331F)
-                        : Colors.blue.shade700,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const FishIcon(size: 10),
+                    Text(
+                      '${card.cost}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: card.isWinningCard
+                            ? const Color(0xFF4D331F)
+                            : Colors.blue.shade700,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

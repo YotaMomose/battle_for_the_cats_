@@ -21,7 +21,11 @@ class GameFlowService {
        _roundResolver = roundResolver ?? RoundResolver();
 
   /// 魚を釣る
-  Future<void> catchFish(String roomCode, String playerId) async {
+  Future<void> catchFish(
+    String roomCode,
+    String playerId, {
+    int? result,
+  }) async {
     await _repository.runTransaction((Transaction transaction) async {
       final room = await _repository.getRoomInTransaction(
         transaction,
@@ -33,7 +37,11 @@ class GameFlowService {
       final player = isHost ? room.host : room.guest;
       if (player == null) return;
 
-      player.roll(_dice);
+      if (result != null) {
+        player.recordDiceRoll(result);
+      } else {
+        player.roll(_dice);
+      }
 
       _repository.updateRoomInTransaction(transaction, roomCode, room.toMap());
     });

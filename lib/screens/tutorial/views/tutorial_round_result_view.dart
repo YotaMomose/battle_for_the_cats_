@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../models/item.dart';
 import '../../../services/se_service.dart';
 import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/fish_icon.dart';
 import '../tutorial_view_model.dart';
 
 /// チュートリアル用の判定結果画面（タイマーステップと完全に同期する）
@@ -485,7 +486,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Text('🐟', style: TextStyle(fontSize: 14)),
+                    FishIcon(size: isSmallScreen ? 14 : 18),
                     if (_revealedMultiplierIndices.contains(index))
                       Text(
                         ' ×2',
@@ -579,12 +580,18 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
                       size: isSmallScreen ? 56 : 80,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '$catCost 🐟',
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 10 : 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$catCost ',
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 10 : 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        FishIcon(size: isSmallScreen ? 10 : 12),
+                      ],
                     ),
                     const Spacer(),
                     if (isRevealed)
@@ -763,7 +770,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Text('🐟', style: TextStyle(fontSize: size, height: 1.0)),
+        FishIcon(size: size),
         Text(
           number,
           style: TextStyle(

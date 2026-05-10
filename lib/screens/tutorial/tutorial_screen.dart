@@ -12,6 +12,7 @@ import 'views/tutorial_round_result_view.dart';
 import 'views/tutorial_final_result_view.dart';
 import 'views/tutorial_characters_dialog.dart';
 import '../../widgets/user_icon_widget.dart';
+import '../../widgets/fish_icon.dart';
 import '../../models/user_profile.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
@@ -677,10 +678,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               spacing: 1,
               children: List.generate(
                 card.baseCost,
-                (_) => Text(
-                  '🐟',
-                  style: TextStyle(fontSize: isSmallScreen ? 12 : 16),
-                ),
+                (_) => FishIcon(size: isSmallScreen ? 12 : 16),
               ),
             ),
           ),
@@ -753,12 +751,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
               child: currentBet > 0 && !viewModel.hasPlacedBet
                   ? Draggable<String>(
                       data: 'fish_from_$catIndex',
-                      feedback: Material(
+                      feedback: const Material(
                         color: Colors.transparent,
-                        child: Text(
-                          '🐟',
-                          style: TextStyle(fontSize: fishSize * 1.3),
-                        ),
+                        child: FishIcon(size: 24),
                       ),
                       childWhenDragging: Opacity(
                         opacity: 0.3,
@@ -885,7 +880,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
               data: 'fish_from_hand',
               feedback: Material(
                 color: Colors.transparent,
-                child: Text('🐟', style: TextStyle(fontSize: fishSize * 1.3)),
+                child: FishIcon(size: fishSize * 1.3),
               ),
               childWhenDragging: Opacity(
                 opacity: 0.3,
@@ -1145,7 +1140,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Text('🐟', style: TextStyle(fontSize: size, height: 1.0)),
+        FishIcon(size: size),
         Text(
           number,
           style: TextStyle(

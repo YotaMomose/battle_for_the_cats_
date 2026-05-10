@@ -11,6 +11,7 @@ import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 import '../../../widgets/user_icon_widget.dart';
 import '../../../models/user_profile.dart';
+import '../../../widgets/fish_icon.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
@@ -659,7 +660,7 @@ class BettingPhaseView extends StatelessWidget {
         ? const Color.fromARGB(255, 245, 143, 158)
         : const Color.fromARGB(255, 143, 208, 245);
     final iconSize = isSmallScreen ? 28.0 : 50.0;
-    final fishIconSize = isSmallScreen ? 28.0 : 48.0;
+    final fishIconSize = isSmallScreen ? 32.0 : 56.0;
 
     final iconAndCardsRow = SizedBox(
       width: isSmallScreen ? 280 : 380,
@@ -676,14 +677,23 @@ class BettingPhaseView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                  border: Border.all(
+                    color: const Color(0xFF4D331F),
+                    width: 1.5,
+                  ),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
                   ],
                 ),
                 alignment: Alignment.center,
                 child: UserIconWidget(
-                  icon: isOpponent ? viewModel.opponentUserIcon : viewModel.myUserIcon,
+                  icon: isOpponent
+                      ? viewModel.opponentUserIcon
+                      : viewModel.myUserIcon,
                   size: isSmallScreen ? 20 : 36,
                 ),
               ),
@@ -730,7 +740,7 @@ class BettingPhaseView extends StatelessWidget {
                   ),
                   if (!isSmallScreen) const SizedBox(height: 2),
                   SizedBox(
-                    height: isSmallScreen ? 45 : 60,
+                    height: isSmallScreen ? 50 : 70,
                     child: _buildWonCatsList(
                       inventory,
                       viewModel,
@@ -969,7 +979,7 @@ class BettingPhaseView extends StatelessWidget {
   ) {
     final remaining = totalFish - viewModel.totalBet;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
-    final fishSize = isSmallScreen ? 36.0 : 48.0;
+    final fishSize = isSmallScreen ? 40.0 : 56.0;
 
     // 魚エリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
@@ -1016,10 +1026,7 @@ class BettingPhaseView extends StatelessWidget {
                 data: 'fish_from_hand',
                 feedback: Material(
                   color: Colors.transparent,
-                  child: Text(
-                    '🐟',
-                    style: TextStyle(fontSize: fishSize * 1.3, height: 1.0),
-                  ),
+                  child: FishIcon(size: fishSize * 1.4),
                 ),
                 childWhenDragging: Opacity(
                   opacity: 0.3,
@@ -1091,8 +1098,7 @@ Widget _buildCatCard(
           spacing: 1,
           children: List.generate(
             card.baseCost,
-            (_) =>
-                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 12 : 16)),
+            (_) => FishIcon(size: isSmallScreen ? 16 : 20),
           ),
         ),
       ],
@@ -1150,13 +1156,7 @@ Widget _buildDishArea(
                           data: 'fish_from_$catIndex',
                           feedback: Material(
                             color: Colors.transparent,
-                            child: Text(
-                              '🐟',
-                              style: TextStyle(
-                                fontSize: fishSize * 1.3,
-                                height: 1.0,
-                              ),
-                            ),
+                            child: FishIcon(size: fishSize * 1.6),
                           ),
                           childWhenDragging: Opacity(
                             opacity: 0.3,
@@ -1584,13 +1584,19 @@ Widget _buildWonCatsList(
                 cat.name,
                 size: isSmallScreen ? 24 : 36,
               ),
-              Text(
-                '🐟${cat.cost}',
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 10 : 12,
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FishIcon(size: isSmallScreen ? 12 : 20),
+                  Text(
+                    '${cat.cost}',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 10 : 16,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1798,13 +1804,13 @@ Widget _buildFishWithNumber(String number, {double size = 48, Key? key}) {
     key: key,
     alignment: Alignment.center,
     children: [
-      Text('🐟', style: TextStyle(fontSize: size, height: 1.0)),
+      FishIcon(size: size),
       Text(
         number,
         style: TextStyle(
-          fontSize: size * 0.55,
+          fontSize: size * 0.45,
           fontWeight: FontWeight.w900,
-          color: Colors.black,
+          color: const Color.fromARGB(255, 49, 4, 4),
           shadows: const [
             Shadow(color: Colors.white, blurRadius: 4),
             Shadow(color: Colors.white, blurRadius: 4),

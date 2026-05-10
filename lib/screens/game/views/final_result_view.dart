@@ -9,6 +9,7 @@ import '../../../models/item.dart';
 import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 import '../../../widgets/user_icon_widget.dart';
+import '../../../widgets/fish_icon.dart';
 import '../../../models/user_profile.dart';
 
 /// 最終結果画面
@@ -340,7 +341,7 @@ class _FinalResultViewState extends State<FinalResultView> {
                   ),
                 ),
                 const SizedBox(width: 2),
-                Text('🐟', style: TextStyle(fontSize: isSmallScreen ? 10 : 12)),
+                FishIcon(size: isSmallScreen ? 10 : 12),
               ],
             ),
           ),
@@ -466,7 +467,7 @@ class _FinalResultViewState extends State<FinalResultView> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Text('🐟', style: TextStyle(fontSize: size, height: 1.0)),
+        FishIcon(size: size),
         Text(
           number,
           style: TextStyle(
@@ -593,13 +594,20 @@ class _FinalResultViewState extends State<FinalResultView> {
                       width: 2,
                     ),
                   ),
-                  child: Text(
-                    '🐟 ${cards.fold<int>(0, (sum, card) => sum + card.cost)}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF4D331F),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const FishIcon(size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${cards.fold<int>(0, (sum, card) => sum + card.cost)}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF4D331F),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -654,15 +662,21 @@ class _FinalResultViewState extends State<FinalResultView> {
               children: [
                 _buildCatAvatarFromCard(card, size: 28),
                 const SizedBox(height: 2),
-                Text(
-                  '🐟${card.cost}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: card.isWinningCard
-                        ? const Color(0xFF4D331F)
-                        : Colors.blue.shade700,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const FishIcon(size: 10),
+                    Text(
+                      '${card.cost}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: card.isWinningCard
+                            ? const Color(0xFF4D331F)
+                            : Colors.blue.shade700,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

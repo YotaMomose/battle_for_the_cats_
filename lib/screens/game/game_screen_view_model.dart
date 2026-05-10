@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../models/game_room.dart';
 import '../../models/bets.dart';
@@ -134,6 +135,7 @@ class GameScreenViewModel extends ChangeNotifier {
 
   // つり演出中フラグ
   bool _isFishingEffect = false;
+  int? _predictedDiceResult; // 先行決定したサイコロの結果
   bool get isFishingEffect => _isFishingEffect;
 
   // カード選択状態（賭け用）
@@ -403,7 +405,7 @@ class GameScreenViewModel extends ChangeNotifier {
     final data = playerData;
     if (data == null) return '';
     final remaining = data.myFishCount - totalBet;
-    return '$myDisplayName の魚: $remaining / ${data.myFishCount} 🐟';
+    return '$myDisplayName の魚: $remaining / ${data.myFishCount}';
   }
 
   /// 確定ボタンのラベル
@@ -473,7 +475,10 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 自分のサイコロ結果を表示すべきか
   bool get shouldShowMyRollResult =>
-      playerData?.shouldShowMyRollResult ?? false;
+      _hasRolled || _isFishingEffect || (playerData?.shouldShowMyRollResult ?? false);
+
+  /// 先行決定したサイコロの結果
+  int? get predictedDiceResult => _predictedDiceResult;
 
   /// 相手のサイコロ結果を表示すべきか
   bool get shouldShowOpponentRollResult =>
@@ -605,7 +610,9 @@ class GameScreenViewModel extends ChangeNotifier {
       case GameStatus.finished:
         var newState = GameScreenState.finished(room);
         // 決着が付いていない(finalWinnerがいない)状態で相手が退出（リタイア）済みの場合はフラグを付ける
-        final opponentAbandoned = isHost ? (room.guest?.abandoned ?? false) : room.host.abandoned;
+        final opponentAbandoned = isHost
+            ? (room.guest?.abandoned ?? false)
+            : room.host.abandoned;
         if (opponentAbandoned && room.finalWinner == null) {
           newState = newState.copyWithOpponentLeft();
         }
@@ -701,26 +708,9 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// サーバーの状態とローカルの操作状態を同期する
   void _syncWithServerState(GameRoom room) {
-    final my = isHost ? room.host : room.guest;
-    if (my == null) return;
-
-    // サーバー側で「まだ」の状態なのにローカルで「完了」になっていれば、
-    // 書き込みの失敗や上書きが発生した可能性があるため、ボタンを再活性化する
-    if (room.status == GameStatus.rolling) {
-      if (!my.rolled && _hasRolled) {
-        debugPrint(
-          '[GameScreenViewModel] Roll state synced: server says not rolled',
-        );
-        _hasRolled = false;
-      }
-    } else if (room.status == GameStatus.playing) {
-      if (!my.ready && _hasPlacedBet) {
-        debugPrint(
-          '[GameScreenViewModel] Bet state synced: server says not ready',
-        );
-        _hasPlacedBet = false;
-      }
-    }
+    // サーバーの状態とローカルの操作状態を同期する
+    // ターンの途中でサーバーが一時的に false になっている場合でも、
+    // ローカルの操作（_hasRolled）を維持することでチラつきを防止する
   }
 
   Future<void> confirmRoll() async {
@@ -738,17 +728,23 @@ class GameScreenViewModel extends ChangeNotifier {
     if (_isFishingEffect || _hasRolled) return;
 
     try {
+      // クライアント側で先に結果を決定しておく（演出終了後に即表示するため）
+      _predictedDiceResult = math.Random().nextInt(6) + 1;
       _isFishingEffect = true;
       notifyListeners();
 
-      // 溜め演出（1.5秒待機）
-      await Future.delayed(const Duration(milliseconds: 1500));
+      // 溜め演出（2回沈むのが見えるように1.1秒待機）
+      await Future.delayed(const Duration(milliseconds: 1100));
 
-      await _gameService.catchFish(roomCode, playerId);
+      // 演出が終わった瞬間にローカルのフラグを立てて、竿とボタンを即座に消す
       _hasRolled = true;
+      _isFishingEffect = false;
+      notifyListeners();
+
+      // サーバーにも決定した数値を送る
+      await _gameService.catchFish(roomCode, playerId, result: _predictedDiceResult);
     } catch (e) {
       _uiState = _uiState.copyWithError('つりができませんでした: $e');
-    } finally {
       _isFishingEffect = false;
       notifyListeners();
     }

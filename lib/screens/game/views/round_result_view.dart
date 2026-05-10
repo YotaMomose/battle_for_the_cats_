@@ -9,6 +9,7 @@ import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 import '../../../widgets/user_icon_widget.dart';
 import '../../../models/user_profile.dart';
+import '../../../widgets/fish_icon.dart';
 
 /// ラウンド結果画面
 class RoundResultView extends StatefulWidget {
@@ -31,7 +32,7 @@ class _RoundResultViewState extends State<RoundResultView> {
   @override
   void initState() {
     super.initState();
-    _startRevealAnimation();
+    _playNextSequence();
   }
 
   @override
@@ -41,11 +42,6 @@ class _RoundResultViewState extends State<RoundResultView> {
     super.dispose();
   }
 
-  void _startRevealAnimation() {
-    // 最初のカードのカウントアップを開始する
-    _playNextSequence();
-  }
-
   void _playNextSequence() {
     _revealTimer?.cancel();
     _itemTimer?.cancel();
@@ -53,9 +49,17 @@ class _RoundResultViewState extends State<RoundResultView> {
 
     final viewModel = context.read<GameScreenViewModel>();
 
-    // step 6 (3枚目の判定が終わった後) の分岐はそのまま
-    if (_step == 6 && viewModel.finalWinner != null) {
-      viewModel.nextTurn();
+    // step 6 (3枚目の判定が終わった後) のボタン押下
+    if (_step == 6) {
+      setState(() {
+        _step = 7;
+      });
+      // 最終勝者が決まっている（ゲーム終了）場合は自動で結果画面へ
+      if (viewModel.finalWinner != null) {
+        Timer(const Duration(milliseconds: 1000), () {
+          if (mounted) viewModel.nextTurn();
+        });
+      }
       return;
     }
 
@@ -70,9 +74,9 @@ class _RoundResultViewState extends State<RoundResultView> {
         maxBetForThisCard = val1 > val2 ? val1 : val2;
       }
 
-      // 第1段階: カウントアップ終了まで待つ
-      final animationDuration = maxBetForThisCard * 800;
-      final countWait = 800 + animationDuration;
+      // 第1段階: カウントアップ終了まで待つ (1匹300msに短縮)
+      final animationDuration = maxBetForThisCard * 300;
+      final countWait = 400 + animationDuration;
 
       setState(() {
         _step++; // カウント開始
@@ -85,13 +89,13 @@ class _RoundResultViewState extends State<RoundResultView> {
             _revealedItemIndices.add(index);
           });
 
-          // またたびがある場合、少し遅れて ×2 を表示 (500ms後)
           final items = viewModel.lastRoundDisplayItems;
           if (index < items.length) {
             final item = items[index];
+            // またたびがある場合、少し遅れて ×2 を表示
             if (item.myItem == ItemType.matatabi ||
                 item.opponentItem == ItemType.matatabi) {
-              Timer(const Duration(milliseconds: 500), () {
+              Timer(const Duration(milliseconds: 400), () {
                 if (mounted) {
                   setState(() {
                     _revealedMultiplierIndices.add(index);
@@ -100,10 +104,10 @@ class _RoundResultViewState extends State<RoundResultView> {
               });
             }
 
-            // びっくりホーンがある場合、少し遅れて魚を吹き飛ばす (300ms後)
+            // びっくりホーンがある場合、少し遅れて魚を吹き飛ばす
             if (item.myItem == ItemType.surpriseHorn ||
                 item.opponentItem == ItemType.surpriseHorn) {
-              Timer(const Duration(milliseconds: 300), () {
+              Timer(const Duration(milliseconds: 500), () {
                 if (mounted) {
                   setState(() {
                     _blownAwayIndices.add(index);
@@ -113,15 +117,15 @@ class _RoundResultViewState extends State<RoundResultView> {
             }
           }
 
-          // 第3段階: 1秒後に判定スタンプを出す
-          _itemTimer = Timer(const Duration(milliseconds: 1000), () {
+          // 第3段階: 判定スタンプを出す (800ms後)
+          _itemTimer = Timer(const Duration(milliseconds: 800), () {
             if (mounted) {
               setState(() {
-                _step++; // 偶数になる(判定確定)
+                _step++; // 確定
                 SeService().play('button_buni.mp3');
               });
 
-              // 3枚目(Step 6)の判定後の自動遷移ロジックはここ
+              // 最終勝者が決まっている場合のみ、最後のカードの後に自動で結果画面へ進む
               if (_step == 6 && viewModel.finalWinner != null) {
                 Timer(const Duration(milliseconds: 1000), () {
                   if (mounted) viewModel.nextTurn();
@@ -152,21 +156,22 @@ class _RoundResultViewState extends State<RoundResultView> {
             _blownAwayIndices.add(index);
           }
         }
-
         _step++; // 一旦「確定」状態にする（偶数になる）
         SeService().play('button_buni.mp3');
       });
 
-      // まだ3枚目（Step 6）に達していない、かつ次のカードがあるなら即座に次へ進める
-      // 判定スタンプ（WinningStampなど）を確認できるよう、少し長めのディレイ(800ms)を置く
-      if (_step < 6) {
-        Future.delayed(const Duration(milliseconds: 800), () {
-          if (mounted) _playNextSequence();
-        });
-      } else if (_step == 6 && viewModel.finalWinner != null) {
-        // 最終勝者が決まっている場合は結果画面へ
+      if (_step == 6) {
+        // 全判定終了
         Future.delayed(const Duration(milliseconds: 1000), () {
-          if (mounted) viewModel.nextTurn();
+          if (mounted) {
+            setState(() {
+              _step = 7;
+            });
+            // 最終勝者が決まっている場合は自動で結果画面へ
+            if (viewModel.finalWinner != null) {
+              viewModel.nextTurn();
+            }
+          }
         });
       }
     }
@@ -1049,7 +1054,7 @@ class _RoundResultViewState extends State<RoundResultView> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Text('🐟', style: TextStyle(fontSize: 14)),
+                      const FishIcon(size: 14),
                       // またたびの演出：表示フラグが立っているか、判定完了後なら表示
                       if (_revealedMultiplierIndices.contains(index) ||
                           isRevealed)
@@ -1202,12 +1207,7 @@ class _RoundResultViewState extends State<RoundResultView> {
                                 ),
                               ),
                               const SizedBox(width: 2),
-                              Text(
-                                '🐟',
-                                style: TextStyle(
-                                  fontSize: isSmallScreen ? 10 : 12,
-                                ),
-                              ),
+                              FishIcon(size: isSmallScreen ? 10 : 12),
                               if (_revealedMultiplierIndices.contains(index) ||
                                   isRevealed)
                                 if (item.myItem == ItemType.matatabi ||
@@ -1274,22 +1274,25 @@ class _RoundResultViewState extends State<RoundResultView> {
   Widget _buildRevealActionButtons(bool isSmallScreen) {
     return Column(
       children: [
-        // 次へボタン
         SizedBox(
           width: double.infinity,
           height: isSmallScreen ? 50 : 72,
           child: StereoscopicButton(
-            onPressed: () {
-              SeService().play('button_buni.mp3');
-              _playNextSequence();
-            },
-            baseColor: Colors.orange,
-            shadowColor: Colors.orange.shade700,
+            onPressed: (_step % 2 == 0)
+                ? () {
+                    SeService().play('button_buni.mp3');
+                    _playNextSequence();
+                  }
+                : null,
+            baseColor: (_step % 2 == 0) ? Colors.orange : Colors.grey,
+            shadowColor: (_step % 2 == 0)
+                ? Colors.orange.shade700
+                : Colors.grey.shade700,
             borderRadius: 36,
             depth: 8,
             child: Center(
               child: Text(
-                '次へ ▶',
+                (_step % 2 == 0) ? '次へ ▶' : '判定中...',
                 style: TextStyle(
                   fontSize: isSmallScreen ? 20 : 32,
                   fontWeight: FontWeight.w900,
@@ -1552,11 +1555,8 @@ class _RoundResultViewState extends State<RoundResultView> {
                                     angle: angle + (3.14159 / 2),
                                     child: Opacity(
                                       opacity: opacity,
-                                      child: Text(
-                                        '🐟',
-                                        style: TextStyle(
-                                          fontSize: isSmallScreen ? 20 : 30,
-                                        ),
+                                      child: FishIcon(
+                                        size: isSmallScreen ? 20 : 30,
                                       ),
                                     ),
                                   ),
@@ -1568,23 +1568,22 @@ class _RoundResultViewState extends State<RoundResultView> {
                     },
                     child: TweenAnimationBuilder<double>(
                       key: ValueKey(
-                        'bet_anim_${cardIndex}_${label}_$isImmediate',
+                        'bet_anim_${cardIndex}_${label}_${isImmediate}_$startCounting',
                       ),
                       tween: Tween<double>(
-                        begin: -1.0, // スライド完了まで 0 を維持するための遊び
-                        // maxTargetValueまでアニメーションさせ、表示時に自身の目標値で止める
-                        end: startCounting ? maxTargetValue.toDouble() : 0,
+                        begin: -1.5, // スライド時間（600ms）分をマイナスで稼ぐための遊び
+                        end: startCounting ? targetValue.toDouble() : 0.0,
                       ),
                       duration: isImmediate
                           ? Duration.zero
                           : Duration(
-                              milliseconds: 800 + (maxTargetValue * 800),
+                              milliseconds:
+                                  600 + (targetValue * 350).clamp(350, 2000),
                             ),
                       builder: (context, val, child) {
                         // マイナスの間は 0 にクランプ
-                        int displayValue = val.toInt();
+                        int displayValue = val.round();
                         if (displayValue < 0) displayValue = 0;
-                        // 自分の本来の目標値でさらにクランプ
                         if (displayValue > targetValue)
                           displayValue = targetValue;
 
@@ -1619,7 +1618,7 @@ class _RoundResultViewState extends State<RoundResultView> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Text('🐟', style: TextStyle(fontSize: size, height: 1.0)),
+        FishIcon(size: size),
         Text(
           number,
           style: TextStyle(

@@ -7,6 +7,7 @@ import '../player_data.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 import '../../../widgets/user_icon_widget.dart';
 import '../../../models/user_profile.dart';
+import '../../../widgets/fish_icon.dart';
 import 'dart:math' as math;
 
 /// つりフェーズ画面
@@ -172,7 +173,7 @@ class FishingPhaseView extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('🐟', style: TextStyle(fontSize: 24)),
+                    const FishIcon(size: 24),
                     const SizedBox(width: 8),
                     Text(
                       '${playerData.opponentDiceRoll}${playerData.opponentFishermanCount > 0 ? ' + ${playerData.opponentFishermanCount}' : ''}',
@@ -343,10 +344,12 @@ class FishingPhaseView extends StatelessWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text('🐟', style: TextStyle(fontSize: 32)),
+                                  const FishIcon(size: 32),
                                 const SizedBox(width: 8),
                                 Text(
-                                  '${playerData.myDiceRoll! + playerData.myFishermanCount}',
+                                  (playerData.myDiceRoll ?? viewModel.predictedDiceResult) == null
+                                      ? '...'
+                                      : '${(playerData.myDiceRoll ?? viewModel.predictedDiceResult)! + playerData.myFishermanCount}',
                                   style: const TextStyle(
                                     fontSize: 44,
                                     fontWeight: FontWeight.w900,
@@ -373,13 +376,27 @@ class FishingPhaseView extends StatelessWidget {
 
             if (viewModel.shouldShowMyRollResult) ...[
               if (playerData.myFishermanCount > 0)
-                Text(
-                  '(漁師ボーナス +${playerData.myFishermanCount} 🐟)',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF4D331F),
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '(漁師ボーナス +${playerData.myFishermanCount} ',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF4D331F),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const FishIcon(size: 14),
+                    const Text(
+                      ')',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF4D331F),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               const SizedBox(height: 12),
               if (viewModel.canProceedFromRoll)
@@ -423,14 +440,15 @@ class FishingPhaseView extends StatelessWidget {
                     ),
                   ),
                 ),
-            ] else ...[
+            ] else if (!viewModel.isFishingEffect && 
+                       !viewModel.hasRolled && 
+                       playerData.myDiceRoll == null) ...[
+              // 本当につりを実行していない時だけボタンを表示
               StereoscopicButton(
-                onPressed: (viewModel.hasRolled || viewModel.isFishingEffect)
-                    ? null
-                    : () {
-                        SeService().play('button_buni.mp3');
-                        viewModel.catchFish();
-                      },
+                onPressed: () {
+                  SeService().play('button_buni.mp3');
+                  viewModel.catchFish();
+                },
                 baseColor: const Color(0xFF1A73E8),
                 shadowColor: const Color(0xFF0D47A1),
                 borderRadius: 30,
@@ -485,7 +503,7 @@ class _FishingActionAnimationState extends State<_FishingActionAnimation>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000), // 1秒周期
+      duration: const Duration(milliseconds: 500), // 0.5秒周期（2回で1秒）
       vsync: this,
     )..repeat();
   }
