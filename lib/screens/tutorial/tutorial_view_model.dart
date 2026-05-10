@@ -22,7 +22,7 @@ class TutorialViewModel extends ChangeNotifier {
   TutorialViewModel() {
     // チュートリアル用の初期設定
     final player = Player(id: 'me', displayName: 'あなた', iconId: 'cat_orange');
-    final elder = Player(id: 'elder', displayName: '長老ねこ', iconId: 'cat_black');
+    final elder = Player(id: 'elder', displayName: 'あいて', iconId: 'cat_black');
 
     final round = RoundCards(
       card1: const RegularCat(id: 'white', displayName: 'しろねこ', baseCost: 3),
@@ -64,7 +64,7 @@ class TutorialViewModel extends ChangeNotifier {
   String get myDisplayName => 'あなた';
   String get myIconEmoji => '🐱';
   String get myIconId => 'cat_orange';
-  String get opponentDisplayName => '長老ねこ';
+  String get opponentDisplayName => 'あいて';
   String get opponentIconEmoji => '👴';
   String get opponentIconId => 'cat_black';
 
@@ -156,7 +156,7 @@ class TutorialViewModel extends ChangeNotifier {
       isHost: true,
       myDisplayName: 'あなた',
       myIconId: 'cat_orange',
-      opponentDisplayName: '長老ねこ',
+      opponentDisplayName: 'あいて',
       opponentIconId: 'cat_black',
       myFishCount: myCurrentFish,
       opponentFishCount: 10,
@@ -208,17 +208,17 @@ class TutorialViewModel extends ChangeNotifier {
   String get currentMessage {
     switch (_currentStep) {
       case 0:
-        return 'ほっほっほ。ようこそ、にゃんこほいほい！へ！ワシがルールを教えてやろう。';
+        return 'ほっほっほ。ワシがゲームのルールを教えてやろう。';
       case 1:
-        return 'このゲームは、相手より多くのお魚をあげてにゃんこをゲットするゲームじゃ。';
+        return 'このゲームは、相手より多くのお魚をあげてにゃんこをゲットすることが目的じゃ。';
       case 2:
-        return '先に３匹の同じ種類のにゃんこを集めるか、３匹の違う種類のにゃんこを集めれば勝利じゃ。';
+        return '先に3匹の同じ種類のにゃんこを集めるか、3匹の違う種類のにゃんこを集めれば勝利じゃ。';
       case 3:
-        return '真ん中に3匹の猫がおるじゃろう？この3匹から欲しいにゃんこをゲットするのじゃ。';
+        return '画面中央に3匹の猫がおるじゃろう？この3匹から欲しいにゃんこをゲットするのじゃ。';
       case 4:
-        return 'にゃんこを仲間にするには、必要な魚の数が決まっておる。にゃんこの下に書いてある魚の数以上のお魚を置かないと仲間にできんのじゃ。';
+        return 'にゃんこを仲間にするには、必要な魚の数が決まっておる。にゃんこの下にある魚の数以上の魚を置かないと仲間にできんのじゃ。';
       case 5:
-        return 'まずは左の「しろねこ」にお魚を3匹置いておくれ。下の魚をドラッグ、もしくはお皿を数回タップするのじゃ。';
+        return 'まずは左の「しろねこ」にお魚を3匹置いておくれ。下の魚をドラッグしてしろねこのお皿まで移動させるのじゃ。';
       case 6:
         return 'よしよし、上手じゃ！次は真ん中の「くろねこ」じゃな。';
       case 7:
@@ -228,23 +228,23 @@ class TutorialViewModel extends ChangeNotifier {
       case 9:
         return 'アイテムは使うとなくなるからタイミングが大事じゃ。最後に右の「茶トラねこ」じゃな。';
       case 10:
-        return '「茶トラ」はコスト1じゃから、お魚を1匹だけ置いてみるのじゃ。';
+        return '「茶トラ」はお魚1匹分必要じゃから、お魚を1匹だけ置いてみるのじゃ。';
       case 11:
-        return 'よし、これですべての準備が整った！それじゃあ右下の「確定する」ボタンを押してみるのじゃ。';
+        return 'よし、これですべての準備が整った！それじゃあ「確定する」ボタンを押してみるのじゃ。\n今回使わなかったお魚は次のターンに持ち越されるぞ。';
       case 12:
         return '判定が始まるぞ！わくわくするのう。';
       case 13:
-        return 'まずは「しろ」じゃな。相手（ワシ）は0匹。お主の勝ちじゃ！';
+        return 'まずは「しろねこ」じゃな。相手は0匹。お主の勝ちじゃ！';
       case 14:
-        return '次は「くろ」じゃな。「ねこじゃらし」のおかげでお魚0匹で仲間にできたぞ。';
+        return '次は「くろねこ」じゃな。相手がお魚を置いてないから、「ねこじゃらし」のおかげでお魚0匹で仲間にできたぞ。';
       case 15:
-        return '最後は「茶トラ」じゃが...おっと！ワシが「またたび」を置いたようじゃ。';
+        return '最後は「茶トラねこ」じゃが...おっと！相手が「またたび」を置いたようじゃ。';
       case 16:
-        return '「またたび」はカードの必要コストを2倍にする！コスト1が2になったようじゃな。';
+        return '「またたび」はにゃんこに必要な魚の数が2倍になるじゃ！お主は1匹しか置いておらんから、魚不足で仲間にできなかったようじゃ。';
       case 17:
-        return 'お主は1匹しか置いておらんから、コスト不足で仲間にできなかったようじゃ。ワシも魚は0匹じゃから誰も仲間にできんかったがの。';
+        return '1ターン目の結果じゃ。\nしろねことくろねこをゲットしたから茶トラねこをゲットできれば勝てるぞ！';
       case 18:
-        return '負けることもあるが、次がある！しかし、お魚が少なくなってきたのう。';
+        return 'しかし、お魚が少なくなってきたのう。';
       case 19:
         return 'お魚がなくなったらサイコロを振るのじゃ。出た目の数だけお魚が補充されるぞ。';
       case 20:
@@ -252,43 +252,43 @@ class TutorialViewModel extends ChangeNotifier {
       case 21:
         return 'ほっほっほ、これでまた戦えるな！さあ、このまま第2ターンへ進むぞ。';
       case 22:
-        return '2ターン目じゃ！ここでお主を勝利に導く秘策を伝授しようかの。';
+        return '2ターン目じゃ！\n出てくるキャラクターは毎回ランダムに変わるぞ。';
       case 23:
-        return '新しいアイテム「びっくりホーン」を授けるぞ。';
+        return '今回はアイテム「びっくりホーン」を使ってみるのじゃ！';
       case 24:
-        return 'これは「自分も相手も魚を0にする」という特殊なアイテムじゃ。取られたくないカードに置くのが吉じゃな。';
+        return 'このアイテムを置くとどれだけ魚を置いてもお互いにキャラクターをゲットする事はできないのじゃ。';
       case 25:
         return 'まずは一番左の「しろねこ」に「びっくりホーン」を置いてみるのじゃ。';
       case 26:
-        return 'よし！これでワシとお主、どちらが魚を置いても驚いて逃げ出してしまうぞ。';
+        return 'よし！これであいてとお主、どちらが魚を置いてもこのしろねこはゲットできないぞ。';
       case 27:
-        return '次に、真ん中の「しろねこ」に魚を3匹置いてみるのじゃ。コストぴったりじゃな。';
+        return '次に、真ん中の「しろねこ」に魚を3匹置いてみるのじゃ。';
       case 28:
         return 'ふむ、魚を置いても安心はできんぞ。相手の方が多くの魚を置いた場合は、そちらに取られてしまうのじゃ。';
       case 29:
-        return '最後に、右の「茶トラ」を確実に取るために、魚を2匹置いておくのじゃ！';
+        return '最後に、右の「茶トラ」を取るために、魚を2匹置いておくのじゃ！';
       case 30:
-        return 'ほっほっほ、完璧な布陣じゃな。それでは右下の「確定する」ボタンを押してみるのじゃ。';
+        return 'ほっほっほ、完璧な布陣じゃな。それでは「確定する」ボタンを押してみるのじゃ。';
       case 31:
-        return 'ワシも準備完了じゃ。さあ、2ターン目の判定、いってみようかの！';
+        return 'さあ、2ターン目の判定、いってみようかの！';
       case 32:
-        return 'まずは一番左の「しろ」からじゃな。判定、いってみようかの！';
+        return 'まずは一番左の「しろ」からじゃな。';
       case 33:
-        return 'びっくりホーンでお互いの魚が逃げ出した！誰も仲間にできんかったのう。';
+        return 'びっくりホーンの効果で誰も仲間にできんかったのう。あいての魚を無駄に使わせることができたぞ！';
       case 34:
-        return '次は真ん中の「しろ」じゃ。お主も3匹置いたが、ワシはどうしたかのう？';
+        return '次は真ん中の「しろ」じゃ。お主は3匹置いたが、相手はどうかのう？';
       case 35:
-        return 'ワシは4匹置いた。ワシの勝ちじゃな！';
+        return 'おっと！相手は4匹も置いておる。';
       case 36:
-        return 'このように、コストを満たしていても相手より少ないと取られてしまう。駆け引きが重要じゃ。';
+        return '残念！お主より多い魚を置かれてしまった。必要な魚の数を満たしていても相手より少ないと取られてしまうのじゃ。';
       case 37:
-        return '最後は右の「茶トラ」！お主は2匹、ワシは1匹。結果は...？';
+        return '最後は右の「茶トラ」！お主は必要な数より多い2匹置いておるが、相手は？';
       case 38:
-        return 'お主の勝ちじゃ！「茶トラ」が仲間に加わったぞ。';
+        return '相手は1匹しか置かなかったようじゃな。お主の勝ちじゃ！';
       case 39:
         return 'これで「しろ」「くろ」「茶トラ」の3種類が揃ったな！';
       case 40:
-        return 'お見事！3種類揃ったのでお主の完全勝利じゃ！';
+        return 'お見事！お主の完全勝利じゃ！';
       case 41:
         return '今回は登場しなかったが、実際のゲームでは他にも様々なキャラクターが登場するぞ。紹介しておこう。';
       case 42:

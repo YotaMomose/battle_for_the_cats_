@@ -58,6 +58,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
             SafeArea(
               child: Column(
                 children: [
+
                   // ターン情報 (最上部)
                   _buildTurnHeader(isSmallScreen),
 
@@ -263,7 +264,68 @@ class _TutorialScreenState extends State<TutorialScreen> {
             const Positioned.fill(
               child: SafeArea(child: TutorialCharactersDialog()),
             ),
+
+          // 退出ボタン
+          _buildExitButton(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildExitButton(BuildContext context) {
+    return Positioned(
+      bottom: 16,
+      left: 16,
+      child: SafeArea(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              // 確認ダイアログを出す
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('チュートリアルを終了しますか？'),
+                  content: const Text('進行状況は保存されません。'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('キャンセル'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context); // ダイアログを閉じる
+                        Navigator.pop(context); // チュートリアル画面を閉じる
+                      },
+                      child: const Text('終了する'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF4D331F), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.close,
+                color: Color(0xFF4D331F),
+                size: 24,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
