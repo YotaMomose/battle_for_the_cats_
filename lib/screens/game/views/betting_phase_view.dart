@@ -9,6 +9,8 @@ import '../../../models/item.dart';
 import '../../../models/cards/game_card.dart';
 import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/user_icon_widget.dart';
+import '../../../models/user_profile.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
@@ -671,15 +673,18 @@ class BettingPhaseView extends StatelessWidget {
               Container(
                 width: iconSize,
                 height: iconSize,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
                   shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                  ],
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  iconEmoji,
-                  style: TextStyle(fontSize: isSmallScreen ? 16 : 28),
+                child: UserIconWidget(
+                  icon: isOpponent ? viewModel.opponentUserIcon : viewModel.myUserIcon,
+                  size: isSmallScreen ? 20 : 36,
                 ),
               ),
               if (!isSmallScreen) const SizedBox(height: 4),

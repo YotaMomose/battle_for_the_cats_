@@ -5,6 +5,8 @@ import '../../../models/game_room.dart';
 import '../game_screen_view_model.dart';
 import '../player_data.dart';
 import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/user_icon_widget.dart';
+import '../../../models/user_profile.dart';
 import 'dart:math' as math;
 
 /// つりフェーズ画面
@@ -119,10 +121,28 @@ class FishingPhaseView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '${viewModel.opponentIconEmoji} ',
-                  style: const TextStyle(fontSize: 18),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: UserIconWidget(
+                    icon: viewModel.opponentUserIcon,
+                    size: 22,
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   viewModel.opponentDisplayName,
                   style: const TextStyle(
@@ -135,29 +155,35 @@ class FishingPhaseView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             if (viewModel.shouldShowOpponentRollResult) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  const Text('🐟', style: TextStyle(fontSize: 24)),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${playerData.opponentDiceRoll}${playerData.opponentFishermanCount > 0 ? ' + ${playerData.opponentFishermanCount}' : ''}',
-                    style: const TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 3),
-                          blurRadius: 4,
-                        ),
-                      ],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFF4D331F), width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🐟', style: TextStyle(fontSize: 24)),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${playerData.opponentDiceRoll}${playerData.opponentFishermanCount > 0 ? ' + ${playerData.opponentFishermanCount}' : ''}',
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF4D331F),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ] else if (playerData.opponentRolled)
               const Text(
@@ -216,10 +242,28 @@ class FishingPhaseView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '${viewModel.myIconEmoji} ',
-                  style: const TextStyle(fontSize: 18),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: UserIconWidget(
+                    icon: viewModel.myUserIcon,
+                    size: 26,
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   viewModel.myDisplayName,
                   style: const TextStyle(
@@ -238,66 +282,81 @@ class FishingPhaseView extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // 水面 (右側に寄せる)
-                  Positioned(
-                    right: 10,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.shade300,
-                            offset: const Offset(0, 4),
-                            blurRadius: 0,
-                          ),
-                        ],
+                  // 水面 (右側に寄せる) - ゲットした時は非表示
+                  if (!viewModel.shouldShowMyRollResult)
+                    Positioned(
+                      right: 10,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade100,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.shade300,
+                              offset: const Offset(0, 4),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
 
                   if (viewModel.isFishingEffect)
                     const _FishingActionAnimation()
                   else if (viewModel.shouldShowMyRollResult)
-                    Positioned(
-                      right: 35, // 水面の中心あたり
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            '獲物ゲット！',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF4D331F),
-                              fontWeight: FontWeight.w900,
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: const Color(0xFF4D331F),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('🐟', style: TextStyle(fontSize: 28)),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${playerData.myDiceRoll! + playerData.myFishermanCount}',
-                                style: const TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.blue,
-                                      offset: Offset(0, 3),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '獲物ゲット！',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF4D331F),
+                                fontWeight: FontWeight.w900,
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('🐟', style: TextStyle(fontSize: 32)),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${playerData.myDiceRoll! + playerData.myFishermanCount}',
+                                  style: const TextStyle(
+                                    fontSize: 44,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF4D331F),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   else

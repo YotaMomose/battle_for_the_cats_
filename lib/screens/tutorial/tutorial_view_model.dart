@@ -8,6 +8,7 @@ import '../../models/item_inventory.dart';
 import '../../models/item.dart';
 import '../../models/cards/round_cards.dart';
 import '../../models/cards/regular_cat.dart';
+import '../../models/user_profile.dart';
 import '../../constants/game_constants.dart';
 
 class TutorialViewModel extends ChangeNotifier {
@@ -67,6 +68,12 @@ class TutorialViewModel extends ChangeNotifier {
   String get opponentDisplayName => 'あいて';
   String get opponentIconEmoji => '👴';
   String get opponentIconId => 'cat_black';
+
+  /// 自分のアイコン
+  UserIcon get myUserIcon => UserIcon.fromId(myIconId);
+
+  /// 相手のアイコン
+  UserIcon get opponentUserIcon => UserIcon.fromId(opponentIconId);
 
   String get opponentReadyStatusLabel => '選択中...';
   Color get opponentReadyStatusColor => const Color.fromARGB(255, 255, 38, 0);
@@ -222,13 +229,13 @@ class TutorialViewModel extends ChangeNotifier {
       case 6:
         return 'よしよし、上手じゃ！次は真ん中の「くろねこ」じゃな。';
       case 7:
-        return 'ここではアイテムを使ってみよう。「ねこじゃらし」を「くろ」のお皿にドラッグするのじゃ。';
+        return 'ここではアイテムを使ってみよう。「ねこじゃらし」を「くろねこ」のお皿にドラッグするのじゃ。';
       case 8:
         return '「ねこじゃらし」は相手がお魚を置いていなければ、お魚を使わずに仲間にできる優れものじゃ。';
       case 9:
         return 'アイテムは使うとなくなるからタイミングが大事じゃ。最後に右の「茶トラねこ」じゃな。';
       case 10:
-        return '「茶トラ」はお魚1匹分必要じゃから、お魚を1匹だけ置いてみるのじゃ。';
+        return '「茶トラねこ」はお魚1匹分必要じゃから、お魚を1匹だけ置いてみるのじゃ。';
       case 11:
         return 'よし、これですべての準備が整った！それじゃあ「確定する」ボタンを押してみるのじゃ。\n今回使わなかったお魚は次のターンに持ち越されるぞ。';
       case 12:

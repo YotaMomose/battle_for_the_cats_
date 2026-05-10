@@ -542,14 +542,31 @@ class _FinalResultViewState extends State<FinalResultView> {
             child: Row(
               children: [
                 // アイコン
-                UserIconWidget(
-                  icon: UserIcon.fromId(
-                    name == viewModel.myDisplayName
-                        ? viewModel.myIconId
-                        : viewModel.opponentIconId,
-                  ),
-                  size: 48,
-                ),
+                 Container(
+                   width: 56,
+                   height: 56,
+                   decoration: BoxDecoration(
+                     color: Colors.white,
+                     shape: BoxShape.circle,
+                     border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                     boxShadow: [
+                       BoxShadow(
+                         color: Colors.black.withOpacity(0.1),
+                         blurRadius: 4,
+                         offset: const Offset(0, 2),
+                       ),
+                     ],
+                   ),
+                   alignment: Alignment.center,
+                   child: UserIconWidget(
+                     icon: UserIcon.fromId(
+                       name == viewModel.myDisplayName
+                           ? viewModel.myIconId
+                           : viewModel.opponentIconId,
+                     ),
+                     size: 40,
+                   ),
+                 ),
                 const SizedBox(width: 12),
                 // 名前
                 Expanded(

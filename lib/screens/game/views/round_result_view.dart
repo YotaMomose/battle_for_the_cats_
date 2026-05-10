@@ -7,6 +7,8 @@ import '../../../models/game_room.dart';
 import '../../../models/item.dart';
 import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/user_icon_widget.dart';
+import '../../../models/user_profile.dart';
 
 /// ラウンド結果画面
 class RoundResultView extends StatefulWidget {
@@ -605,14 +607,14 @@ class _RoundResultViewState extends State<RoundResultView> {
             ),
             const SizedBox(height: 16),
             _buildPlayerCumulativeRow(
-              viewModel.myIconEmoji,
+              viewModel.myUserIcon,
               viewModel.myDisplayName,
               viewModel.myWonCardDetails,
               isSmallScreen,
             ),
             const SizedBox(height: 10),
             _buildPlayerCumulativeRow(
-              viewModel.opponentIconEmoji,
+              viewModel.opponentUserIcon,
               viewModel.opponentDisplayName,
               viewModel.opponentWonCardDetails,
               isSmallScreen,
@@ -862,7 +864,7 @@ class _RoundResultViewState extends State<RoundResultView> {
   }
 
   Widget _buildPlayerCumulativeRow(
-    String emoji,
+    UserIcon icon,
     String name,
     List<FinalResultCardInfo> cards,
     bool isSmallScreen,
@@ -877,7 +879,7 @@ class _RoundResultViewState extends State<RoundResultView> {
       ),
       child: Row(
         children: [
-          _buildCircleIcon(emoji, isSmallScreen),
+          _buildCircleIcon(icon, isSmallScreen),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -1777,7 +1779,7 @@ class _RoundResultViewState extends State<RoundResultView> {
     );
   }
 
-  Widget _buildCircleIcon(String emoji, bool isSmallScreen) {
+  Widget _buildCircleIcon(UserIcon icon, bool isSmallScreen) {
     final size = isSmallScreen ? 24.0 : 32.0;
     return Container(
       width: size,
@@ -1788,7 +1790,7 @@ class _RoundResultViewState extends State<RoundResultView> {
         border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
       ),
       alignment: Alignment.center,
-      child: Text(emoji, style: TextStyle(fontSize: isSmallScreen ? 12 : 16)),
+      child: UserIconWidget(icon: icon, size: size * 0.7),
     );
   }
 

@@ -5,6 +5,7 @@ import '../game_screen_view_model.dart';
 import '../../../models/user_profile.dart';
 import 'package:flutter/services.dart';
 import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/user_icon_widget.dart';
 
 /// 対戦相手待機画面
 class WaitingView extends StatelessWidget {
@@ -66,9 +67,26 @@ class WaitingView extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          viewModel.opponentIconEmoji,
-                          style: const TextStyle(fontSize: 64),
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.pink.shade200, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: UserIconWidget(
+                            icon: viewModel.opponentUserIcon,
+                            size: 64,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -361,9 +379,9 @@ class WaitingView extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final friend = vm.friends[index];
                           return ListTile(
-                            leading: Text(
-                              UserIcon.fromId(friend.iconId).emoji,
-                              style: const TextStyle(fontSize: 24),
+                            leading: UserIconWidget(
+                              icon: UserIcon.fromId(friend.iconId),
+                              size: 32,
                             ),
                             title: Text(friend.displayName),
                             trailing: StereoscopicButton(

@@ -11,6 +11,8 @@ import '../home/home_screen_view_model.dart';
 import 'views/tutorial_round_result_view.dart';
 import 'views/tutorial_final_result_view.dart';
 import 'views/tutorial_characters_dialog.dart';
+import '../../widgets/user_icon_widget.dart';
+import '../../models/user_profile.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
@@ -387,9 +389,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
           width: avatarSize,
           height: avatarSize,
           decoration: BoxDecoration(
-            color: isOpponent ? Colors.red.shade100 : Colors.blue.shade100,
+            color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
+            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -399,9 +401,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
             ],
           ),
           child: Center(
-            child: Text(
-              iconEmoji,
-              style: TextStyle(fontSize: avatarSize * 0.6),
+            child: UserIconWidget(
+              icon: isOpponent ? viewModel.opponentUserIcon : viewModel.myUserIcon,
+              size: avatarSize * 0.7,
             ),
           ),
         ),

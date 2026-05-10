@@ -386,6 +386,12 @@ class GameScreenViewModel extends ChangeNotifier {
   String get opponentIconEmoji =>
       UserIcon.fromId(playerData?.opponentIconId ?? 'cat_orange').emoji;
 
+  /// 自分のアイコン
+  UserIcon get myUserIcon => UserIcon.fromId(myIconId);
+
+  /// 相手のアイコン
+  UserIcon get opponentUserIcon => UserIcon.fromId(opponentIconId);
+
   /// 自分のアイコンID
   String get myIconId => playerData?.myIconId ?? 'cat_orange';
 
