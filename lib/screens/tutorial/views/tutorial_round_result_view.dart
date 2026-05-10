@@ -46,65 +46,64 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
 
     setState(() {
       // ステップに応じた演出の「開始」トリガーのみを管理
-      if (step == 11) {
-        // カード1の演出開始
+      if (step == 12) {
         _startCardAnimation(0, viewModel);
-      } else if (step == 12) {
+      } else if (step == 13) {
         // カード1を完了、カード2はまだ開始しない（表示切り替え待ち）
         _forceCompleteCard(0);
         viewModel.setAnimationFinished(true);
-      } else if (step == 13) {
+      } else if (step == 14) {
         // カード2を表示し、演出開始
         _forceCompleteCard(0);
         _startCardAnimation(1, viewModel);
-      } else if (step == 14) {
+      } else if (step == 15) {
         // カード3を表示し、演出開始（スタンプ前で止める）
         _forceCompleteCard(0);
         _forceCompleteCard(1);
-        _startCardAnimation(2, viewModel, pauseBeforeStamp: true);
-      } else if (step == 15) {
-        // カード3のアイテム解説中にスタンプを表示
+        _startCardAnimation(2, viewModel);
+      } else if (step == 16) {
         _forceCompleteCard(1);
         _revealedItemIndices.add(2);
         _revealedMultiplierIndices.add(2);
-        _startStampOnly(2, viewModel);
-      } else if (step == 16) {
-        // カード3の結果解説
-        _forceCompleteCard(1);
-        _forceCompleteCard(2);
         viewModel.setAnimationFinished(true);
-      } else if (step >= 17 && step < 30) {
+      } else if (step == 17) {
+        // カード3の結果解説
         _forceCompleteCard(0);
         _forceCompleteCard(1);
         _forceCompleteCard(2);
         viewModel.setAnimationFinished(true);
-      } else if (step == 31) {
+      } else if (step >= 18 && step < 30) {
+        _forceCompleteCard(0);
+        _forceCompleteCard(1);
+        _forceCompleteCard(2);
+        viewModel.setAnimationFinished(true);
+      } else if (step == 32) {
         // カード0 演出開始 (しろねこ・びっくりホーン)
         _revealedItemIndices.clear();
         _revealedMultiplierIndices.clear();
         _stampedIndices.clear();
         _startCardAnimation(0, viewModel);
-      } else if (step == 32) {
+      } else if (step == 33) {
         // カード0 結果確認
         _forceCompleteCard(0);
         viewModel.setAnimationFinished(true);
-      } else if (step == 33) {
+      } else if (step == 34) {
         // カード1 演出開始 (しろねこ・自分3 vs 相手4)
         _forceCompleteCard(0);
         _startCardAnimation(1, viewModel);
-      } else if (step == 34 || step == 35) {
+      } else if (step == 35 || step == 36) {
         // カード1 結果確認・解説
         _forceCompleteCard(1);
         viewModel.setAnimationFinished(true);
-      } else if (step == 36) {
+      } else if (step == 37) {
         // カード2 演出開始 (茶トラ)
         _forceCompleteCard(1);
         _startCardAnimation(2, viewModel);
-      } else if (step == 37) {
+      } else if (step == 38) {
         // カード2 結果確認
         _forceCompleteCard(2);
         viewModel.setAnimationFinished(true);
-      } else if (step >= 38) {
+      } else if (step >= 39) {
         _forceCompleteCard(0);
         _forceCompleteCard(1);
         _forceCompleteCard(2);
@@ -235,7 +234,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
               child: Column(
                 children: [
                   const SizedBox(height: 12),
-                  if (step < 16 || (step >= 31 && step <= 36))
+                  if (step <= 16 || (step >= 32 && step <= 38))
                     ClipRect(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 600),
@@ -279,14 +278,15 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
   }
 
   int _getCurrentDisplayIndex(int step) {
-    if (step <= 11) return 0;
-    if (step == 13) return 1;
-    if (step >= 14 && step <= 15) return 2;
+    // 第1ラウンド
+    if (step <= 13) return 0;
+    if (step == 14) return 1;
+    if (step >= 15 && step <= 17) return 2;
 
     // 第2ラウンド
-    if (step == 31 || step == 32) return 0;
-    if (step >= 33 && step <= 34) return 1;
-    if (step >= 36) return 2;
+    if (step == 32 || step == 33) return 0;
+    if (step >= 34 && step <= 36) return 1;
+    if (step >= 37) return 2;
 
     return 0;
   }
@@ -595,8 +595,8 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
                         color: item.winStatus == 'win'
                             ? const Color.fromARGB(255, 243, 63, 9)
                             : (item.winStatus == 'lose'
-                                ? Colors.blue
-                                : Colors.grey),
+                                  ? Colors.blue
+                                  : Colors.grey),
                         isSmallScreen: isSmallScreen,
                       )
                     else
@@ -626,6 +626,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
     bool isRevealed,
   ) {
     final maxTarget = val1 > val2 ? val1 : val2;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),

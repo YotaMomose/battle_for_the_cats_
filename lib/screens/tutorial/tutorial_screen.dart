@@ -97,17 +97,17 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
                         // ステップに応じたハイライト
                         bool isHighlighted = false;
-                        if (viewModel.currentStep == 4 && index == 0)
+                        if (viewModel.currentStep == 5 && index == 0)
                           isHighlighted = true;
-                        if (viewModel.currentStep == 6 && index == 1)
+                        if (viewModel.currentStep == 7 && index == 1)
                           isHighlighted = true;
-                        if (viewModel.currentStep == 9 && index == 2)
+                        if (viewModel.currentStep == 10 && index == 2)
                           isHighlighted = true;
-                        if (viewModel.currentStep == 24 && index == 0)
+                        if (viewModel.currentStep == 25 && index == 0)
                           isHighlighted = true;
-                        if (viewModel.currentStep == 26 && index == 1)
+                        if (viewModel.currentStep == 27 && index == 1)
                           isHighlighted = true;
-                        if (viewModel.currentStep == 28 && index == 2)
+                        if (viewModel.currentStep == 29 && index == 2)
                           isHighlighted = true;
 
                         return Expanded(
@@ -237,7 +237,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 child: TutorialDialogueWidget(
                   message: viewModel.currentMessage,
                   onNext: () async {
-                    if (viewModel.currentStep == 41) {
+                    if (viewModel.currentStep == 42) {
                       setState(() {
                         _isDialogueDismissed = true;
                       });
@@ -250,9 +250,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       viewModel.nextStep();
                     }
                   },
-                  isLast: viewModel.currentStep == 41,
+                  isLast: viewModel.currentStep == 42,
                   isEnabled:
-                      viewModel.canProgress || viewModel.currentStep == 41,
+                      viewModel.canProgress || viewModel.currentStep == 42,
                   characterImagePath: 'assets/images/kuroneko.png', // 長老ねこ
                 ),
               ),
@@ -561,7 +561,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     GameCard card,
     bool isSmallScreen,
   ) {
-    final avatarSize = isSmallScreen ? 55.0 : 90.0;
+    final avatarSize = isSmallScreen ? 50.0 : 85.0;
     return Container(
       width: isSmallScreen ? 80 : 110,
       padding: const EdgeInsets.all(4),
@@ -592,14 +592,31 @@ class _TutorialScreenState extends State<TutorialScreen> {
             ),
           ),
           _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 1,
-            children: List.generate(
-              card.baseCost,
-              (_) => Text(
-                '🐟',
-                style: TextStyle(fontSize: isSmallScreen ? 12 : 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: viewModel.currentStep == 4
+                ? BoxDecoration(
+                    color: Colors.yellow.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.yellow, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.yellow.withOpacity(0.5),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  )
+                : null,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 1,
+              children: List.generate(
+                card.baseCost,
+                (_) => Text(
+                  '🐟',
+                  style: TextStyle(fontSize: isSmallScreen ? 12 : 16),
+                ),
               ),
             ),
           ),
@@ -784,7 +801,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
 
     // ステップ3でハイライト
-    final bool isHighlighted = viewModel.currentStep == 5;
+    final bool isHighlighted = viewModel.currentStep == 6;
 
     return Container(
       key: _myHandFishKey,
@@ -861,9 +878,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
     // アイテムをハイライト
     bool isHighlighted = false;
-    if (viewModel.currentStep == 6 && type == ItemType.catTeaser)
+    if (viewModel.currentStep == 7 && type == ItemType.catTeaser)
       isHighlighted = true;
-    if (viewModel.currentStep == 24 && type == ItemType.surpriseHorn)
+    if (viewModel.currentStep == 25 && type == ItemType.surpriseHorn)
       isHighlighted = true;
 
     final content = _buildItemIcon(
@@ -940,12 +957,12 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
     // ステップ10または29で確定ボタンをハイライト
     final bool isConfirmHighlighted =
-        viewModel.currentStep == 10 || viewModel.currentStep == 29;
+        viewModel.currentStep == 11 || viewModel.currentStep == 30;
     // ステップ20でつりボタンをハイライト
-    final bool isFishHighlighted = viewModel.currentStep == 20;
+    final bool isFishHighlighted = viewModel.currentStep == 21;
 
-    if ((viewModel.currentStep <= 10 ||
-            (viewModel.currentStep >= 21 && viewModel.currentStep <= 29)) &&
+    if ((viewModel.currentStep <= 11 ||
+            (viewModel.currentStep >= 21 && viewModel.currentStep <= 30)) &&
         !viewModel.isMyRolled) {
       return Center(
         child: SizedBox(
@@ -953,7 +970,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           height: 50,
           child: StereoscopicButton(
             onPressed:
-                (viewModel.currentStep == 10 || viewModel.currentStep == 29)
+                (viewModel.currentStep == 11 || viewModel.currentStep == 30)
                 ? viewModel.placeBets
                 : null,
             baseColor: isConfirmHighlighted
@@ -987,7 +1004,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           width: 200,
           height: 50,
           child: StereoscopicButton(
-            onPressed: viewModel.currentStep == 19 ? viewModel.rollDice : null,
+            onPressed: viewModel.currentStep == 20 ? viewModel.rollDice : null,
             baseColor: isFishHighlighted
                 ? Colors.yellow
                 : (viewModel.isMyRolled

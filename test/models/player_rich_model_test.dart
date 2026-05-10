@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:battle_for_the_cats/models/player.dart';
 import 'package:battle_for_the_cats/models/bets.dart';
