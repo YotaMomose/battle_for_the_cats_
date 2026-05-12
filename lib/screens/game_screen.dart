@@ -41,7 +41,10 @@ class GameScreen extends StatelessWidget {
           if (context.mounted) {
             Navigator.of(context).popUntil((route) => route.isFirst);
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomeScreen(message: 'ホストに退出させられました')),
+              MaterialPageRoute(
+                builder: (context) =>
+                    const HomeScreen(message: 'ホストに退出させられました'),
+              ),
             );
           }
         },
@@ -49,7 +52,9 @@ class GameScreen extends StatelessWidget {
           if (context.mounted) {
             Navigator.of(context).popUntil((route) => route.isFirst);
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomeScreen(message: 'ルームが閉鎖されました')),
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(message: 'ルームが閉鎖されました'),
+              ),
             );
           }
         },
@@ -59,8 +64,15 @@ class GameScreen extends StatelessWidget {
   }
 }
 
-class _GameScreenContent extends StatelessWidget {
+class _GameScreenContent extends StatefulWidget {
   const _GameScreenContent();
+
+  @override
+  State<_GameScreenContent> createState() => _GameScreenContentState();
+}
+
+class _GameScreenContentState extends State<_GameScreenContent> {
+  Type? _lastStateType;
 
   @override
   Widget build(BuildContext context) {
@@ -69,28 +81,52 @@ class _GameScreenContent extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.height < 680;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: PawBackground(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              _buildBody(context, state, viewModel),
-              // 退出ボタン（待機画面、最終結果画面以外で表示）
-              if (state is! FinishedState && state is! WaitingState)
-                Positioned(
-                  bottom: isSmallScreen ? 8 : 12,
-                  left: isSmallScreen ? 8 : 12,
-                  child: _buildCircleButton(
-                    icon: Icons.exit_to_app,
-                    isSmallScreen: isSmallScreen,
-                    onPressed: () {
-                      SeService().play('button_buni.mp3');
-                      _showLeaveDialog(context, viewModel);
-                    },
+    // フェーズが変わったら開いているダイアログを閉じる
+    if (_lastStateType != null && _lastStateType != state.runtimeType) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          // ダイアログが開いている場合は閉じる
+          // Navigator.of(context).pop() を呼び出す前に、
+          // modal route がトップにあるか確認するのが理想的だが、
+          // ここでは単純に Navigator.popUntil を使って
+          // GameScreen 自体は閉じないように制御する。
+          Navigator.of(
+            context,
+          ).popUntil((route) => route.isFirst || route is! PopupRoute);
+        }
+      });
+    }
+    _lastStateType = state.runtimeType;
+
+    return PopScope(
+      canPop: false, // スワイプや戻るボタンでの退出を禁止
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        // 戻る操作が試行された際の処理が必要ならここに記述（現在は退出ボタンがあるため何もしない）
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: PawBackground(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                _buildBody(context, state, viewModel),
+                // 退出ボタン（待機画面、最終結果画面以外で表示）
+                if (state is! FinishedState && state is! WaitingState)
+                  Positioned(
+                    bottom: isSmallScreen ? 8 : 12,
+                    left: isSmallScreen ? 8 : 12,
+                    child: _buildCircleButton(
+                      icon: Icons.exit_to_app,
+                      isSmallScreen: isSmallScreen,
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        _showLeaveDialog(context, viewModel);
+                      },
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

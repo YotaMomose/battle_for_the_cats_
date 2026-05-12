@@ -937,11 +937,12 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   /// アイテム復活を実行
-  Future<void> reviveItem(ItemType item) async {
+  Future<void> reviveItem(ItemType? item) async {
     if (_isReviving) return;
     _isReviving = true;
     try {
-      await _gameService.reviveItem(roomCode, playerId, item);
+      // item が null の場合は復活なしとして処理（サーバー側で unknown 扱いにする等の対応）
+      await _gameService.reviveItem(roomCode, playerId, item ?? ItemType.unknown);
       notifyListeners();
     } catch (e) {
       _uiState = _uiState.copyWithError('アイテムの復活に失敗しました: $e');

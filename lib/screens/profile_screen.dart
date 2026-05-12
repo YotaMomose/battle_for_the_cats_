@@ -44,110 +44,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeScreenViewModel>();
-    return PawBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(80),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFD54F), // 明るい黄色
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  offset: const Offset(0, 4),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: StripePainter(
-                        color: Colors.white.withOpacity(0.2),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        // スワイプ戻りを無効化
+      },
+      child: PawBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(80),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFD54F), // 明るい黄色
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    offset: const Offset(0, 4),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: StripePainter(
+                          color: Colors.white.withOpacity(0.2),
+                        ),
                       ),
                     ),
-                  ),
-                  Center(
-                    child: Text(
-                      'プロフィール設定',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.brown.shade900,
-                        letterSpacing: 1.2,
+                    Center(
+                      child: Text(
+                        'プロフィール設定',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.brown.shade900,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: 16,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          SeService().play('button_buni.mp3');
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.brown.shade900,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                offset: const Offset(0, 2),
+                    Positioned(
+                      left: 16,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            SeService().play('button_buni.mp3');
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.brown.shade900,
+                                width: 2,
                               ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.black,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 現在のアイコンプレビュー
-              _buildMainProfileCard(context, viewModel),
-              const SizedBox(height: 24),
-
-              // アイコン選択
-              _buildSectionHeader('アイコンを選択'),
-              const SizedBox(height: 16),
-              _buildIconGrid(context, viewModel),
-              const SizedBox(height: 32),
-
-              // 音設定
-              _buildSectionHeader('サウンド設定'),
-              const SizedBox(height: 16),
-              _buildSoundSettings(context),
-              const SizedBox(height: 40),
-
-              // 開発者応援・広告非表示セクション（一番下に移動）
-              if (viewModel.shouldShowAds) ...[
-                _buildSupportSection(context, viewModel),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 現在のアイコンプレビュー
+                _buildMainProfileCard(context, viewModel),
+                const SizedBox(height: 24),
+  
+                // アイコン選択
+                _buildSectionHeader('アイコンを選択'),
+                const SizedBox(height: 16),
+                _buildIconGrid(context, viewModel),
+                const SizedBox(height: 32),
+  
+                // 音設定
+                _buildSectionHeader('サウンド設定'),
+                const SizedBox(height: 16),
+                _buildSoundSettings(context),
                 const SizedBox(height: 40),
+  
+                // 開発者応援・広告非表示セクション（一番下に移動）
+                if (viewModel.shouldShowAds) ...[
+                  _buildSupportSection(context, viewModel),
+                  const SizedBox(height: 40),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

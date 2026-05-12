@@ -123,12 +123,19 @@ class _HomeScreenContent extends StatelessWidget {
     }
 
     // 状態に応じた画面を表示
-    return switch (viewModel.state) {
-      IdleState() => const MainMenuView(),
-      LoadingState() => const MainMenuView(),
-      MatchmakingState() => const MatchmakingView(),
-      _ => const MainMenuView(),
-    };
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        // ホーム画面で戻る操作をした際の挙動が必要ならここに記述
+      },
+      child: switch (viewModel.state) {
+        IdleState() => const MainMenuView(),
+        LoadingState() => const MainMenuView(),
+        MatchmakingState() => const MatchmakingView(),
+        _ => const MainMenuView(),
+      },
+    );
   }
 
   void _showInfoDialog(

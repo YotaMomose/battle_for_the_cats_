@@ -59,7 +59,13 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
     final homeViewModel = context.read<HomeScreenViewModel>();
     final myProfile = homeViewModel.userProfile!;
 
-    return PawBackground(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        // スワイプ戻りを無効化
+      },
+      child: PawBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: PreferredSize(
@@ -184,6 +190,7 @@ class _FriendManagementViewState extends State<_FriendManagementView> {
           ),
         ),
       ),
+    ),
     );
   }
 

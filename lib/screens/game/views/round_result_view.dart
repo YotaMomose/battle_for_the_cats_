@@ -290,9 +290,7 @@ class _RoundResultViewState extends State<RoundResultView> {
               ],
 
               // 特殊効果UI (復活/追い出し) - すべての結果が出た後に表示
-              if (_step >= 7 &&
-                  canRevive &&
-                  viewModel.revivableItems.length > 1) ...[
+              if (_step >= 7 && canRevive) ...[
                 _buildReviveSection(context, viewModel, isSmallScreen),
                 SizedBox(height: isSmallScreen ? 12 : 20),
               ],
@@ -674,7 +672,25 @@ class _RoundResultViewState extends State<RoundResultView> {
           ),
           const SizedBox(height: 16),
           if (viewModel.revivableItems.isEmpty)
-            const Text('復活できるアイテムがありません', style: TextStyle(color: Colors.grey))
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.purple.shade200),
+                ),
+                child: const Text(
+                  '復活できるアイテムがありません',
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            )
           else
             Wrap(
               spacing: 12,
@@ -1649,12 +1665,14 @@ class _RoundResultViewState extends State<RoundResultView> {
         onPressed:
             (isConfirmed ||
                 (canChase && viewModel.availableTargetsForDog.isNotEmpty) ||
-                canRevive)
+                (canRevive && viewModel.revivableItems.isNotEmpty))
             ? null
             : () {
                 SeService().play('button_buni.mp3');
                 if (canChase && viewModel.availableTargetsForDog.isEmpty) {
                   viewModel.chaseAwayCard(null);
+                } else if (canRevive && viewModel.revivableItems.isEmpty) {
+                  viewModel.reviveItem(null);
                 } else {
                   viewModel.nextTurn();
                 }
@@ -1676,7 +1694,11 @@ class _RoundResultViewState extends State<RoundResultView> {
                   labelText = 'キャラ選択待ち';
                 }
               } else if (canRevive) {
-                labelText = isSmallScreen ? 'アイテムを選択' : 'アイテムを選択してください';
+                if (viewModel.revivableItems.isEmpty) {
+                  labelText = '次へ進む';
+                } else {
+                  labelText = isSmallScreen ? 'アイテムを選択' : 'アイテムを選択してください';
+                }
               } else if (isConfirmed) {
                 labelText = '確認待ち';
                 showDots = true;

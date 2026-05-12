@@ -39,8 +39,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.height < 680;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFDEFD5), // バトル画面と同じ背景色
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        // スワイプ戻りを無効化
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFDEFD5), // バトル画面と同じ背景色
       body: Stack(
         children: [
           // 背景のドット
@@ -272,6 +278,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           _buildExitButton(context),
         ],
       ),
+    ),
     );
   }
 
