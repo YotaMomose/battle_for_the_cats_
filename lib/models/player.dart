@@ -102,16 +102,16 @@ class Player {
 
   // ===== Domain Methods =====
 
-  /// 獲得した全猫の合計コスト
+  /// 獲得した全にゃんこの合計コスト
   int get totalWonCatCost => catsWon.totalCost;
 
-  /// 獲得した猫の名前リスト
+  /// 獲得したにゃんこの名前リスト
   List<String> get wonCatNames => catsWon.names;
 
   /// 獲得した漁師の数
   int get currentFishermanCount => fishermanCount;
 
-  /// 魚を増やす
+  /// さかなを増やす
   void addFish(int amount) {
     fishCount += amount;
   }
@@ -125,7 +125,7 @@ class Player {
   void recordDiceRoll(int value) {
     diceRoll = value;
     rolled = true;
-    // サイコロの目 + 漁師の数だけ魚を追加
+    // サイコロの目 + 漁師の数だけさかなを追加
     addFish(value + fishermanCount);
   }
 
@@ -138,12 +138,12 @@ class Player {
     ready = true;
   }
 
-  /// 獲得した猫を記録する
+  /// 獲得したにゃんこを記録する
   void addWonCat(String name, int cost) {
     catsWon.addCat(name, cost);
   }
 
-  /// 獲得した猫を削除する（犬の効果などで使用）
+  /// 獲得したにゃんこを削除する（犬の効果などで使用）
   void removeWonCat(String name) {
     final beforeCount = catsWon.count;
     catsWon.removeByName(name);
@@ -169,7 +169,7 @@ class Player {
     }
   }
 
-  /// 次のターンのために状態をリセットし、残りの魚を算出する
+  /// 次のターンのために状態をリセットし、残りのさかなを算出する
   void resetRoundState() {
     currentBets = Bets.empty();
     ready = false;

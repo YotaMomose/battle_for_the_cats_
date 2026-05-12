@@ -1,6 +1,6 @@
 import 'item.dart';
 
-/// 各猫への賭け金を管理するクラス
+/// 各にゃんこへの賭け金を管理するクラス
 class Bets {
   final Map<String, int> _bets;
   final Map<String, ItemType?> _itemPlacements;
@@ -11,10 +11,10 @@ class Bets {
         itemPlacements ?? {'0': null, '1': null, '2': null},
       );
 
-  /// 特定の猫の賭け金を取得
+  /// 特定のにゃんこの賭け金を取得
   int getBet(String index) => _bets[index] ?? 0;
 
-  /// 特定の猫に配置されたアイテムを取得
+  /// 特定のにゃんこに配置されたアイテムを取得
   ItemType? getItem(String index) => _itemPlacements[index];
 
   /// 合計賭け金を計算

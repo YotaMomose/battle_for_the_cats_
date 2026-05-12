@@ -128,7 +128,10 @@ class FishingPhaseView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -157,7 +160,10 @@ class FishingPhaseView extends StatelessWidget {
             const SizedBox(height: 12),
             if (viewModel.shouldShowOpponentRollResult) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(20),
@@ -203,7 +209,7 @@ class FishingPhaseView extends StatelessWidget {
                   Text(
                     '${viewModel.opponentDisplayName}が釣りをしています',
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 18,
                       color: Color(0xFF4D331F),
                       fontWeight: FontWeight.w900,
                     ),
@@ -249,7 +255,10 @@ class FishingPhaseView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -259,10 +268,7 @@ class FishingPhaseView extends StatelessWidget {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: UserIconWidget(
-                    icon: viewModel.myUserIcon,
-                    size: 26,
-                  ),
+                  child: UserIconWidget(icon: viewModel.myUserIcon, size: 26),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -344,10 +350,12 @@ class FishingPhaseView extends StatelessWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                  const FishIcon(size: 32),
+                                const FishIcon(size: 32),
                                 const SizedBox(width: 8),
                                 Text(
-                                  (playerData.myDiceRoll ?? viewModel.predictedDiceResult) == null
+                                  (playerData.myDiceRoll ??
+                                              viewModel.predictedDiceResult) ==
+                                          null
                                       ? '...'
                                       : '${(playerData.myDiceRoll ?? viewModel.predictedDiceResult)! + playerData.myFishermanCount}',
                                   style: const TextStyle(
@@ -440,9 +448,9 @@ class FishingPhaseView extends StatelessWidget {
                     ),
                   ),
                 ),
-            ] else if (!viewModel.isFishingEffect && 
-                       !viewModel.hasRolled && 
-                       playerData.myDiceRoll == null) ...[
+            ] else if (!viewModel.isFishingEffect &&
+                !viewModel.hasRolled &&
+                playerData.myDiceRoll == null) ...[
               // 本当につりを実行していない時だけボタンを表示
               StereoscopicButton(
                 onPressed: () {
@@ -592,7 +600,7 @@ class _FishingLinePainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    // 竿の描画 (猫の手元から斜め上に)
+    // 竿の描画 (にゃんこの手元から斜め上に)
     final Offset rodStart = catPos + const Offset(30, 0);
     final Offset rodEnd =
         rodStart +

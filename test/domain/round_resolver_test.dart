@@ -48,7 +48,7 @@ void main() {
       expect(room.currentTurn, 2);
     });
 
-    test('advanceFromRoundResult - 確率に基づき太っちょネコイベントが発生する', () {
+    test('advanceFromRoundResult - 確率に基づき太っちょにゃんこイベントが発生する', () {
       room.host.confirmedRoundResult = true;
       room.guest?.confirmedRoundResult = true;
       room.host.fishCount = 10;

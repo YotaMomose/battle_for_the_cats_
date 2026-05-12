@@ -53,11 +53,11 @@ class FatCatEventView extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    // 猫のアイコン（本来は生成画像）
+                    // にゃんこのアイコン（本来は生成画像）
                     const Icon(Icons.pets, size: 100, color: Colors.orange),
                     const SizedBox(height: 20),
                     const Text(
-                      '太っちょネコ 現る！',
+                      '太っちょにゃんこ 現る！',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -84,7 +84,7 @@ class FatCatEventView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        '太っちょネコが魚を全部食べてしまいました！\n両プレイヤーの魚が0になります。',
+                        '太っちょにゃんこがさかなを全部食べてしまいました！\n両プレイヤーのさかなが0になります。',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,

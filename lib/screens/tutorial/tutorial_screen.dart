@@ -47,238 +47,238 @@ class _TutorialScreenState extends State<TutorialScreen> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFFDEFD5), // バトル画面と同じ背景色
-      body: Stack(
-        children: [
-          // 背景のドット
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DotPatternPainter(
-                dotColor: const Color(0xFFEBD9B4),
-                spacing: 12,
-              ),
-            ),
-          ),
-
-          if (viewModel.isFinalResultPhase)
-            const SafeArea(child: TutorialFinalResultView())
-          else if (viewModel.isResultPhase)
-            const SafeArea(child: TutorialRoundResultView())
-          else
-            SafeArea(
-              child: Column(
-                children: [
-
-                  // ターン情報 (最上部)
-                  _buildTurnHeader(isSmallScreen),
-
-                  // 対戦相手セクション
-                  Expanded(
-                    flex: isSmallScreen ? 4 : 4,
-                    child: _buildPlayerSection(
-                      context,
-                      isOpponent: true,
-                      displayName: viewModel.opponentDisplayName,
-                      iconEmoji: viewModel.opponentIconEmoji,
-                      fishCount: viewModel.playerData.opponentFishCount,
-                      inventory: viewModel.playerData.opponentCatsWon,
-                      viewModel: viewModel,
-                      statusLabel: viewModel.opponentReadyStatusLabel,
-                      statusColor: viewModel.opponentReadyStatusColor,
-                      isSmallScreen: isSmallScreen,
-                    ),
-                  ),
-
-                  // 3匹の猫カードとお皿のエリア (中央)
-                  Expanded(
-                    flex: isSmallScreen ? 6 : 5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(3, (index) {
-                        final catIndex = index.toString();
-                        final cards =
-                            viewModel.room.currentRound?.toList() ?? [];
-                        if (cards.isEmpty || index >= cards.length) {
-                          return const Expanded(child: SizedBox());
-                        }
-
-                        final card = cards[index];
-                        final currentBet = viewModel.bets[catIndex] ?? 0;
-                        final placedItem = viewModel.getPlacedItem(catIndex);
-
-                        // ステップに応じたハイライト
-                        bool isHighlighted = false;
-                        if (viewModel.currentStep == 5 && index == 0)
-                          isHighlighted = true;
-                        if (viewModel.currentStep == 7 && index == 1)
-                          isHighlighted = true;
-                        if (viewModel.currentStep == 10 && index == 2)
-                          isHighlighted = true;
-                        if (viewModel.currentStep == 25 && index == 0)
-                          isHighlighted = true;
-                        if (viewModel.currentStep == 27 && index == 1)
-                          isHighlighted = true;
-                        if (viewModel.currentStep == 29 && index == 2)
-                          isHighlighted = true;
-
-                        return Expanded(
-                          child: DragTarget<Object>(
-                            onWillAccept: (data) => !viewModel.hasPlacedBet,
-                            onAccept: (data) {
-                              _handleDrop(
-                                viewModel,
-                                catIndex,
-                                data,
-                                currentBet,
-                              );
-                            },
-                            builder: (context, candidateData, rejectedData) {
-                              final isTarget = candidateData.isNotEmpty;
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4.0,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                  horizontal: 2.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                    255,
-                                    0,
-                                    0,
-                                    0,
-                                  ).withOpacity(isTarget ? 0.9 : 0.7),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isHighlighted
-                                        ? Colors.yellow
-                                        : (isTarget
-                                              ? Colors.yellow.withOpacity(0.5)
-                                              : Colors.grey.shade300),
-                                    width: isHighlighted
-                                        ? 4
-                                        : (isTarget ? 2 : 1),
-                                  ),
-                                  boxShadow: isHighlighted
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.yellow.withOpacity(
-                                              0.5,
-                                            ),
-                                            blurRadius: 10,
-                                            spreadRadius: 2,
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          height: isSmallScreen ? 110 : 150,
-                                          child: _buildCatCard(
-                                            viewModel,
-                                            card,
-                                            isSmallScreen,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        _buildDishArea(
-                                          context,
-                                          viewModel: viewModel,
-                                          catIndex: catIndex,
-                                          currentBet: currentBet,
-                                          placedItem: placedItem,
-                                          isSmallScreen: isSmallScreen,
-                                          isTarget: isTarget,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-
-                  // 自分セクション
-                  Expanded(
-                    flex: isSmallScreen ? 4 : 4,
-                    child: _buildPlayerSection(
-                      context,
-                      isOpponent: false,
-                      displayName: viewModel.myDisplayName,
-                      iconEmoji: viewModel.myIconEmoji,
-                      fishCount: viewModel.playerData.myFishCount,
-                      inventory: viewModel.playerData.myCatsWon,
-                      viewModel: viewModel,
-                      isReady: viewModel.isMyReady,
-                      isSmallScreen: isSmallScreen,
-                    ),
-                  ),
-
-                  // アクションボタン
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: _buildActionArea(viewModel, isSmallScreen),
-                  ),
-                ],
-              ),
-            ),
-
-          // チュートリアル・ダイアログ (上部)
-          if (!_isDialogueDismissed)
-            Positioned(
-              left: 0,
-              right: 0,
-              top: (viewModel.isResultPhase || viewModel.isFinalResultPhase)
-                  ? null
-                  : 10,
-              bottom: (viewModel.isResultPhase || viewModel.isFinalResultPhase)
-                  ? 10
-                  : null,
-              child: SafeArea(
-                child: TutorialDialogueWidget(
-                  message: viewModel.currentMessage,
-                  onNext: () async {
-                    if (viewModel.currentStep == 42) {
-                      setState(() {
-                        _isDialogueDismissed = true;
-                      });
-                      final homeVm = context.read<HomeScreenViewModel>();
-                      await homeVm.completeTutorial();
-                      if (mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    } else {
-                      viewModel.nextStep();
-                    }
-                  },
-                  isLast: viewModel.currentStep == 42,
-                  isEnabled:
-                      viewModel.canProgress || viewModel.currentStep == 42,
-                  characterImagePath: 'assets/images/kuroneko.png', // 長老ねこ
+        body: Stack(
+          children: [
+            // 背景のドット
+            Positioned.fill(
+              child: CustomPaint(
+                painter: DotPatternPainter(
+                  dotColor: const Color(0xFFEBD9B4),
+                  spacing: 12,
                 ),
               ),
             ),
 
-          // キャラクター紹介ポップアップ
-          if (viewModel.showCharacterIntro)
-            const Positioned.fill(
-              child: SafeArea(child: TutorialCharactersDialog()),
-            ),
+            if (viewModel.isFinalResultPhase)
+              const SafeArea(child: TutorialFinalResultView())
+            else if (viewModel.isResultPhase)
+              const SafeArea(child: TutorialRoundResultView())
+            else
+              SafeArea(
+                child: Column(
+                  children: [
+                    // ターン情報 (最上部)
+                    _buildTurnHeader(isSmallScreen),
 
-          // 退出ボタン
-          _buildExitButton(context),
-        ],
+                    // 対戦相手セクション
+                    Expanded(
+                      flex: isSmallScreen ? 4 : 4,
+                      child: _buildPlayerSection(
+                        context,
+                        isOpponent: true,
+                        displayName: viewModel.opponentDisplayName,
+                        iconEmoji: viewModel.opponentIconEmoji,
+                        fishCount: viewModel.playerData.opponentFishCount,
+                        inventory: viewModel.playerData.opponentCatsWon,
+                        viewModel: viewModel,
+                        statusLabel: viewModel.opponentReadyStatusLabel,
+                        statusColor: viewModel.opponentReadyStatusColor,
+                        isSmallScreen: isSmallScreen,
+                      ),
+                    ),
+
+                    // 3匹のにゃんこカードとお皿のエリア (中央)
+                    Expanded(
+                      flex: isSmallScreen ? 6 : 5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(3, (index) {
+                          final catIndex = index.toString();
+                          final cards =
+                              viewModel.room.currentRound?.toList() ?? [];
+                          if (cards.isEmpty || index >= cards.length) {
+                            return const Expanded(child: SizedBox());
+                          }
+
+                          final card = cards[index];
+                          final currentBet = viewModel.bets[catIndex] ?? 0;
+                          final placedItem = viewModel.getPlacedItem(catIndex);
+
+                          // ステップに応じたハイライト
+                          bool isHighlighted = false;
+                          if (viewModel.currentStep == 5 && index == 0)
+                            isHighlighted = true;
+                          if (viewModel.currentStep == 7 && index == 1)
+                            isHighlighted = true;
+                          if (viewModel.currentStep == 10 && index == 2)
+                            isHighlighted = true;
+                          if (viewModel.currentStep == 25 && index == 0)
+                            isHighlighted = true;
+                          if (viewModel.currentStep == 27 && index == 1)
+                            isHighlighted = true;
+                          if (viewModel.currentStep == 29 && index == 2)
+                            isHighlighted = true;
+
+                          return Expanded(
+                            child: DragTarget<Object>(
+                              onWillAccept: (data) => !viewModel.hasPlacedBet,
+                              onAccept: (data) {
+                                _handleDrop(
+                                  viewModel,
+                                  catIndex,
+                                  data,
+                                  currentBet,
+                                );
+                              },
+                              builder: (context, candidateData, rejectedData) {
+                                final isTarget = candidateData.isNotEmpty;
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 4.0,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0,
+                                    horizontal: 2.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                      255,
+                                      0,
+                                      0,
+                                      0,
+                                    ).withOpacity(isTarget ? 0.9 : 0.7),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isHighlighted
+                                          ? Colors.yellow
+                                          : (isTarget
+                                                ? Colors.yellow.withOpacity(0.5)
+                                                : Colors.grey.shade300),
+                                      width: isHighlighted
+                                          ? 4
+                                          : (isTarget ? 2 : 1),
+                                    ),
+                                    boxShadow: isHighlighted
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.yellow.withOpacity(
+                                                0.5,
+                                              ),
+                                              blurRadius: 10,
+                                              spreadRadius: 2,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: isSmallScreen ? 110 : 150,
+                                            child: _buildCatCard(
+                                              viewModel,
+                                              card,
+                                              isSmallScreen,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          _buildDishArea(
+                                            context,
+                                            viewModel: viewModel,
+                                            catIndex: catIndex,
+                                            currentBet: currentBet,
+                                            placedItem: placedItem,
+                                            isSmallScreen: isSmallScreen,
+                                            isTarget: isTarget,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+
+                    // 自分セクション
+                    Expanded(
+                      flex: isSmallScreen ? 4 : 4,
+                      child: _buildPlayerSection(
+                        context,
+                        isOpponent: false,
+                        displayName: viewModel.myDisplayName,
+                        iconEmoji: viewModel.myIconEmoji,
+                        fishCount: viewModel.playerData.myFishCount,
+                        inventory: viewModel.playerData.myCatsWon,
+                        viewModel: viewModel,
+                        isReady: viewModel.isMyReady,
+                        isSmallScreen: isSmallScreen,
+                      ),
+                    ),
+
+                    // アクションボタン
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _buildActionArea(viewModel, isSmallScreen),
+                    ),
+                  ],
+                ),
+              ),
+
+            // チュートリアル・ダイアログ (上部)
+            if (!_isDialogueDismissed)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: (viewModel.isResultPhase || viewModel.isFinalResultPhase)
+                    ? null
+                    : 10,
+                bottom:
+                    (viewModel.isResultPhase || viewModel.isFinalResultPhase)
+                    ? 10
+                    : null,
+                child: SafeArea(
+                  child: TutorialDialogueWidget(
+                    message: viewModel.currentMessage,
+                    onNext: () async {
+                      if (viewModel.currentStep == 42) {
+                        setState(() {
+                          _isDialogueDismissed = true;
+                        });
+                        final homeVm = context.read<HomeScreenViewModel>();
+                        await homeVm.completeTutorial();
+                        if (mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      } else {
+                        viewModel.nextStep();
+                      }
+                    },
+                    isLast: viewModel.currentStep == 42,
+                    isEnabled:
+                        viewModel.canProgress || viewModel.currentStep == 42,
+                    characterImagePath: 'assets/images/kuroneko.png', // 長老ねこ
+                  ),
+                ),
+              ),
+
+            // キャラクター紹介ポップアップ
+            if (viewModel.showCharacterIntro)
+              const Positioned.fill(
+                child: SafeArea(child: TutorialCharactersDialog()),
+              ),
+
+            // 退出ボタン
+            _buildExitButton(context),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -410,13 +410,15 @@ class _TutorialScreenState extends State<TutorialScreen> {
           ),
           child: Center(
             child: UserIconWidget(
-              icon: isOpponent ? viewModel.opponentUserIcon : viewModel.myUserIcon,
+              icon: isOpponent
+                  ? viewModel.opponentUserIcon
+                  : viewModel.myUserIcon,
               size: avatarSize * 0.7,
             ),
           ),
         ),
         const SizedBox(width: 8),
-        // 名前と獲得猫
+        // 名前と獲得にゃんこ
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -449,7 +451,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       child: Row(
         children: [
           const SizedBox(width: 4),
-          // 魚の数
+          // さかなの数
           if (!isOpponent)
             _buildMyFishDraggableArea(fishCount, viewModel, isSmallScreen)
           else

@@ -10,7 +10,6 @@ import '../../../models/cards/game_card.dart';
 import '../game_screen_view_model.dart';
 import '../../../widgets/stereoscopic_ui.dart';
 import '../../../widgets/user_icon_widget.dart';
-import '../../../models/user_profile.dart';
 import '../../../widgets/fish_icon.dart';
 
 final GlobalKey _myHandFishKey = GlobalKey();
@@ -103,113 +102,122 @@ class BettingPhaseView extends StatelessWidget {
                 ),
               ),
 
-              // 3匹の猫カードとお皿のエリア (中央)
+              // 3匹のにゃんこカードとお皿のエリア (中央)
               Expanded(
                 flex: isSmallScreen ? 6 : 5,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: List.generate(3, (index) {
-                    final catIndex = index.toString();
-                    final cards = room.currentRound?.toList() ?? [];
-                    if (cards.isEmpty || index >= cards.length) {
-                      return const Expanded(child: SizedBox());
-                    }
+                      final catIndex = index.toString();
+                      final cards = room.currentRound?.toList() ?? [];
+                      if (cards.isEmpty || index >= cards.length) {
+                        return const Expanded(child: SizedBox());
+                      }
 
-                    final card = cards[index];
-                    final currentBet = viewModel.bets[catIndex] ?? 0;
-                    final placedItem = viewModel.getPlacedItem(catIndex);
+                      final card = cards[index];
+                      final currentBet = viewModel.bets[catIndex] ?? 0;
+                      final placedItem = viewModel.getPlacedItem(catIndex);
 
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          SeService().play('button_buni.mp3');
-                          viewModel.selectCat(catIndex);
-                        },
-                        child: DragTarget<Object>(
-                          onWillAccept: (data) => !viewModel.hasPlacedBet,
-                          onAccept: (data) {
-                            _handleDrop(viewModel, catIndex, data, currentBet);
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            SeService().play('button_buni.mp3');
+                            viewModel.selectCat(catIndex);
                           },
-                          builder: (context, candidateData, rejectedData) {
-                            final isTarget = candidateData.isNotEmpty;
-                            final isSelected =
-                                viewModel.selectedCatIndex == catIndex;
-                            return Container(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 4.0,
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                vertical: isSmallScreen ? 2.0 : 8.0,
-                                horizontal: 2.0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 0, 0, 0)
-                                    .withOpacity(
-                                      (isTarget || isSelected) ? 0.9 : 0.7,
-                                    ),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: (isTarget || isSelected)
-                                      ? Colors.yellow
-                                      : Colors.grey.shade300,
-                                  width: (isTarget || isSelected) ? 3 : 1,
+                          child: DragTarget<Object>(
+                            onWillAccept: (data) => !viewModel.hasPlacedBet,
+                            onAccept: (data) {
+                              _handleDrop(
+                                viewModel,
+                                catIndex,
+                                data,
+                                currentBet,
+                              );
+                            },
+                            builder: (context, candidateData, rejectedData) {
+                              final isTarget = candidateData.isNotEmpty;
+                              final isSelected =
+                                  viewModel.selectedCatIndex == catIndex;
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4.0,
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.yellow.withOpacity(0.3),
-                                          blurRadius: 8,
-                                          spreadRadius: 2,
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 2.0,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: isSmallScreen ? 2.0 : 8.0,
+                                  horizontal: 2.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 0, 0, 0)
+                                      .withOpacity(
+                                        (isTarget || isSelected) ? 0.9 : 0.7,
+                                      ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: (isTarget || isSelected)
+                                        ? Colors.yellow
+                                        : Colors.grey.shade300,
+                                    width: (isTarget || isSelected) ? 3 : 1,
                                   ),
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment
-                                          .start, // Changed to start for better alignment
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          height: isSmallScreen
-                                              ? 110
-                                              : 150, // 余裕を持たせた高さに修正
-                                          child: _buildCatCard(
-                                            viewModel,
-                                            card,
-                                            isSmallScreen,
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.yellow.withOpacity(
+                                              0.3,
+                                            ),
+                                            blurRadius: 8,
+                                            spreadRadius: 2,
                                           ),
-                                        ),
-                                        SizedBox(height: isSmallScreen ? 4 : 8),
-                                        _buildDishArea(
-                                          context,
-                                          viewModel: viewModel,
-                                          catIndex: catIndex,
-                                          currentBet: currentBet,
-                                          placedItem: placedItem,
-                                          isSmallScreen: isSmallScreen,
-                                          isTarget: isTarget,
-                                        ),
-                                      ],
+                                        ]
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 2.0,
+                                    ),
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .start, // Changed to start for better alignment
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: isSmallScreen
+                                                ? 110
+                                                : 150, // 余裕を持たせた高さに修正
+                                            child: _buildCatCard(
+                                              viewModel,
+                                              card,
+                                              isSmallScreen,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: isSmallScreen ? 4 : 8,
+                                          ),
+                                          _buildDishArea(
+                                            context,
+                                            viewModel: viewModel,
+                                            catIndex: catIndex,
+                                            currentBet: currentBet,
+                                            placedItem: placedItem,
+                                            isSmallScreen: isSmallScreen,
+                                            isTarget: isTarget,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
-              ),
 
               // 自分セクション
               Expanded(
@@ -444,21 +452,21 @@ class BettingPhaseView extends StatelessWidget {
                           _GuideItem(
                             'ねこじゃらし',
                             'assets/images/nekojarashi.png',
-                            '相手が魚を置いていなければ、その猫をタダで獲得できる。読み勝ちの一手。',
+                            '相手がさかなを置いていなければ、そのにゃんこをタダで獲得できる。読み勝ちの一手。',
                             tagColor: Colors.red.shade50,
                             tagTextColor: Colors.red.shade400,
                           ),
                           _GuideItem(
                             'びっくりホーン',
                             'assets/images/horn.png',
-                            '両者が置いた魚をすべて無効化。相手に取られたくない時に有効！',
+                            '両者が置いたさかなをすべて無効化。相手に取られたくない時に有効！',
                             tagColor: Colors.blue.shade50,
                             tagTextColor: Colors.blue.shade400,
                           ),
                           _GuideItem(
                             'またたび',
                             'assets/images/matatabi.png',
-                            'その猫を獲得するために必要な魚の数が2倍になる。狙われている猫を守るのに使える。',
+                            'そのにゃんこを獲得するために必要なさかなの数が2倍になる。狙われているにゃんこを守るのに使える。',
                             tagColor: Colors.purple.shade50,
                             tagTextColor: Colors.purple.shade400,
                           ),
@@ -699,11 +707,11 @@ class BettingPhaseView extends StatelessWidget {
               ),
               if (!isSmallScreen) const SizedBox(height: 4),
               SizedBox(
-                width: isSmallScreen ? 40 : 60,
+                width: isSmallScreen ? 60 : 80,
                 child: Text(
                   displayName,
                   style: TextStyle(
-                    fontSize: isSmallScreen ? 8 : 10,
+                    fontSize: isSmallScreen ? 12 : 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -761,7 +769,7 @@ class BettingPhaseView extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 4),
-          // 魚の数 (自分ならドラッグ＆ドロップ用)
+          // さかなの数 (自分ならドラッグ＆ドロップ用)
           if (!isOpponent)
             _buildMyFishDraggableArea(
               context,
@@ -925,7 +933,7 @@ class BettingPhaseView extends StatelessWidget {
       ),
     );
 
-    // 自分セクションの場合は、全体を魚/アイテム返却用のドロップエリアにする
+    // 自分セクションの場合は、全体をさかな/アイテム返却用のドロップエリアにする
     if (!isOpponent) {
       return DragTarget<String>(
         onWillAccept: (data) =>
@@ -970,7 +978,7 @@ class BettingPhaseView extends StatelessWidget {
     return content;
   }
 
-  /// 自分の魚表示エリア (ドラッグ＆ドロップ対応)
+  /// 自分のさかな表示エリア (ドラッグ＆ドロップ対応)
   Widget _buildMyFishDraggableArea(
     BuildContext context,
     int totalFish,
@@ -981,7 +989,7 @@ class BettingPhaseView extends StatelessWidget {
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
     final fishSize = isSmallScreen ? 40.0 : 56.0;
 
-    // 魚エリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
+    // さかなエリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1051,7 +1059,7 @@ class BettingPhaseView extends StatelessWidget {
   }
 }
 
-/// 猫カード
+/// にゃんこカード
 Widget _buildCatCard(
   GameScreenViewModel viewModel,
   GameCard card,
@@ -1062,7 +1070,10 @@ Widget _buildCatCard(
     width: isSmallScreen ? 80 : 110,
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
-      color: Colors.lightGreen.shade200,
+      image: const DecorationImage(
+        image: AssetImage('assets/images/card_back.jpeg'),
+        fit: BoxFit.cover,
+      ),
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: Colors.green.shade300, width: 2),
     ),
@@ -1092,7 +1103,7 @@ Widget _buildCatCard(
         ),
         _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
         SizedBox(height: isSmallScreen ? 1 : 2),
-        // 魚アイコンによるコスト表示
+        // さかなアイコンによるコスト表示
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 1,
@@ -1146,7 +1157,7 @@ Widget _buildDishArea(
               fit: BoxFit.contain,
             ),
           ),
-          // 魚の賭け数表示
+          // さかなの賭け数表示
           Transform.translate(
             key: dishKey,
             offset: Offset(0, isSmallScreen ? -10 : -15),
@@ -1222,14 +1233,14 @@ void _handleDrop(
   int currentBet,
 ) {
   if (data == 'fish_from_hand') {
-    // 手元からの魚
+    // 手元からのさかな
     final totalFish = viewModel.playerData?.myFishCount ?? 0;
     if (viewModel.totalBet < totalFish) {
       viewModel.updateBet(catIndex, currentBet + 1);
       SeService().play('button_buni.mp3');
     }
   } else if (data is String && data.startsWith('fish_from_')) {
-    // 他のお皿からの魚
+    // 他のお皿からのさかな
     final fromIndex = data.replaceFirst('fish_from_', '');
     if (fromIndex != catIndex && fromIndex != 'hand') {
       final fromBet = viewModel.bets[fromIndex] ?? 0;

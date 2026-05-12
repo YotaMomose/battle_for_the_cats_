@@ -7,8 +7,8 @@ import 'game_card.dart';
 import 'card_type.dart';
 import 'card_effect.dart';
 
-/// 通常の猫カード
-/// 場に出るときにコスト（1-4の魚が必要）がランダムに決定される
+/// 通常のにゃんこカード
+/// 場に出るときにコスト（1-4のさかなが必要）がランダムに決定される
 final class RegularCat implements GameCard {
   @override
   final String id;
@@ -29,7 +29,7 @@ final class RegularCat implements GameCard {
   /// RegularCat のコンストラクタ
   /// [id]: このカード固有のID（例: 'round_1_cat_0'）
   /// [displayName]: 表示名（例: '茶トラねこ', '白ねこ'）
-  /// [baseCost]: このカードを獲得するのに必要な魚の数（1-4）
+  /// [baseCost]: このカードを獲得するのに必要なさかなの数（1-4）
   const RegularCat({
     required this.id,
     required this.displayName,
@@ -51,12 +51,12 @@ final class RegularCat implements GameCard {
   factory RegularCat.fromMap(Map<String, dynamic> map) {
     return RegularCat(
       id: map['id'] ?? '',
-      displayName: map['displayName'] ?? '通常ネコ',
+      displayName: map['displayName'] ?? '通常にゃんこ',
       baseCost: map['baseCost'] ?? 1,
     );
   }
 
-  /// ランダムな猫を生成する
+  /// ランダムなにゃんこを生成する
   /// [index]: 生成順序（IDに含める）
   factory RegularCat.random(int index) {
     final random = Random();
@@ -73,6 +73,6 @@ final class RegularCat implements GameCard {
 
   @override
   void applyAcquisitionEffect(Player player) {
-    // 通常の猫には獲得時の特殊効果はない
+    // 通常のにゃんこには獲得時の特殊効果はない
   }
 }

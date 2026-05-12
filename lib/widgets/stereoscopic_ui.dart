@@ -10,6 +10,7 @@ class StereoscopicWidget extends StatelessWidget {
   final bool showStripes;
   final bool showDots;
   final bool showHighlight;
+  final DecorationImage? backgroundImage;
 
   const StereoscopicWidget({
     super.key,
@@ -22,6 +23,7 @@ class StereoscopicWidget extends StatelessWidget {
     this.showStripes = true,
     this.showDots = false,
     this.showHighlight = true,
+    this.backgroundImage,
   });
 
   @override
@@ -36,6 +38,7 @@ class StereoscopicWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: baseColor,
           borderRadius: BorderRadius.circular(borderRadius),
+          image: backgroundImage,
           boxShadow: [
             if (!isPressed)
               BoxShadow(
@@ -161,6 +164,7 @@ class StereoscopicContainer extends StatelessWidget {
   final bool showStripes;
   final bool showDots;
   final bool showHighlight;
+  final DecorationImage? backgroundImage;
 
   const StereoscopicContainer({
     super.key,
@@ -172,6 +176,7 @@ class StereoscopicContainer extends StatelessWidget {
     this.showStripes = true,
     this.showDots = false,
     this.showHighlight = true,
+    this.backgroundImage,
   });
 
   @override
@@ -185,6 +190,7 @@ class StereoscopicContainer extends StatelessWidget {
       showStripes: showStripes,
       showDots: showDots,
       showHighlight: showHighlight,
+      backgroundImage: backgroundImage,
       child: child,
     );
   }

@@ -135,19 +135,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // 現在のアイコンプレビュー
                 _buildMainProfileCard(context, viewModel),
                 const SizedBox(height: 24),
-  
+
                 // アイコン選択
                 _buildSectionHeader('アイコンを選択'),
                 const SizedBox(height: 16),
                 _buildIconGrid(context, viewModel),
                 const SizedBox(height: 32),
-  
+
                 // 音設定
                 _buildSectionHeader('サウンド設定'),
                 const SizedBox(height: 16),
                 _buildSoundSettings(context),
                 const SizedBox(height: 40),
-  
+
                 // 開発者応援・広告非表示セクション（一番下に移動）
                 if (viewModel.shouldShowAds) ...[
                   _buildSupportSection(context, viewModel),
@@ -187,6 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildCapsuleLabel('ユーザー名', color: Colors.grey.shade200),
                       Text(
                         _nameController.text,
                         style: const TextStyle(
@@ -195,7 +196,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Color(0xFF4D331F),
                         ),
                       ),
-                      _buildCapsuleLabel('ユーザー名', color: Colors.grey.shade200),
                     ],
                   ),
                 ),
@@ -411,7 +411,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : null,
                   ),
                   padding: EdgeInsets.all(isSelected ? 2 : 6),
-                  child: UserIconWidget(icon: icon, size: 36, isLocked: isLocked),
+                  child: UserIconWidget(
+                    icon: icon,
+                    size: 36,
+                    isLocked: isLocked,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -419,8 +423,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color:
-                        isSelected ? const Color(0xFF4D331F) : Colors.grey[700],
+                    color: isSelected
+                        ? const Color(0xFF4D331F)
+                        : Colors.grey[700],
                   ),
                 ),
               ],

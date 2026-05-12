@@ -8,7 +8,7 @@ class GameConstants {
   static const int diceMin = 1;
   static const int diceMax = 6;
 
-  // 猫の種類名
+  // にゃんこの種類名
   static const String catOrange = '茶トラねこ';
   static const String catWhite = '白ねこ';
   static const String catBlack = '黒ねこ';
@@ -19,16 +19,16 @@ class GameConstants {
   static const String dog = '犬';
 
   // ゲームルール
-  static const int catsPerRound = 3; // 1ターンに登場する猫の数
-  static const int maxCatCost = 4; // 猫のコストの最大値（1～4）
-  static const int winCondition = 3; // 勝利に必要な猫の数
+  static const int catsPerRound = 3; // 1ターンに登場するにゃんこの数
+  static const int maxCatCost = 4; // にゃんこのコストの最大値（1～4）
+  static const int winCondition = 3; // 勝利に必要なにゃんこの数
   static const List<String> catTypes = [catOrange, catWhite, catBlack];
 
   // マッチング
   static const int matchmakingSearchLimit = 10; // マッチング検索数上限
 
   // イベント
-  static const double fatCatEventProbability = 0.1; // 太っちょネコイベント発生確率
+  static const double fatCatEventProbability = 0.1; // 太っちょにゃんこイベント発生確率
 
   // フレンド
   static const int maxFriendLimit = 50; // フレンドの上限数

@@ -1,9 +1,9 @@
 /// ゲームカードが持つ特殊効果
 enum CardEffect {
   none('none', 'なし'),
-  dogEffect('dog', '相手の猫を逃がす'),
-  fattyEffect('fatty', '登場時、手札の魚全て破棄'),
-  fishermanEffect('fisherman', '毎ターン魚+1'),
+  dogEffect('dog', '相手のにゃんこを逃がす'),
+  fattyEffect('fatty', '登場時、手札のさかな全て破棄'),
+  fishermanEffect('fisherman', '毎ターンさかな+1'),
   itemShopEffect('item_shop', 'アイテム1つ復活');
 
   final String value;

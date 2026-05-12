@@ -6,9 +6,9 @@ import '../models/player.dart';
 import '../models/round_winners.dart';
 import '../models/item.dart';
 
-/// 各猫の勝敗判定を行うクラス
+/// 各にゃんこの勝敗判定を行うクラス
 class BattleEvaluator {
-  /// 全ての猫について、賭け金とコストを比較して勝者を決定する
+  /// 全てのにゃんこについて、賭け金とコストを比較して勝者を決定する
   RoundWinners evaluate(RoundCards currentRound, Player host, Player guest) {
     final cards = currentRound.toList();
     final winnersMap = <String, Winner>{};
@@ -26,7 +26,7 @@ class BattleEvaluator {
     return RoundWinners(winnersMap);
   }
 
-  /// 1匹の猫に対する勝敗を判定する
+  /// 1匹のにゃんこに対する勝敗を判定する
   Winner _evaluateSingleCat(
     GameCard card,
     String catIndex,

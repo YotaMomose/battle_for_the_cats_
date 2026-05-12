@@ -38,7 +38,7 @@ void main() {
         }
       });
 
-      test('複数の猫への賭けが同時に可能である', () {
+      test('複数のにゃんこへの賭けが同時に可能である', () {
         // Arrange
         const bets = {'cat_0': 1, 'cat_1': 2, 'cat_2': 3};
 
@@ -47,7 +47,7 @@ void main() {
         expect(bets.keys, containsAll(['cat_0', 'cat_1', 'cat_2']));
       });
 
-      test('賭けの合計が魚の保有数を超えないことを検証可能', () {
+      test('賭けの合計がさかなの保有数を超えないことを検証可能', () {
         // Arrange
         const fishCount = 10;
         const bets = {'cat_0': 3, 'cat_1': 2, 'cat_2': 4};

@@ -62,13 +62,13 @@ lib/
 │   ├── bets.dart                               (約40行) - 賭け金管理
 │   ├── round_result.dart                       (60行) - ラウンド結果
 │   ├── round_winners.dart                      (約30行) - 勝者マップ
-│   ├── won_cat.dart                            (約20行) - 獲得した猫のデータ
-│   ├── cat_inventory.dart                      (約50行) - 猫のコレクション
+│   ├── won_cat.dart                            (約20行) - 獲得したにゃんこのデータ
+│   ├── cat_inventory.dart                      (約50行) - にゃんこのコレクション
 │   └── cards/                                   【カード定義（静的データ）】
 │       ├── round_cards.dart                    (約80行) - ラウンドの3枚
 │       ├── game_card.dart                      (約40行) - 基本カード
-│       ├── regular_cat.dart                    (約70行) - 通常の猫
-│       ├── boss_cat.dart                       (約70行) - ボス猫
+│       ├── regular_cat.dart                    (約70行) - 通常のにゃんこ
+│       ├── boss_cat.dart                       (約70行) - ボスにゃんこ
 │       ├── fisherman.dart                      (約60行) - 漁師
 │       ├── item_shop.dart                      (約60行) - アイテム屋
 │       └── dog.dart                             (約70行) - 犬
@@ -149,7 +149,7 @@ lib/services/
 
 ```
 lib/domain/
-├── battle_evaluator.dart        - 猫の足切り・勝敗判定ロジック
+├── battle_evaluator.dart        - にゃんこの足切り・勝敗判定ロジック
 ├── dice.dart                    - サイコロの抽選アルゴリズム
 └── win_condition.dart           - 最終的な勝利判定（タイブレーク含む）
 ```
@@ -165,7 +165,7 @@ lib/domain/
 lib/models/
 ├── game_room.dart               - ルーム全体のドキュメント構造と、ラウンド解決ロジック 
 ├── player.dart                  - 個々のプレイヤーの状態と、サイコロ・ベット等の行為
-└── cards/                       - 猫の種類、コスト、エフェクト等の静的データ
+└── cards/                       - にゃんこの種類、コスト、エフェクト等の静的データ
 ```
 
 ---

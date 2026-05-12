@@ -69,7 +69,7 @@ void main() {
       // 結果の検証
       expect(player.rolled, isTrue);
       expect(player.diceRoll, equals(4));
-      // 魚の獲得: サイコロの目(4) + 漁師の数(初期0) = 4
+      // さかなの獲得: サイコロの目(4) + 漁師の数(初期0) = 4
       expect(player.fishCount, equals(4));
     });
 
@@ -87,7 +87,7 @@ void main() {
       player.roll(fakeDice);
 
       expect(player.diceRoll, equals(3));
-      // 魚の獲得: 3 + 1(漁師) = 4. 合計: 10 + 4 = 14
+      // さかなの獲得: 3 + 1(漁師) = 4. 合計: 10 + 4 = 14
       expect(player.fishCount, equals(14));
     });
   });

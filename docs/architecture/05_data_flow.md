@@ -113,7 +113,7 @@ sequenceDiagram
     RR->>BE: evaluate(cats, host, guest)
     BE-->>RR: RoundWinners生成
     RR->>GR: applyRoundResults(winnersMap)
-    GR->>GR: 魚の消費・猫の付与・statusを roundResult に更新
+    GR->>GR: さかなの消費・にゃんこの付与・statusを roundResult に更新
     GR-->>FS: データ保存
 ```
 
@@ -133,7 +133,7 @@ sequenceDiagram
     
     alt イベント発生 (例: FatCatEvent)
         RR->>GR: triggerFatCatEvent()
-        GR->>GR: status = fatCatEvent, 魚全没収
+        GR->>GR: status = fatCatEvent, さかな全没収
     else 通常遷移
         RR->>GR: prepareNextTurn(nextCards)
         GR->>GR: ターンのインクリメント, status = rolling

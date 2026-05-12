@@ -1,4 +1,4 @@
-/// 獲得した猫の情報を保持するクラス
+/// 獲得したにゃんこの情報を保持するクラス
 class WonCat {
   final String name;
   final int cost;

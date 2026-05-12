@@ -23,7 +23,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/ryousi.png',
       'color': Colors.blue,
       'description':
-          '仲間にすると、毎ターンの『つり』のたびに、お魚を1匹追加で獲ってきてくれる頼もしい味方じゃ！たくさん集めれば魚に困ることはなくなるぞ。',
+          '仲間にすると、毎ターンの『つり』のたびに、おさかなを1匹追加で獲ってきてくれる頼もしい味方じゃ！たくさん集めればさかなに困ることはなくなるぞ。',
     },
     {
       'name': '犬',
@@ -42,11 +42,11 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
           '勝負に勝って仲間に引き入れると、すでに使用したアイテムを1つ復活してくれるぞ。戦いを有利に進めるために、見かけたらぜひ狙いたいところじゃな。',
     },
     {
-      'name': '太っちょネコ',
+      'name': '太っちょにゃんこ',
       'icon': Icons.pets,
       'color': Colors.deepOrange,
       'description':
-          'こやつは要注意じゃ！ターンのはじめに突然現れ、お主と相手の持っているお魚をすべて食べてゼロにしてしまうハプニングメーカーじゃ！魚を溜め込んでいるときは特に注意じゃ！',
+          'こやつは要注意じゃ！ターンのはじめに突然現れ、お主と相手の持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカーじゃ！さかなを溜め込んでいるときは特に注意じゃ！',
     },
   ];
 

@@ -74,7 +74,7 @@ class MatchmakingView extends StatelessWidget {
                 ),
               ),
             ),
-            // 画面下部の猫アニメーション
+            // 画面下部のにゃんこアニメーション
             Positioned(
               bottom: 0,
               left: 0,

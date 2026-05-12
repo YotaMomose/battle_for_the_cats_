@@ -1,6 +1,6 @@
 import '../constants/game_constants.dart';
 
-/// ラウンドの各猫の勝者情報を保持するクラス
+/// ラウンドの各にゃんこの勝者情報を保持するクラス
 class RoundWinners {
   final Map<String, Winner> _winners;
 

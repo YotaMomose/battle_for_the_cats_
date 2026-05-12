@@ -64,7 +64,7 @@ class _MainMenuViewState extends State<MainMenuView> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // 3匹の猫
+                      // 3匹のにゃんこ
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

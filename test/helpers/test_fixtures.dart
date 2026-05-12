@@ -9,7 +9,7 @@ import 'package:battle_for_the_cats/models/cat_inventory.dart';
 import 'package:battle_for_the_cats/models/cards/round_cards.dart';
 import 'package:battle_for_the_cats/models/cards/regular_cat.dart';
 
-/// テスト用のRoundCardsを作成（特定の猫データで）
+/// テスト用のRoundCardsを作成（特定のにゃんこデータで）
 RoundCards createTestRoundCards(List<String> displayNames, [List<int>? costs]) {
   final cats = [
     RegularCat(

@@ -1,7 +1,7 @@
 import '../constants/game_constants.dart';
 import 'won_cat.dart';
 
-/// 獲得した猫のコレクションを管理するクラス
+/// 獲得したにゃんこのコレクションを管理するクラス
 ///
 /// データの保持だけでなく、勝利条件に関する問い合わせ（正規化カウント、
 /// 同種3匹判定、3種類判定など）も自身の責務として持つ。
@@ -13,17 +13,17 @@ class CatInventory {
   /// リストとして取得（読み取り専用）
   List<WonCat> get all => List.unmodifiable(_cats);
 
-  /// 獲得した猫の総数
+  /// 獲得したにゃんこの総数
   int get count => _cats.length;
 
-  /// 猫を追加
+  /// にゃんこを追加
   void add(WonCat cat) => _cats.add(cat);
 
-  /// 猫の名前とコストを指定して追加
+  /// にゃんこの名前とコストを指定して追加
   void addCat(String name, int cost) =>
       _cats.add(WonCat(name: name, cost: cost));
 
-  /// 名前を指定して猫を1匹削除する（犬の効果などで使用）
+  /// 名前を指定してにゃんこを1匹削除する（犬の効果などで使用）
   void removeByName(String name) {
     final index = _cats.indexWhere((c) => c.name == name);
     if (index != -1) {
@@ -31,10 +31,10 @@ class CatInventory {
     }
   }
 
-  /// すべての猫の合計コスト
+  /// すべてのにゃんこの合計コスト
   int get totalCost => _cats.fold(0, (sum, cat) => sum + cat.cost);
 
-  /// 獲得した猫の名前リスト
+  /// 獲得したにゃんこの名前リスト
   List<String> get names => _cats.map((c) => c.name).toList();
 
   /// 種類（名前）ごとのカウント
@@ -48,7 +48,7 @@ class CatInventory {
 
   // ===== 勝利条件に関する問い合わせ =====
 
-  /// 通常猫の種類別カウント
+  /// 通常にゃんこの種類別カウント
   Map<String, int> get normalizedCounts {
     final allCounts = countByName();
     final counts = <String, int>{};
@@ -62,7 +62,7 @@ class CatInventory {
     return counts;
   }
 
-  /// 勝利条件に有効な猫の合計数（アイテム屋等は除外）
+  /// 勝利条件に有効なにゃんこの合計数（アイテム屋等は除外）
   int get totalValidCatCount =>
       normalizedCounts.values.fold(0, (sum, count) => sum + count);
 
@@ -70,10 +70,10 @@ class CatInventory {
   bool get hasThreeOfAKind =>
       normalizedCounts.values.any((count) => count >= 3);
 
-  /// 3種類以上の猫を持っているか
+  /// 3種類以上のにゃんこを持っているか
   bool get hasThreeDifferentTypes => normalizedCounts.keys.length >= 3;
 
-  /// 勝利に寄与した猫のインデックスを取得
+  /// 勝利に寄与したにゃんこのインデックスを取得
   Set<int> get winningIndices {
     final normalizedNames = _cats
         .map((cat) => _getNormalizedName(cat.name))
@@ -107,7 +107,7 @@ class CatInventory {
     return result;
   }
 
-  /// 猫の名前を正規化する（将来的な拡張用）
+  /// にゃんこの名前を正規化する（将来的な拡張用）
   String _getNormalizedName(String name) {
     return name;
   }

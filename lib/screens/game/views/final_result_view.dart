@@ -274,7 +274,7 @@ class _FinalResultViewState extends State<FinalResultView> {
     );
   }
 
-  /// 猫のカード（RoundResultViewと同じ詳細レイアウト）
+  /// にゃんこのカード（RoundResultViewと同じ詳細レイアウト）
   Widget _buildResultCatCard(
     BuildContext context,
     RoundDisplayItem item,
@@ -318,10 +318,10 @@ class _FinalResultViewState extends State<FinalResultView> {
             ),
           ),
           SizedBox(height: isSmallScreen ? 4 : 8),
-          // 猫アバター
+          // にゃんこアバター
           _buildCatAvatar(item, size: isSmallScreen ? 45 : 60),
           const SizedBox(height: 2),
-          // 必要コストの表示（猫アバターの下）
+          // 必要コストの表示（にゃんこアバターの下）
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
@@ -462,7 +462,7 @@ class _FinalResultViewState extends State<FinalResultView> {
         : Icon(Icons.help_outline, size: size, color: Colors.blueAccent);
   }
 
-  /// 魚アイコンと数字
+  /// さかなアイコンと数字
   Widget _buildFishWithNumber(String number, {double size = 45}) {
     return Stack(
       alignment: Alignment.center,
@@ -543,31 +543,34 @@ class _FinalResultViewState extends State<FinalResultView> {
             child: Row(
               children: [
                 // アイコン
-                 Container(
-                   width: 56,
-                   height: 56,
-                   decoration: BoxDecoration(
-                     color: Colors.white,
-                     shape: BoxShape.circle,
-                     border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
-                     boxShadow: [
-                       BoxShadow(
-                         color: Colors.black.withOpacity(0.1),
-                         blurRadius: 4,
-                         offset: const Offset(0, 2),
-                       ),
-                     ],
-                   ),
-                   alignment: Alignment.center,
-                   child: UserIconWidget(
-                     icon: UserIcon.fromId(
-                       name == viewModel.myDisplayName
-                           ? viewModel.myIconId
-                           : viewModel.opponentIconId,
-                     ),
-                     size: 40,
-                   ),
-                 ),
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: UserIconWidget(
+                    icon: UserIcon.fromId(
+                      name == viewModel.myDisplayName
+                          ? viewModel.myIconId
+                          : viewModel.opponentIconId,
+                    ),
+                    size: 40,
+                  ),
+                ),
                 const SizedBox(width: 12),
                 // 名前
                 Expanded(
@@ -580,7 +583,7 @@ class _FinalResultViewState extends State<FinalResultView> {
                     ),
                   ),
                 ),
-                // スコア（魚の合計コスト）
+                // スコア（さかなの合計コスト）
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -757,7 +760,7 @@ class _FinalResultViewState extends State<FinalResultView> {
     );
   }
 
-  /// 猫のアバター
+  /// にゃんこのアバター
   Widget _buildCatAvatar(RoundDisplayItem item, {required double size}) {
     return SizedBox(
       width: size,
@@ -768,7 +771,7 @@ class _FinalResultViewState extends State<FinalResultView> {
     );
   }
 
-  /// 猫のアバター（カード用）
+  /// にゃんこのアバター（カード用）
   Widget _buildCatAvatarFromCard(
     FinalResultCardInfo card, {
     required double size,

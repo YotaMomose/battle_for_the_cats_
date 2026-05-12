@@ -1,6 +1,6 @@
 /// ゲームカードのタイプ分類
 enum CardType {
-  regularCat('regular_cat', '通常ネコ'),
+  regularCat('regular_cat', '通常にゃんこ'),
   dog('dog', '犬'),
   fatCat('fat_cat', '太っちょねこ'),
   fisherman('fisherman', '漁師'),

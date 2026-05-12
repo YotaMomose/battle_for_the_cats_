@@ -207,14 +207,14 @@ class GameScreenViewModel extends ChangeNotifier {
     });
   }
 
-  /// 自分の獲得した猫のサマリーテキスト
+  /// 自分の獲得したにゃんこのサマリーテキスト
   String get myCatsWonSummary {
     final data = playerData;
     if (data == null) return '';
     return _formatCatsSummary(data.myCatsWon);
   }
 
-  /// 相手の獲得した猫のサマリーテキスト
+  /// 相手の獲得したにゃんこのサマリーテキスト
   String get opponentCatsWonSummary {
     final data = playerData;
     if (data == null) return '';
@@ -250,7 +250,7 @@ class GameScreenViewModel extends ChangeNotifier {
     });
   }
 
-  /// 猫の名前に応じて色を返す（内部用ヘルパー）
+  /// にゃんこの名前に応じて色を返す（内部用ヘルパー）
   Color _getCatColor(String catName) {
     if (catName.contains(GameConstants.catOrange)) {
       return Colors.orange;
@@ -280,7 +280,7 @@ class GameScreenViewModel extends ChangeNotifier {
     return Icons.pets;
   }
 
-  /// 猫の名前に応じて画像パスを返す（内部用ヘルパー）
+  /// にゃんこの名前に応じて画像パスを返す（内部用ヘルパー）
   String? _getCatImagePath(String catName) {
     if (catName.contains(GameConstants.catOrange)) {
       return 'assets/images/tyatoranekopng.png';
@@ -303,7 +303,7 @@ class GameScreenViewModel extends ChangeNotifier {
     return null;
   }
 
-  /// 獲得した猫を種類別にフォーマット（内部用ヘルパー）
+  /// 獲得したにゃんこを種類別にフォーマット（内部用ヘルパー）
   String _formatCatsSummary(CatInventory inventory) {
     final counts = inventory.countByName();
     final brown = counts[GameConstants.catOrange] ?? 0;
@@ -400,12 +400,12 @@ class GameScreenViewModel extends ChangeNotifier {
   /// 相手のアイコンID
   String get opponentIconId => playerData?.opponentIconId ?? 'cat_orange';
 
-  /// 残りの魚の表示ラベル
+  /// 残りのさかなの表示ラベル
   String get myRemainingFishLabel {
     final data = playerData;
     if (data == null) return '';
     final remaining = data.myFishCount - totalBet;
-    return '$myDisplayName の魚: $remaining / ${data.myFishCount}';
+    return '$myDisplayName のさかな: $remaining / ${data.myFishCount}';
   }
 
   /// 確定ボタンのラベル
@@ -432,7 +432,7 @@ class GameScreenViewModel extends ChangeNotifier {
     if (data == null) return '';
     if (data.opponentRolled && data.opponentDiceRoll != null) {
       final totalFish = data.opponentDiceRoll! + data.opponentFishermanCount;
-      return '$opponentDisplayName は 魚を $totalFish 匹獲得しました！';
+      return '$opponentDisplayName は さかなを $totalFish 匹獲得しました！';
     }
     return '$opponentDisplayName がつりをしています...';
   }
@@ -444,13 +444,13 @@ class GameScreenViewModel extends ChangeNotifier {
     return data.opponentRolled ? Colors.green : Colors.blue;
   }
 
-  /// 猫のアイコン色を取得（外部View用）
+  /// にゃんこのアイコン色を取得（外部View用）
   Color getCatIconColor(String catName) => _getCatColor(catName);
 
-  /// 猫のアイコン種類を取得（外部View用）
+  /// にゃんこのアイコン種類を取得（外部View用）
   IconData getCatIconData(String catName) => _getCatIcon(catName);
 
-  /// 猫の画像パスを取得（外部View用）
+  /// にゃんこの画像パスを取得（外部View用）
   String? getCatImagePath(String catName) => _getCatImagePath(catName);
 
   /// アイテムのアイコンを取得（内部用ヘルパー）
@@ -475,7 +475,9 @@ class GameScreenViewModel extends ChangeNotifier {
 
   /// 自分のサイコロ結果を表示すべきか
   bool get shouldShowMyRollResult =>
-      _hasRolled || _isFishingEffect || (playerData?.shouldShowMyRollResult ?? false);
+      _hasRolled ||
+      _isFishingEffect ||
+      (playerData?.shouldShowMyRollResult ?? false);
 
   /// 先行決定したサイコロの結果
   int? get predictedDiceResult => _predictedDiceResult;
@@ -742,7 +744,11 @@ class GameScreenViewModel extends ChangeNotifier {
       notifyListeners();
 
       // サーバーにも決定した数値を送る
-      await _gameService.catchFish(roomCode, playerId, result: _predictedDiceResult);
+      await _gameService.catchFish(
+        roomCode,
+        playerId,
+        result: _predictedDiceResult,
+      );
     } catch (e) {
       _uiState = _uiState.copyWithError('つりができませんでした: $e');
       _isFishingEffect = false;
@@ -776,12 +782,12 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
-  /// 太っちょネコイベントを承認する
+  /// 太っちょにゃんこイベントを承認する
   Future<void> confirmFatCatEvent() async {
     try {
       await _gameService.confirmFatCatEvent(roomCode, playerId);
     } catch (e) {
-      _uiState = _uiState.copyWithError('太っちょネコイベントの承認に失敗しました: $e');
+      _uiState = _uiState.copyWithError('太っちょにゃんこイベントの承認に失敗しました: $e');
       notifyListeners();
     }
   }
@@ -942,7 +948,11 @@ class GameScreenViewModel extends ChangeNotifier {
     _isReviving = true;
     try {
       // item が null の場合は復活なしとして処理（サーバー側で unknown 扱いにする等の対応）
-      await _gameService.reviveItem(roomCode, playerId, item ?? ItemType.unknown);
+      await _gameService.reviveItem(
+        roomCode,
+        playerId,
+        item ?? ItemType.unknown,
+      );
       notifyListeners();
     } catch (e) {
       _uiState = _uiState.copyWithError('アイテムの復活に失敗しました: $e');

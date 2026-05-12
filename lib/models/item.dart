@@ -3,16 +3,21 @@ enum ItemType {
   catTeaser(
     'catTeaser',
     'ねこじゃらし',
-    '相手が魚を置いていなければ自動で猫をゲット！',
+    '相手がさかなを置いていなければ自動でにゃんこをゲット！',
     'assets/images/nekojarashi.png',
   ),
   surpriseHorn(
     'surpriseHorn',
     'びっくりホーン',
-    '全員の魚を無効化する',
+    '全員のさかなを無効化する',
     'assets/images/horn.png',
   ),
-  matatabi('matatabi', 'またたび', '猫の必要魚数が2倍になる', 'assets/images/matatabi.png'),
+  matatabi(
+    'matatabi',
+    'またたび',
+    'にゃんこの必要さかな数が2倍になる',
+    'assets/images/matatabi.png',
+  ),
   unknown('unknown', '不明', '', null);
 
   final String value;

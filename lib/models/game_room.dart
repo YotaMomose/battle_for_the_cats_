@@ -21,10 +21,10 @@ class GameRoom {
   // 前回のラウンド情報（画面表示用、個別に次へ進むために必要）
   RoundResult? lastRoundResult;
 
-  // 現在のラウンドの3匹の猫
+  // 現在のラウンドの3匹のにゃんこ
   RoundCards? currentRound;
 
-  // 各猫の勝者
+  // 各にゃんこの勝者
   RoundWinners? winners;
 
   // 最終勝者
@@ -107,7 +107,7 @@ class GameRoom {
   bool get bothConfirmedRoundResult =>
       host.confirmedRoundResult && (guest?.confirmedRoundResult ?? false);
 
-  /// 両者が太っちょネコイベントを確認したか
+  /// 両者が太っちょにゃんこイベントを確認したか
   bool get bothConfirmedFatCatEvent =>
       host.confirmedFatCatEvent && (guest?.confirmedFatCatEvent ?? false);
 
@@ -120,10 +120,10 @@ class GameRoom {
     // 1. 履歴の記録
     _recordRoundHistory(winnersMap);
 
-    // 2. コストの支払い（魚とアイテム消費）
+    // 2. コストの支払い（さかなとアイテム消費）
     _payRoundCosts();
 
-    // 3. プレイヤーへの猫・特殊効果の付与
+    // 3. プレイヤーへのにゃんこ・特殊効果の付与
     _distributeCards(winnersMap);
 
     // 4. 確認フラグのリセット
@@ -143,7 +143,7 @@ class GameRoom {
     );
   }
 
-  /// 両プレイヤーにラウンドのコスト（魚、アイテム）を支払わせる
+  /// 両プレイヤーにラウンドのコスト（さかな、アイテム）を支払わせる
   void _payRoundCosts() {
     host.payCosts();
     guest?.payCosts();
@@ -194,7 +194,7 @@ class GameRoom {
     }
   }
 
-  /// 指定されたプレイヤーの太っちょネコイベント確認フラグを立てる
+  /// 指定されたプレイヤーの太っちょにゃんこイベント確認フラグを立てる
   void confirmFatCatEvent(String playerId) {
     if (isHost(playerId)) {
       host.confirmedFatCatEvent = true;
@@ -203,7 +203,7 @@ class GameRoom {
     }
   }
 
-  /// 太っちょネコイベントを発生させる
+  /// 太っちょにゃんこイベントを発生させる
   void triggerFatCatEvent(RoundCards nextRoundCards) {
     status = GameStatus.fatCatEvent;
     currentTurn++;
@@ -211,7 +211,7 @@ class GameRoom {
     host.resetRoundState();
     guest?.resetRoundState();
 
-    // 魚を没収
+    // さかなを没収
     host.fishCount = 0;
     guest?.fishCount = 0;
 

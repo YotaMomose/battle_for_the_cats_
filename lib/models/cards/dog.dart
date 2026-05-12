@@ -7,7 +7,7 @@ import 'card_type.dart';
 import 'card_effect.dart';
 
 /// キャラクター「犬」
-/// 獲得した場合、そのターンで獲得したネコを含めた相手のキャラクターを1匹逃がすことができる。
+/// 獲得した場合、そのターンで獲得したにゃんこを含めた相手のキャラクターを1匹逃がすことができる。
 final class Dog implements GameCard {
   @override
   final String id;

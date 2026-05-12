@@ -20,7 +20,7 @@ class GameFlowService {
        _dice = dice ?? StandardDice(),
        _roundResolver = roundResolver ?? RoundResolver();
 
-  /// 魚を釣る
+  /// さかなを釣る
   Future<void> catchFish(
     String roomCode,
     String playerId, {
@@ -71,7 +71,7 @@ class GameFlowService {
     });
   }
 
-  /// 魚を賭ける
+  /// さかなを賭ける
   Future<void> placeBets(
     String roomCode,
     String playerId,
@@ -125,7 +125,7 @@ class GameFlowService {
     });
   }
 
-  /// 太っちょネコイベントを確認する
+  /// 太っちょにゃんこイベントを確認する
   Future<void> confirmFatCatEvent(String roomCode, String playerId) async {
     await _repository.runTransaction((Transaction transaction) async {
       final roomRef = _repository.firestoreRepository.getDocumentReference(
