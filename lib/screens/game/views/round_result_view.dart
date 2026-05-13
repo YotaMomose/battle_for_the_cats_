@@ -1203,15 +1203,14 @@ class _RoundResultViewState extends State<RoundResultView> {
                             item.catName,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: isSmallScreen ? 12 : 18,
+                              fontSize: isSmallScreen ? 14 : 20,
                               fontWeight: FontWeight.w900,
                               color: const Color(0xFF4D331F),
                             ),
                           ),
                         ),
-                        SizedBox(height: isSmallScreen ? 6 : 10),
                         // にゃんこアバター
-                        _buildCatAvatar(item, size: isSmallScreen ? 56 : 80),
+                        _buildCatAvatar(item, size: isSmallScreen ? 64 : 90),
 
                         const SizedBox(height: 4),
                         // 必要コストの表示（にゃんこアバターの下）
@@ -1454,7 +1453,8 @@ class _RoundResultViewState extends State<RoundResultView> {
 
     final itemIconSize = isSmallScreen ? 14.0 : 20.0;
     // 表の高さがずれないように高さを固定する（カウントアップ時の拡大に対応）
-    final rowHeight = isSmallScreen ? 60.0 : 80.0;
+    // 計算: Label(14/18) + Space(2) + Fish(40/52 * 1.2 = 48/62.4) = 64/82.4 以上の高さが必要
+    final rowHeight = isSmallScreen ? 70.0 : 90.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),

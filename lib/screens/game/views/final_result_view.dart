@@ -184,21 +184,36 @@ class _FinalResultViewState extends State<FinalResultView> {
     );
   }
 
-  /// 勝利者を表示するバナー（勝敗に応じた色分け）
+  /// 勝利者を表示するバナー（勝敗に応じた画像を表示）
   Widget _buildWinnerBanner(String text, Color color) {
-    // スコアに応じた影の色を計算（簡易的）
+    String? bannerAsset;
+    if (text.contains('WIN')) {
+      bannerAsset = 'assets/images/win_banner.png';
+    } else if (text.contains('LOSE')) {
+      bannerAsset = 'assets/images/lose_banner.png';
+    }
+
+    if (bannerAsset != null) {
+      return Image.asset(
+        bannerAsset,
+        width: double.infinity,
+        fit: BoxFit.contain,
+      );
+    }
+
+    // DRAW または画像がない場合のフォールバック（従来のテキストバナー）
     final Color shadowColor = color == Colors.green
-        ? const Color(0xFF2E7D32) // 濃い緑
+        ? const Color(0xFF2E7D32)
         : color == Colors.red
-        ? const Color(0xFFC62828) // 濃い赤
-        : const Color(0xFF616161); // 濃いグレー（引き分け）
+        ? const Color(0xFFC62828)
+        : const Color(0xFF616161);
 
     final Color textColor = color == Colors.grey
         ? const Color(0xFF4D331F)
         : Colors.white;
 
     return StereoscopicContainer(
-      baseColor: color, // 勝敗に応じた色を採用
+      baseColor: color,
       shadowColor: shadowColor,
       borderRadius: 40,
       depth: 8,
@@ -211,7 +226,6 @@ class _FinalResultViewState extends State<FinalResultView> {
             fontSize: 34,
             fontWeight: FontWeight.w900,
             color: textColor,
-            // 文字の視認性を高めるためのシャドウ（特に白文字用）
             shadows: color != Colors.grey
                 ? [
                     Shadow(

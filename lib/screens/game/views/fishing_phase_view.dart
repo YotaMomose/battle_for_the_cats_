@@ -241,6 +241,11 @@ class FishingPhaseView extends StatelessWidget {
       borderRadius: 32,
       depth: 6,
       showDots: true,
+      showStripes: false,
+      backgroundImage: const DecorationImage(
+        image: AssetImage('assets/images/sea.jpg'),
+        fit: BoxFit.cover,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         width: 320,
@@ -289,28 +294,6 @@ class FishingPhaseView extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // 水面 (右側に寄せる) - ゲットした時は非表示
-                  if (!viewModel.shouldShowMyRollResult)
-                    Positioned(
-                      right: 10,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.shade300,
-                              offset: const Offset(0, 4),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
                   if (viewModel.isFishingEffect)
                     const _FishingActionAnimation()
                   else if (viewModel.shouldShowMyRollResult)
