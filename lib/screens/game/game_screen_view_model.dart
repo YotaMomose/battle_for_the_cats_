@@ -300,6 +300,9 @@ class GameScreenViewModel extends ChangeNotifier {
     if (catName == GameConstants.itemShop) {
       return 'assets/images/shop.png';
     }
+    if (catName.contains('ふとっちょ')) {
+      return 'assets/images/fatcat.png';
+    }
     return null;
   }
 
@@ -457,11 +460,11 @@ class GameScreenViewModel extends ChangeNotifier {
   IconData _getItemIcon(ItemType? type) {
     if (type == null) return Icons.help_outline;
     switch (type) {
-      case ItemType.catTeaser:
+      case ItemType.captureNet:
         return Icons.auto_awesome;
       case ItemType.surpriseHorn:
         return Icons.campaign;
-      case ItemType.matatabi:
+      case ItemType.potion:
         return Icons.monetization_on;
       case ItemType.unknown:
         return Icons.help_outline;
@@ -782,12 +785,12 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
-  /// 太っちょにゃんこイベントを承認する
+  /// ふとっちょにゃんこイベントを承認する
   Future<void> confirmFatCatEvent() async {
     try {
       await _gameService.confirmFatCatEvent(roomCode, playerId);
     } catch (e) {
-      _uiState = _uiState.copyWithError('太っちょにゃんこイベントの承認に失敗しました: $e');
+      _uiState = _uiState.copyWithError('ふとっちょにゃんこイベントの承認に失敗しました: $e');
       notifyListeners();
     }
   }

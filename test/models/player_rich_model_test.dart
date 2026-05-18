@@ -61,17 +61,17 @@ void main() {
     });
 
     test('payCosts should consume used items from inventory', () {
-      final player = Player(id: 'p1'); // Initial inventory has 1 catTeaser
-      expect(player.items.count(ItemType.catTeaser), 1);
+      final player = Player(id: 'p1'); // Initial inventory has 1 captureNet
+      expect(player.items.count(ItemType.captureNet), 1);
 
       player.placeBetsWithItems(
         {'0': 0, '1': 0, '2': 0},
-        {'0': ItemType.catTeaser, '1': null, '2': null},
+        {'0': ItemType.captureNet, '1': null, '2': null},
       );
 
       player.payCosts();
 
-      expect(player.items.count(ItemType.catTeaser), 0);
+      expect(player.items.count(ItemType.captureNet), 0);
     });
   });
 }

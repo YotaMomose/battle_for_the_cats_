@@ -6,12 +6,12 @@ class ItemInventory {
 
   ItemInventory([Map<ItemType, int>? items]) : _items = Map.from(items ?? {});
 
-  /// 初期状態（ねこじゃらしを1つ持っている）
+  /// 初期状態（捕獲ネットを1つ持っている）
   factory ItemInventory.initial() {
     return ItemInventory({
-      ItemType.catTeaser: 1,
+      ItemType.captureNet: 1,
       ItemType.surpriseHorn: 1,
-      ItemType.matatabi: 1,
+      ItemType.potion: 1,
     });
   }
 

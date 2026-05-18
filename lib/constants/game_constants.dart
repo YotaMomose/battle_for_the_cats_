@@ -28,7 +28,8 @@ class GameConstants {
   static const int matchmakingSearchLimit = 10; // マッチング検索数上限
 
   // イベント
-  static const double fatCatEventProbability = 0.1; // 太っちょにゃんこイベント発生確率
+  static const double fatCatEventProbability =
+      1.0; // ふとっちょにゃんこイベント発生確率 (テスト用に100%)
 
   // フレンド
   static const int maxFriendLimit = 50; // フレンドの上限数

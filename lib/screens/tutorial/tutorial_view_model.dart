@@ -92,14 +92,14 @@ class TutorialViewModel extends ChangeNotifier {
           catName: 'くろねこ',
           myBet: 0,
           opponentBet: 0,
-          myItem: ItemType.catTeaser,
+          myItem: ItemType.captureNet,
           winStatus: 'win',
         ),
         TutorialRoundResultItem(
           catName: '茶トラねこ',
           myBet: 1,
           opponentBet: 0,
-          opponentItem: ItemType.matatabi,
+          opponentItem: ItemType.potion,
           winStatus: 'lose', // コスト不足で失敗
         ),
       ];
@@ -143,9 +143,9 @@ class TutorialViewModel extends ChangeNotifier {
     final oppInventory = CatInventory();
 
     final myItemInventory = ItemInventory({
-      ItemType.catTeaser: _round == 1 ? 1 : 0,
+      ItemType.captureNet: _round == 1 ? 1 : 0,
       ItemType.surpriseHorn: 1,
-      ItemType.matatabi: 1,
+      ItemType.potion: 1,
     });
 
     if (_round >= 2 || isAcquisitionComplete) {
@@ -200,6 +200,7 @@ class TutorialViewModel extends ChangeNotifier {
     if (catName.contains('しろ')) return 'assets/images/sironeko.png';
     if (catName.contains('くろ')) return 'assets/images/kuroneko.png';
     if (catName.contains('茶トラ')) return 'assets/images/tyatoranekopng.png';
+    if (catName.contains('ふとっちょ')) return 'assets/images/fatcat.png';
     return null;
   }
 
@@ -229,9 +230,9 @@ class TutorialViewModel extends ChangeNotifier {
       case 6:
         return 'よしよし、上手じゃ！次は真ん中の「くろねこ」じゃな。';
       case 7:
-        return 'ここではアイテムを使ってみよう。「ねこじゃらし」を「くろねこ」のお皿にドラッグするのじゃ。';
+        return 'ここではアイテムを使ってみよう。「捕獲ネット」を「くろねこ」のお皿にドラッグするのじゃ。';
       case 8:
-        return '「ねこじゃらし」は相手がおさかなを置いていなければ、おさかなを使わずに仲間にできる優れものじゃ。';
+        return '「捕獲ネット」は相手がおさかなを置いていなければ、おさかなを使わずに仲間にできる優れものじゃ。';
       case 9:
         return 'アイテムは使うとなくなるからタイミングが大事じゃ。最後に右の「茶トラねこ」じゃな。';
       case 10:
@@ -243,11 +244,11 @@ class TutorialViewModel extends ChangeNotifier {
       case 13:
         return 'まずは「しろねこ」じゃな。相手は0匹。お主の勝ちじゃ！';
       case 14:
-        return '次は「くろねこ」じゃな。相手がおさかなを置いてないから、「ねこじゃらし」のおかげでおさかな0匹で仲間にできたぞ。';
+        return '次は「くろねこ」じゃな。相手がおさかなを置いてないから、「捕獲ネット」のおかげでおさかな0匹で仲間にできたぞ。';
       case 15:
-        return '最後は「茶トラねこ」じゃが...おっと！相手が「またたび」を置いたようじゃ。';
+        return '最後は「茶トラねこ」じゃが...おっと！相手が「食欲増進ポーション」を置いたようじゃ。';
       case 16:
-        return '「またたび」はにゃんこに必要なさかなの数が2倍になるじゃ！お主は1匹しか置いておらんから、さかな不足で仲間にできなかったようじゃ。';
+        return '「食欲増進ポーション」はにゃんこに必要なさかなの数が2倍になるじゃ！お主は1匹しか置いておらんから、さかな不足で仲間にできなかったようじゃ。';
       case 17:
         return '1ターン目の結果じゃ。\nしろねことくろねこをゲットしたから茶トラねこをゲットできれば勝てるぞ！';
       case 18:
@@ -372,7 +373,7 @@ class TutorialViewModel extends ChangeNotifier {
   }
 
   void updateItemPlacement(String catIndex, ItemType? item) {
-    if ((_currentStep == 7 && catIndex == '1' && item == ItemType.catTeaser) ||
+    if ((_currentStep == 7 && catIndex == '1' && item == ItemType.captureNet) ||
         (_currentStep == 10 && catIndex == '2' && item != null) ||
         (_currentStep == 25 &&
             catIndex == '0' &&

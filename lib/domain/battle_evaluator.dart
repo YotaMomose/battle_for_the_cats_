@@ -50,27 +50,27 @@ class BattleEvaluator {
       guestItem,
     );
 
-    // 2. ねこじゃらしによる特殊勝利判定
-    final teaserWinner = _checkTeaserVictory(
+    // 2. 捕獲ネットによる特殊勝利判定
+    final captureNetWinner = _checkCaptureNetVictory(
       hostItem,
       guestItem,
       hostBet,
       guestBet,
     );
-    if (teaserWinner != null) return teaserWinner;
+    if (captureNetWinner != null) return captureNetWinner;
 
     // 3. 通常の賭け金比較による勝敗判定
     return _determineWinner(effectiveCost, hostBet, guestBet);
   }
 
-  /// またたびの効果を適用したコストを計算
+  /// 食欲増進ポーションの効果を適用したコストを計算
   int _calculateEffectiveCost(
     int cost,
     ItemType? hostItem,
     ItemType? guestItem,
   ) {
     final isLuckyCatActive =
-        hostItem == ItemType.matatabi || guestItem == ItemType.matatabi;
+        hostItem == ItemType.potion || guestItem == ItemType.potion;
     return isLuckyCatActive ? cost * 2 : cost;
   }
 
@@ -95,19 +95,20 @@ class BattleEvaluator {
     );
   }
 
-  /// ねこじゃらしによる特殊勝利があるか判定
-  Winner? _checkTeaserVictory(
+  /// 捕獲ネットによる特殊勝利があるか判定
+  Winner? _checkCaptureNetVictory(
     ItemType? hostItem,
     ItemType? guestItem,
     int hostBet,
     int guestBet,
   ) {
-    final hostTeaserWins = hostItem == ItemType.catTeaser && guestBet == 0;
-    final guestTeaserWins = guestItem == ItemType.catTeaser && hostBet == 0;
+    final hostCaptureNetWins = hostItem == ItemType.captureNet && guestBet == 0;
+    final guestCaptureNetWins =
+        guestItem == ItemType.captureNet && hostBet == 0;
 
-    if (hostTeaserWins && !guestTeaserWins) {
+    if (hostCaptureNetWins && !guestCaptureNetWins) {
       return Winner.host;
-    } else if (guestTeaserWins && !hostTeaserWins) {
+    } else if (guestCaptureNetWins && !hostCaptureNetWins) {
       return Winner.guest;
     }
     return null;

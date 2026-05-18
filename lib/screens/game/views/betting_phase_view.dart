@@ -15,9 +15,9 @@ import '../../../widgets/fish_icon.dart';
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
 final Map<ItemType, GlobalKey> _itemTypeKeys = {
-  ItemType.catTeaser: GlobalKey(),
+  ItemType.captureNet: GlobalKey(),
   ItemType.surpriseHorn: GlobalKey(),
-  ItemType.matatabi: GlobalKey(),
+  ItemType.potion: GlobalKey(),
 };
 final Map<String, GlobalKey> _dishKeys = {
   '0': GlobalKey(),
@@ -109,115 +109,106 @@ class BettingPhaseView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: List.generate(3, (index) {
-                      final catIndex = index.toString();
-                      final cards = room.currentRound?.toList() ?? [];
-                      if (cards.isEmpty || index >= cards.length) {
-                        return const Expanded(child: SizedBox());
-                      }
+                    final catIndex = index.toString();
+                    final cards = room.currentRound?.toList() ?? [];
+                    if (cards.isEmpty || index >= cards.length) {
+                      return const Expanded(child: SizedBox());
+                    }
 
-                      final card = cards[index];
-                      final currentBet = viewModel.bets[catIndex] ?? 0;
-                      final placedItem = viewModel.getPlacedItem(catIndex);
+                    final card = cards[index];
+                    final currentBet = viewModel.bets[catIndex] ?? 0;
+                    final placedItem = viewModel.getPlacedItem(catIndex);
 
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            SeService().play('button_buni.mp3');
-                            viewModel.selectCat(catIndex);
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          SeService().play('button_buni.mp3');
+                          viewModel.selectCat(catIndex);
+                        },
+                        child: DragTarget<Object>(
+                          onWillAccept: (data) => !viewModel.hasPlacedBet,
+                          onAccept: (data) {
+                            _handleDrop(viewModel, catIndex, data, currentBet);
                           },
-                          child: DragTarget<Object>(
-                            onWillAccept: (data) => !viewModel.hasPlacedBet,
-                            onAccept: (data) {
-                              _handleDrop(
-                                viewModel,
-                                catIndex,
-                                data,
-                                currentBet,
-                              );
-                            },
-                            builder: (context, candidateData, rejectedData) {
-                              final isTarget = candidateData.isNotEmpty;
-                              final isSelected =
-                                  viewModel.selectedCatIndex == catIndex;
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4.0,
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: isSmallScreen ? 2.0 : 8.0,
-                                  horizontal: 2.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 0, 0, 0)
-                                      .withOpacity(
-                                        (isTarget || isSelected) ? 0.9 : 0.7,
-                                      ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: (isTarget || isSelected)
-                                        ? Colors.yellow
-                                        : Colors.grey.shade300,
-                                    width: (isTarget || isSelected) ? 3 : 1,
-                                  ),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.yellow.withOpacity(
-                                              0.3,
-                                            ),
-                                            blurRadius: 8,
-                                            spreadRadius: 2,
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2.0,
+                          builder: (context, candidateData, rejectedData) {
+                            final isTarget = candidateData.isNotEmpty;
+                            final isSelected =
+                                viewModel.selectedCatIndex == catIndex;
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 4.0,
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 2.0 : 8.0,
+                                horizontal: 2.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 0, 0, 0)
+                                    .withOpacity(
+                                      (isTarget || isSelected) ? 0.9 : 0.7,
                                     ),
-                                    child: FittedBox(
-                                      fit: BoxFit.contain,
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment
-                                            .start, // Changed to start for better alignment
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(
-                                            height: isSmallScreen
-                                                ? 110
-                                                : 150, // 余裕を持たせた高さに修正
-                                            child: _buildCatCard(
-                                              viewModel,
-                                              card,
-                                              isSmallScreen,
-                                            ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: (isTarget || isSelected)
+                                      ? Colors.yellow
+                                      : Colors.grey.shade300,
+                                  width: (isTarget || isSelected) ? 3 : 1,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.yellow.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          spreadRadius: 2,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2.0,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .start, // Changed to start for better alignment
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          height: isSmallScreen
+                                              ? 110
+                                              : 150, // 余裕を持たせた高さに修正
+                                          child: _buildCatCard(
+                                            viewModel,
+                                            card,
+                                            isSmallScreen,
                                           ),
-                                          SizedBox(
-                                            height: isSmallScreen ? 4 : 8,
-                                          ),
-                                          _buildDishArea(
-                                            context,
-                                            viewModel: viewModel,
-                                            catIndex: catIndex,
-                                            currentBet: currentBet,
-                                            placedItem: placedItem,
-                                            isSmallScreen: isSmallScreen,
-                                            isTarget: isTarget,
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                        SizedBox(height: isSmallScreen ? 4 : 8),
+                                        _buildDishArea(
+                                          context,
+                                          viewModel: viewModel,
+                                          catIndex: catIndex,
+                                          currentBet: currentBet,
+                                          placedItem: placedItem,
+                                          isSmallScreen: isSmallScreen,
+                                          isTarget: isTarget,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    }),
-                  ),
+                      ),
+                    );
+                  }),
                 ),
+              ),
 
               // 自分セクション
               Expanded(
@@ -450,8 +441,8 @@ class BettingPhaseView extends StatelessWidget {
                   child: selectedTab == 0
                       ? _buildGuideList([
                           _GuideItem(
-                            'ねこじゃらし',
-                            'assets/images/nekojarashi.png',
+                            '捕獲ネット',
+                            'assets/images/net.png',
                             '相手がさかなを置いていなければ、そのにゃんこをタダで獲得できる。読み勝ちの一手。',
                             tagColor: Colors.red.shade50,
                             tagTextColor: Colors.red.shade400,
@@ -464,9 +455,9 @@ class BettingPhaseView extends StatelessWidget {
                             tagTextColor: Colors.blue.shade400,
                           ),
                           _GuideItem(
-                            'またたび',
-                            'assets/images/matatabi.png',
-                            'そのにゃんこを獲得するために必要なさかなの数が2倍になる。狙われているにゃんこを守るのに使える。',
+                            '食欲増進ポーション',
+                            'assets/images/potion.png',
+                            'そのキャラを獲得するために必要なさかなの数が2倍になる。狙われているにゃんこを守るのに使える。',
                             tagColor: Colors.purple.shade50,
                             tagTextColor: Colors.purple.shade400,
                           ),
@@ -1281,7 +1272,7 @@ Widget _buildMyItemsList(
     children: [
       _buildDraggableItem(
         context,
-        ItemType.catTeaser,
+        ItemType.captureNet,
         viewModel,
         isSmallScreen: isSmallScreen,
       ),
@@ -1293,7 +1284,7 @@ Widget _buildMyItemsList(
       ),
       _buildDraggableItem(
         context,
-        ItemType.matatabi,
+        ItemType.potion,
         viewModel,
         isSmallScreen: isSmallScreen,
       ),
@@ -1311,21 +1302,21 @@ Widget _buildOpponentItems(
 
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [ItemType.catTeaser, ItemType.surpriseHorn, ItemType.matatabi]
-        .map((type) {
-          final count = inventory.count(type);
-          final isUsed = count <= 0;
-          return Opacity(
-            opacity: isUsed ? 0.3 : 1.0,
-            child: _buildItemIcon(
-              type,
-              size: iconSize,
-              showLabel: false,
-              isPlaced: isUsed,
-            ),
-          );
-        })
-        .toList(),
+    children: [ItemType.captureNet, ItemType.surpriseHorn, ItemType.potion].map(
+      (type) {
+        final count = inventory.count(type);
+        final isUsed = count <= 0;
+        return Opacity(
+          opacity: isUsed ? 0.3 : 1.0,
+          child: _buildItemIcon(
+            type,
+            size: iconSize,
+            showLabel: false,
+            isPlaced: isUsed,
+          ),
+        );
+      },
+    ).toList(),
   );
 }
 
@@ -1537,11 +1528,11 @@ Widget _buildItemImage(ItemType type, {double size = 32}) {
 
 IconData _getItemIcon(ItemType type) {
   switch (type) {
-    case ItemType.catTeaser:
+    case ItemType.captureNet:
       return Icons.auto_awesome;
     case ItemType.surpriseHorn:
       return Icons.campaign;
-    case ItemType.matatabi:
+    case ItemType.potion:
       return Icons.savings;
     default:
       return Icons.help_outline;
@@ -1550,11 +1541,11 @@ IconData _getItemIcon(ItemType type) {
 
 Color _getItemColor(ItemType type) {
   switch (type) {
-    case ItemType.catTeaser:
+    case ItemType.captureNet:
       return Colors.purple;
     case ItemType.surpriseHorn:
       return Colors.orange;
-    case ItemType.matatabi:
+    case ItemType.potion:
       return Colors.amber;
     default:
       return Colors.grey;

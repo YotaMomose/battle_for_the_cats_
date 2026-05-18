@@ -2,7 +2,7 @@
 enum CardType {
   regularCat('regular_cat', '通常にゃんこ'),
   dog('dog', '犬'),
-  fatCat('fat_cat', '太っちょねこ'),
+  fatCat('fat_cat', 'ふとっちょねこ'),
   fisherman('fisherman', '漁師'),
   itemShop('item_shop', 'アイテム屋');
 

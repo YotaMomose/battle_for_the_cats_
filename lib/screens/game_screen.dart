@@ -107,26 +107,37 @@ class _GameScreenContentState extends State<_GameScreenContent> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: PawBackground(
-          child: SafeArea(
-            child: Stack(
-              children: [
-                _buildBody(context, state, viewModel),
-                // 退出ボタン（待機画面、最終結果画面以外で表示）
-                if (state is! FinishedState && state is! WaitingState)
-                  Positioned(
-                    bottom: isSmallScreen ? 8 : 12,
-                    left: isSmallScreen ? 8 : 12,
-                    child: _buildCircleButton(
-                      icon: Icons.exit_to_app,
-                      isSmallScreen: isSmallScreen,
-                      onPressed: () {
-                        SeService().play('button_buni.mp3');
-                        _showLeaveDialog(context, viewModel);
-                      },
+          child: Stack(
+            children: [
+              // メインコンテンツ（FatCatEventは全画面表示のためSafeAreaを外す）
+              state is FatCatEventState
+                  ? _buildBody(context, state, viewModel)
+                  : SafeArea(
+                      child: _buildBody(context, state, viewModel),
+                    ),
+              
+              // 退出ボタン（待機画面、最終結果画面以外で表示）
+              if (state is! FinishedState && state is! WaitingState)
+                SafeArea(
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: isSmallScreen ? 8.0 : 12.0,
+                        bottom: isSmallScreen ? 8.0 : 12.0,
+                      ),
+                      child: _buildCircleButton(
+                        icon: Icons.exit_to_app,
+                        isSmallScreen: isSmallScreen,
+                        onPressed: () {
+                          SeService().play('button_buni.mp3');
+                          _showLeaveDialog(context, viewModel);
+                        },
+                      ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),

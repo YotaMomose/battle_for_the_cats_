@@ -18,9 +18,9 @@ import '../../models/user_profile.dart';
 final GlobalKey _myHandFishKey = GlobalKey();
 final GlobalKey _myItemsKey = GlobalKey();
 final Map<ItemType, GlobalKey> _itemTypeKeys = {
-  ItemType.catTeaser: GlobalKey(),
+  ItemType.captureNet: GlobalKey(),
   ItemType.surpriseHorn: GlobalKey(),
-  ItemType.matatabi: GlobalKey(),
+  ItemType.potion: GlobalKey(),
 };
 
 class TutorialScreen extends StatefulWidget {
@@ -910,7 +910,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildDraggableItem(
-          ItemType.catTeaser,
+          ItemType.captureNet,
           viewModel,
           isSmallScreen: isSmallScreen,
         ),
@@ -920,7 +920,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           isSmallScreen: isSmallScreen,
         ),
         _buildDraggableItem(
-          ItemType.matatabi,
+          ItemType.potion,
           viewModel,
           isSmallScreen: isSmallScreen,
         ),
@@ -946,7 +946,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
     // アイテムをハイライト
     bool isHighlighted = false;
-    if (viewModel.currentStep == 7 && type == ItemType.catTeaser)
+    if (viewModel.currentStep == 7 && type == ItemType.captureNet)
       isHighlighted = true;
     if (viewModel.currentStep == 25 && type == ItemType.surpriseHorn)
       isHighlighted = true;
@@ -1009,7 +1009,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [ItemType.catTeaser, ItemType.surpriseHorn, ItemType.matatabi]
+      children: [ItemType.captureNet, ItemType.surpriseHorn, ItemType.potion]
           .map(
             (type) => Opacity(
               opacity: 0.3,
@@ -1177,11 +1177,11 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   Color _getItemColor(ItemType type) {
     switch (type) {
-      case ItemType.catTeaser:
+      case ItemType.captureNet:
         return Colors.purple;
       case ItemType.surpriseHorn:
         return Colors.orange;
-      case ItemType.matatabi:
+      case ItemType.potion:
         return Colors.amber;
       default:
         return Colors.grey;

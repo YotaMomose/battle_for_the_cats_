@@ -42,7 +42,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
           '勝負に勝って仲間に引き入れると、すでに使用したアイテムを1つ復活してくれるぞ。戦いを有利に進めるために、見かけたらぜひ狙いたいところじゃな。',
     },
     {
-      'name': '太っちょにゃんこ',
+      'name': 'ふとっちょにゃんこ',
       'icon': Icons.pets,
       'color': Colors.deepOrange,
       'description':

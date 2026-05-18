@@ -80,7 +80,7 @@ void main() {
       final host = createPlayer(
         'host',
         {'0': 3, '1': 0, '2': 0},
-        {'0': ItemType.matatabi},
+        {'0': ItemType.potion},
       );
       final guest = createPlayer('guest', {'0': 0, '1': 0, '2': 0});
 
@@ -104,13 +104,13 @@ void main() {
       expect(result.at(0), Winner.draw, reason: 'Both bets become 0');
     });
 
-    test('Cat Teaser wins automatically if opponent bets 0', () {
+    test('Cat CaptureNet wins automatically if opponent bets 0', () {
       final round = createRound(5, 5, 5);
-      // Cost is 5. Host bets 0 but uses Cat Teaser.
+      // Cost is 5. Host bets 0 but uses Cat CaptureNet.
       final host = createPlayer(
         'host',
         {'0': 0, '1': 0, '2': 0},
-        {'0': ItemType.catTeaser},
+        {'0': ItemType.captureNet},
       );
       final guest = createPlayer('guest', {'0': 0, '1': 0, '2': 0});
 
@@ -119,14 +119,14 @@ void main() {
       expect(result.at(0), Winner.host);
     });
 
-    test('Cat Teaser does NOT win if opponent bets > 0', () {
+    test('Cat CaptureNet does NOT win if opponent bets > 0', () {
       final round = createRound(5, 5, 5);
-      // Guest bets 1, invalidating Cat Teaser automatic win.
+      // Guest bets 1, invalidating Cat CaptureNet automatic win.
       // But neither reaches cost 5.
       final host = createPlayer(
         'host',
         {'0': 0, '1': 0, '2': 0},
-        {'0': ItemType.catTeaser},
+        {'0': ItemType.captureNet},
       );
       final guest = createPlayer('guest', {'0': 1, '1': 0, '2': 0});
 
@@ -135,17 +135,17 @@ void main() {
       expect(result.at(0), Winner.draw);
     });
 
-    test('Both use Cat Teaser and both bet 0 results in draw', () {
+    test('Both use Cat CaptureNet and both bet 0 results in draw', () {
       final round = createRound(1, 1, 1);
       final host = createPlayer(
         'host',
         {'0': 0, '1': 0, '2': 0},
-        {'0': ItemType.catTeaser},
+        {'0': ItemType.captureNet},
       );
       final guest = createPlayer(
         'guest',
         {'0': 0, '1': 0, '2': 0},
-        {'0': ItemType.catTeaser},
+        {'0': ItemType.captureNet},
       );
 
       final result = evaluator.evaluate(round, host, guest);

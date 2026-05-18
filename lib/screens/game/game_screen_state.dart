@@ -352,7 +352,7 @@ class FinishedState extends GameScreenState {
   }
 }
 
-/// 太っちょにゃんこイベント
+/// ふとっちょにゃんこイベント
 class FatCatEventState extends GameScreenState {
   final GameRoom room;
   const FatCatEventState(

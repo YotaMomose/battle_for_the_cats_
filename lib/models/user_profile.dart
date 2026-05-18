@@ -169,13 +169,13 @@ class UserIcon {
       id: 'toy',
       label: 'じゃらし',
       emoji: '🌿',
-      imagePath: 'assets/images/nekojarashi.png',
+      imagePath: 'assets/images/net.png',
     ),
     UserIcon(
       id: 'silver_vine',
-      label: 'またたび',
+      label: '食欲増進ポーション',
       emoji: '💊',
-      imagePath: 'assets/images/matatabi.png',
+      imagePath: 'assets/images/potion.png',
     ),
 
     // プレミアムアイコン

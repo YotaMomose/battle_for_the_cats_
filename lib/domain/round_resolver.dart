@@ -70,7 +70,7 @@ class RoundResolver {
     }
   }
 
-  /// 太っちょにゃんこイベント画面から次へ進む
+  /// ふとっちょにゃんこイベント画面から次へ進む
   void advanceFromFatCatEvent(GameRoom room) {
     if (!room.bothConfirmedFatCatEvent) return;
     if (room.status != GameStatus.fatCatEvent) return;

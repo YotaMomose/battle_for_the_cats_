@@ -1,10 +1,10 @@
 /// アイテムの種類
 enum ItemType {
-  catTeaser(
-    'catTeaser',
-    'ねこじゃらし',
+  captureNet(
+    'captureNet',
+    '捕獲ネット',
     '相手がさかなを置いていなければ自動でにゃんこをゲット！',
-    'assets/images/nekojarashi.png',
+    'assets/images/net.png',
   ),
   surpriseHorn(
     'surpriseHorn',
@@ -12,11 +12,11 @@ enum ItemType {
     '全員のさかなを無効化する',
     'assets/images/horn.png',
   ),
-  matatabi(
-    'matatabi',
-    'またたび',
+  potion(
+    'potion',
+    '食欲増進ポーション',
     'にゃんこの必要さかな数が2倍になる',
-    'assets/images/matatabi.png',
+    'assets/images/potion.png',
   ),
   unknown('unknown', '不明', '', null);
 

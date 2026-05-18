@@ -140,8 +140,8 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
       });
 
       // アイテム登場
-      if (item.myItem == ItemType.matatabi ||
-          item.opponentItem == ItemType.matatabi) {
+      if (item.myItem == ItemType.potion ||
+          item.opponentItem == ItemType.potion) {
         _timer = Timer(const Duration(milliseconds: 500), () {
           if (!mounted) return;
           setState(() {
@@ -201,8 +201,8 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
     final items = viewModel.roundResultItems;
     if (index < items.length) {
       final item = items[index];
-      if (item.myItem == ItemType.matatabi ||
-          item.opponentItem == ItemType.matatabi) {
+      if (item.myItem == ItemType.potion ||
+          item.opponentItem == ItemType.potion) {
         _revealedMultiplierIndices.add(index);
       }
     }

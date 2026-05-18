@@ -107,7 +107,7 @@ class GameRoom {
   bool get bothConfirmedRoundResult =>
       host.confirmedRoundResult && (guest?.confirmedRoundResult ?? false);
 
-  /// 両者が太っちょにゃんこイベントを確認したか
+  /// 両者がふとっちょにゃんこイベントを確認したか
   bool get bothConfirmedFatCatEvent =>
       host.confirmedFatCatEvent && (guest?.confirmedFatCatEvent ?? false);
 
@@ -194,7 +194,7 @@ class GameRoom {
     }
   }
 
-  /// 指定されたプレイヤーの太っちょにゃんこイベント確認フラグを立てる
+  /// 指定されたプレイヤーのふとっちょにゃんこイベント確認フラグを立てる
   void confirmFatCatEvent(String playerId) {
     if (isHost(playerId)) {
       host.confirmedFatCatEvent = true;
@@ -203,7 +203,7 @@ class GameRoom {
     }
   }
 
-  /// 太っちょにゃんこイベントを発生させる
+  /// ふとっちょにゃんこイベントを発生させる
   void triggerFatCatEvent(RoundCards nextRoundCards) {
     status = GameStatus.fatCatEvent;
     currentTurn++;

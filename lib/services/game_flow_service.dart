@@ -125,7 +125,7 @@ class GameFlowService {
     });
   }
 
-  /// 太っちょにゃんこイベントを確認する
+  /// ふとっちょにゃんこイベントを確認する
   Future<void> confirmFatCatEvent(String roomCode, String playerId) async {
     await _repository.runTransaction((Transaction transaction) async {
       final roomRef = _repository.firestoreRepository.getDocumentReference(

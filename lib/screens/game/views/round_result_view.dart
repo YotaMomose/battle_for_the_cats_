@@ -24,7 +24,7 @@ class RoundResultView extends StatefulWidget {
 class _RoundResultViewState extends State<RoundResultView> {
   int _step = 0; // 0:初期, 1:左カウント, 2:左開示, 3:中カウント, 4:中開示, 5:右カウント, 6:右開示
   Set<int> _revealedItemIndices = {}; // 各カードのアイテムが表示されたかどうかを管理
-  Set<int> _revealedMultiplierIndices = {}; // またたびの「x2」が表示されたかどうかを管理
+  Set<int> _revealedMultiplierIndices = {}; // 食欲増進ポーションの「x2」が表示されたかどうかを管理
   Set<int> _blownAwayIndices = {}; // びっくりホーンで吹き飛んだかどうかを管理
   Timer? _revealTimer;
   Timer? _itemTimer; // アイテム表示用のセカンドタイマー
@@ -92,9 +92,9 @@ class _RoundResultViewState extends State<RoundResultView> {
           final items = viewModel.lastRoundDisplayItems;
           if (index < items.length) {
             final item = items[index];
-            // またたびがある場合、少し遅れて ×2 を表示
-            if (item.myItem == ItemType.matatabi ||
-                item.opponentItem == ItemType.matatabi) {
+            // 食欲増進ポーションがある場合、少し遅れて ×2 を表示
+            if (item.myItem == ItemType.potion ||
+                item.opponentItem == ItemType.potion) {
               Timer(const Duration(milliseconds: 400), () {
                 if (mounted) {
                   setState(() {
@@ -147,8 +147,8 @@ class _RoundResultViewState extends State<RoundResultView> {
         // 実際にアイテムがある場合のみフラグを立てる
         if (index < items.length) {
           final item = items[index];
-          if (item.myItem == ItemType.matatabi ||
-              item.opponentItem == ItemType.matatabi) {
+          if (item.myItem == ItemType.potion ||
+              item.opponentItem == ItemType.potion) {
             _revealedMultiplierIndices.add(index);
           }
           if (item.myItem == ItemType.surpriseHorn ||
@@ -239,87 +239,81 @@ class _RoundResultViewState extends State<RoundResultView> {
           ),
           child: Column(
             children: [
-                if (_step < 7) ...[
-                  // ステップ数から現在判定中のカードインデックスを計算
-                  // 1,2 -> 0番目, 3,4 -> 1番目, 5,6 -> 2番目
-                  ClipRect(
-                    // スライドが画面外に出ないように領域を制限
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 600),
-                      // 横にスライドしながら切り替わる
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                            final isEntering =
-                                (child.key as ValueKey<int>).value ==
-                                (_step == 0 ? 0 : (_step - 1) ~/ 2);
+              if (_step < 7) ...[
+                // ステップ数から現在判定中のカードインデックスを計算
+                // 1,2 -> 0番目, 3,4 -> 1番目, 5,6 -> 2番目
+                ClipRect(
+                  // スライドが画面外に出ないように領域を制限
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 600),
+                    // 横にスライドしながら切り替わる
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                          final isEntering =
+                              (child.key as ValueKey<int>).value ==
+                              (_step == 0 ? 0 : (_step - 1) ~/ 2);
 
-                            // 入る時は右から(1,0)、出る時は左へ(-1,0)
-                            final offsetAnimation = Tween<Offset>(
-                              begin: isEntering
-                                  ? const Offset(1.2, 0.0)
-                                  : const Offset(-1.2, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation);
+                          // 入る時は右から(1,0)、出る時は左へ(-1,0)
+                          final offsetAnimation = Tween<Offset>(
+                            begin: isEntering
+                                ? const Offset(1.2, 0.0)
+                                : const Offset(-1.2, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation);
 
-                            return SlideTransition(
-                              position: offsetAnimation,
-                              child: child,
-                            );
-                          },
-                      child: Container(
-                        key: ValueKey<int>(_step == 0 ? 0 : (_step - 1) ~/ 2),
-                        child: _buildSingleLargeCard(
-                          context,
-                          viewModel,
-                          isSmallScreen,
-                          _step == 0 ? 0 : (_step - 1) ~/ 2,
-                          _step,
-                        ),
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                    child: Container(
+                      key: ValueKey<int>(_step == 0 ? 0 : (_step - 1) ~/ 2),
+                      child: _buildSingleLargeCard(
+                        context,
+                        viewModel,
+                        isSmallScreen,
+                        _step == 0 ? 0 : (_step - 1) ~/ 2,
+                        _step,
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8,
-                  ),
-                ] else ...[
-                  // 累計結果
-                  _buildCumulativeResult(context, viewModel, isSmallScreen),
-                  SizedBox(
-                    height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8,
-                  ),
+                ),
+                SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
+              ] else ...[
+                // 累計結果
+                _buildCumulativeResult(context, viewModel, isSmallScreen),
+                SizedBox(height: shouldScroll ? (isSmallScreen ? 16 : 32) : 8),
 
-                  // にゃんこカードの横並び一覧
-                  _buildCatCardRow(context, viewModel, isSmallScreen, _step),
-                  SizedBox(
-                    height: shouldScroll ? (isSmallScreen ? 12 : 24) : 8,
-                  ),
-                ],
-
-                // 特殊効果UI (復活/追い出し) - すべての結果が出た後に表示
-                if (_step >= 7 && canRevive) ...[
-                  _buildReviveSection(context, viewModel, isSmallScreen),
-                  SizedBox(height: isSmallScreen ? 12 : 20),
-                ],
-                if (_step >= 7 && canChase) ...[
-                  _buildChaseAwaySection(context, viewModel, isSmallScreen),
-                  SizedBox(height: isSmallScreen ? 12 : 20),
-                ],
-
-                // アニメーション中のみアクションボタンを表示
-                if (_step < 7)
-                  _buildRevealActionButtons(isSmallScreen)
-                else
-                  _buildNextButton(viewModel, isConfirmed, isSmallScreen),
-
-                if (shouldScroll)
-                  const SizedBox(height: 120)
-                else
-                  const SizedBox(height: 8),
+                // にゃんこカードの横並び一覧
+                _buildCatCardRow(context, viewModel, isSmallScreen, _step),
+                SizedBox(height: shouldScroll ? (isSmallScreen ? 12 : 24) : 8),
               ],
-            ),
+
+              // 特殊効果UI (復活/追い出し) - すべての結果が出た後に表示
+              if (_step >= 7 && canRevive) ...[
+                _buildReviveSection(context, viewModel, isSmallScreen),
+                SizedBox(height: isSmallScreen ? 12 : 20),
+              ],
+              if (_step >= 7 && canChase) ...[
+                _buildChaseAwaySection(context, viewModel, isSmallScreen),
+                SizedBox(height: isSmallScreen ? 12 : 20),
+              ],
+
+              // アニメーション中のみアクションボタンを表示
+              if (_step < 7)
+                _buildRevealActionButtons(isSmallScreen)
+              else
+                _buildNextButton(viewModel, isConfirmed, isSmallScreen),
+
+              if (shouldScroll)
+                const SizedBox(height: 120)
+              else
+                const SizedBox(height: 8),
+            ],
           ),
-        ],
-      );
+        ),
+      ],
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -1084,11 +1078,11 @@ class _RoundResultViewState extends State<RoundResultView> {
                       ),
                       const SizedBox(width: 4),
                       const FishIcon(size: 14),
-                      // またたびの演出：表示フラグが立っているか、判定完了後なら表示
+                      // 食欲増進ポーションの演出：表示フラグが立っているか、判定完了後なら表示
                       if (_revealedMultiplierIndices.contains(index) ||
                           isRevealed)
-                        if (item.myItem == ItemType.matatabi ||
-                            item.opponentItem == ItemType.matatabi)
+                        if (item.myItem == ItemType.potion ||
+                            item.opponentItem == ItemType.potion)
                           TweenAnimationBuilder<double>(
                             tween: Tween(begin: 0.0, end: 1.0),
                             duration: const Duration(milliseconds: 400),
@@ -1242,8 +1236,8 @@ class _RoundResultViewState extends State<RoundResultView> {
                               FishIcon(size: isSmallScreen ? 10 : 12),
                               if (_revealedMultiplierIndices.contains(index) ||
                                   isRevealed)
-                                if (item.myItem == ItemType.matatabi ||
-                                    item.opponentItem == ItemType.matatabi)
+                                if (item.myItem == ItemType.potion ||
+                                    item.opponentItem == ItemType.potion)
                                   Text(
                                     '×2',
                                     style: TextStyle(

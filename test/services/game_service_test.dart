@@ -100,7 +100,7 @@ void main() {
 
       test('placeBets をリクエストすると GameFlowService に委譲される', () async {
         final bets = {'cat_001': 5};
-        final items = {'cat_001': 'catTeaser'};
+        final items = {'cat_001': 'captureNet'};
 
         await gameService.placeBets('ROOM_CODE', 'player_001', bets, items);
 

@@ -36,19 +36,62 @@ class _FinalResultViewState extends State<FinalResultView> {
 
   void _checkOpponentLeft() {
     if (!mounted || _hasShownOpponentLeftDialog) return;
-    _hasShownOpponentLeftDialog = true; // タイミング制御のため即座にフラグを立てる
+    _hasShownOpponentLeftDialog = true;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('対戦相手が退出しました'),
-        content: const Text('相手がリタイアしたため、不戦勝となりました。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: StereoscopicContainer(
+          baseColor: Colors.white,
+          shadowColor: Colors.grey.shade400,
+          borderRadius: 32,
+          depth: 8,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '対戦相手が退出しました',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF4D331F),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  '相手がリタイアしたため、\nあなたの不戦勝となります！',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4D331F),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                StereoscopicButton(
+                  onPressed: () => Navigator.pop(context),
+                  baseColor: const Color(0xFF5ABA61),
+                  shadowColor: const Color(0xFF3E7F43),
+                  borderRadius: 20,
+                  depth: 4,
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                    child: Text(
+                      'OK',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -85,7 +128,9 @@ class _FinalResultViewState extends State<FinalResultView> {
     final isSmallScreen = screenSize.height < 680;
 
     final String popResultText;
-    if (widget.room.finalWinner == Winner.draw) {
+    if (viewModel.uiState.isOpponentLeft) {
+      popResultText = 'WIN！';
+    } else if (widget.room.finalWinner == Winner.draw) {
       popResultText = 'DRAW';
     } else if (widget.room.finalWinner ==
         (viewModel.isHost ? Winner.host : Winner.guest)) {

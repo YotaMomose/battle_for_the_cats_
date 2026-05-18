@@ -296,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     depth: 4,
                     child: const Center(
                       child: Text(
-                        'サポーターになる (応援)',
+                        '開発者を応援する',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
