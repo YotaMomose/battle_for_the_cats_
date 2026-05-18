@@ -575,7 +575,7 @@ class GameScreenViewModel extends ChangeNotifier {
     if (room.status != GameStatus.waiting &&
         room.status != GameStatus.finished) {
       final opponentAbandoned = isHost
-          ? (guest?.abandoned ?? false)
+          ? ((guest?.abandoned ?? false) || guest == null)
           : host.abandoned;
       if (opponentAbandoned) {
         // 自己退出中なら処理をスキップ
@@ -614,11 +614,11 @@ class GameScreenViewModel extends ChangeNotifier {
         break;
       case GameStatus.finished:
         var newState = GameScreenState.finished(room);
-        // 決着が付いていない(finalWinnerがいない)状態で相手が退出（リタイア）済みの場合はフラグを付ける
+        // 相手が退出（リタイア）済みの場合はフラグを付ける
         final opponentAbandoned = isHost
-            ? (room.guest?.abandoned ?? false)
+            ? ((room.guest?.abandoned ?? false) || room.guest == null)
             : room.host.abandoned;
-        if (opponentAbandoned && room.finalWinner == null) {
+        if (opponentAbandoned) {
           newState = newState.copyWithOpponentLeft();
         }
         _uiState = newState;
@@ -639,16 +639,12 @@ class GameScreenViewModel extends ChangeNotifier {
   }
 
   void _handleOpponentLeft() {
-    // 既に決着が着いている（勝者が決まっている）場合は、通常の退出として扱う（リタイアポップアップ等を出さない）
-    if (_currentRoom?.finalWinner != null) return;
-
     if (_currentRoom != null) {
       _uiState = FinishedState(_currentRoom!).copyWithOpponentLeft();
     } else {
       _uiState = _uiState.copyWithOpponentLeft();
     }
     notifyListeners();
-    // onOpponentLeft は遷移を伴うため、ここでは呼ばない（最終結果画面で通知するため）
   }
 
   void _handleKicked() {

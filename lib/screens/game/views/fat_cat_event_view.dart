@@ -189,7 +189,7 @@ class _FatCatEventViewState extends State<FatCatEventView>
                                       child: Column(
                                         children: [
                                           const Text(
-                                            'ふとっちょにゃんこ\n強襲！！',
+                                            'ふとっちょにゃんこ\n襲来！！',
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontSize: 28,

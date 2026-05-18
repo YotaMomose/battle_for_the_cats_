@@ -41,20 +41,33 @@ class FishingPhaseView extends StatelessWidget {
               const SizedBox(height: 16),
 
               // タイトル
-              const Text(
-                '🌊 つりフェーズ 🌊',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1A73E8),
-                  shadows: [
-                    Shadow(
-                      color: Colors.white,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const FishIcon(size: 28),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'つりフェーズ',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1A73E8),
+                      shadows: [
+                        Shadow(
+                          color: Colors.white,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(math.pi),
+                    child: const FishIcon(size: 28),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
 

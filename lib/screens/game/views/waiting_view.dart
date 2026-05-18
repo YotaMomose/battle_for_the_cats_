@@ -73,7 +73,10 @@ class WaitingView extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.pink.shade200, width: 2),
+                            border: Border.all(
+                              color: Colors.pink.shade200,
+                              width: 2,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.1),
@@ -321,17 +324,22 @@ class WaitingView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('退出しますか？'),
-        content: const Text('退出するとゲームが中断されます。'),
+        title: const Text('本当に退出してもよろしいですか？\n退出すると負け扱いになります。'),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () {
               SeService().play('button_buni.mp3');
               Navigator.pop(context);
             },
-            child: const Text('キャンセル'),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.grey),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('キャンセル', style: TextStyle(color: Colors.black87)),
           ),
-          TextButton(
+          OutlinedButton(
             onPressed: () {
               SeService().play('button_buni.mp3');
               Navigator.pop(context);
@@ -340,7 +348,16 @@ class WaitingView extends StatelessWidget {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               }
             },
-            child: const Text('退出', style: TextStyle(color: Colors.red)),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.red),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              '退出',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

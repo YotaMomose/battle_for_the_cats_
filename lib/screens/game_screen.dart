@@ -11,6 +11,7 @@ import 'game/views/round_result_view.dart';
 import 'game/views/final_result_view.dart';
 import 'game/views/fat_cat_event_view.dart';
 import '../services/game_service.dart';
+import '../widgets/stereoscopic_ui.dart';
 import 'home_screen.dart';
 
 /// ゲーム画面（MVVM）
@@ -112,10 +113,8 @@ class _GameScreenContentState extends State<_GameScreenContent> {
               // メインコンテンツ（FatCatEventは全画面表示のためSafeAreaを外す）
               state is FatCatEventState
                   ? _buildBody(context, state, viewModel)
-                  : SafeArea(
-                      child: _buildBody(context, state, viewModel),
-                    ),
-              
+                  : SafeArea(child: _buildBody(context, state, viewModel)),
+
               // 退出ボタン（待機画面、最終結果画面以外で表示）
               if (state is! FinishedState && state is! WaitingState)
                 SafeArea(
@@ -176,16 +175,22 @@ class _GameScreenContentState extends State<_GameScreenContent> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('退出しますか？'),
-        content: const Text('退出するとゲームが中断されます。'),
+        content: const Text('本当に退出してもよろしいですか？\n退出すると負け扱いになります。'),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () {
               SeService().play('button_buni.mp3');
               Navigator.pop(context);
             },
-            child: const Text('キャンセル'),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.grey),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('キャンセル', style: TextStyle(color: Colors.black87)),
           ),
-          TextButton(
+          OutlinedButton(
             onPressed: () {
               SeService().play('button_buni.mp3');
               Navigator.pop(context);
@@ -194,7 +199,13 @@ class _GameScreenContentState extends State<_GameScreenContent> {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               }
             },
-            child: const Text('退出', style: TextStyle(color: Colors.red)),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.red),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('退出', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

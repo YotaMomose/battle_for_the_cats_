@@ -128,7 +128,7 @@ class _FinalResultViewState extends State<FinalResultView> {
     final isSmallScreen = screenSize.height < 680;
 
     final String popResultText;
-    if (viewModel.uiState.isOpponentLeft) {
+    if (viewModel.uiState.isOpponentLeft && widget.room.finalWinner == null) {
       popResultText = 'WIN！';
     } else if (widget.room.finalWinner == Winner.draw) {
       popResultText = 'DRAW';

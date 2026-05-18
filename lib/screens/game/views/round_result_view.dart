@@ -971,7 +971,7 @@ class _RoundResultViewState extends State<RoundResultView> {
             depth: isCounting ? 12 : 6,
             showDots: true,
             backgroundImage: const DecorationImage(
-              image: AssetImage('assets/images/card_back.jpeg'),
+              image: AssetImage('assets/images/card_back.png'),
               fit: BoxFit.cover,
             ),
             child: Column(
@@ -1172,7 +1172,7 @@ class _RoundResultViewState extends State<RoundResultView> {
                     depth: isCounting ? 8 : 4,
                     showDots: true,
                     backgroundImage: const DecorationImage(
-                      image: AssetImage('assets/images/card_back.jpeg'),
+                      image: AssetImage('assets/images/card_back.png'),
                       fit: BoxFit.cover,
                     ),
                     child: Column(

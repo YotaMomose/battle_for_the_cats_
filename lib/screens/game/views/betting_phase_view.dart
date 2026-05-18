@@ -1062,7 +1062,7 @@ Widget _buildCatCard(
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
       image: const DecorationImage(
-        image: AssetImage('assets/images/card_back.jpeg'),
+        image: AssetImage('assets/images/card_back.png'),
         fit: BoxFit.cover,
       ),
       borderRadius: BorderRadius.circular(12),
