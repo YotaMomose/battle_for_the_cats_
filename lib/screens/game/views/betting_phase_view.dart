@@ -143,10 +143,18 @@ class BettingPhaseView extends StatelessWidget {
                                 horizontal: 2.0,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 0, 0, 0)
-                                    .withOpacity(
-                                      (isTarget || isSelected) ? 0.9 : 0.7,
+                                image: DecorationImage(
+                                  image: const AssetImage(
+                                    'assets/images/card_sec.png',
+                                  ),
+                                  fit: BoxFit.cover,
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.black.withOpacity(
+                                      (isTarget || isSelected) ? 0.45 : 0.6,
                                     ),
+                                    BlendMode.darken,
+                                  ),
+                                ),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: (isTarget || isSelected)
@@ -641,7 +649,6 @@ class BettingPhaseView extends StatelessWidget {
     );
   }
 
-  /// プレイヤー情報のセクション
   Widget _buildPlayerSection(
     BuildContext context, {
     required bool isOpponent,
@@ -655,272 +662,307 @@ class BettingPhaseView extends StatelessWidget {
     bool isReady = false,
     bool isSmallScreen = false,
   }) {
-    final bgColor = isOpponent
-        ? const Color.fromARGB(255, 245, 143, 158)
-        : const Color.fromARGB(255, 143, 208, 245);
-    final iconSize = isSmallScreen ? 28.0 : 50.0;
-    final fishIconSize = isSmallScreen ? 32.0 : 56.0;
+    final baseColor = isOpponent
+        ? const Color(0xFFFFC0C6) // 可愛くて少し濃いパステルピンク
+        : const Color(0xFFCBE5FF); // 可愛くて少し濃いパステルブルー
+    final shadowColor = isOpponent
+        ? const Color(0xFFE88A96) // 濃いピンクシャドウ
+        : const Color(0xFF90CAF9); // 濃いブルーシャドウ
+    final borderColor = isOpponent
+        ? const Color(0xFFFF6B81) // ピンクボーダー
+        : const Color(0xFF4FC3F7); // ブルーボーダー
+    final innerBorderColor = isOpponent
+        ? const Color(0xFFFFCCD2)
+        : const Color(0xFFCBE5FF);
 
-    final iconAndCardsRow = SizedBox(
-      width: isSmallScreen ? 280 : 380,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // アイコンとユーザー名
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: iconSize,
-                height: iconSize,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFF4D331F),
-                    width: 1.5,
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: UserIconWidget(
-                  icon: isOpponent
-                      ? viewModel.opponentUserIcon
-                      : viewModel.myUserIcon,
-                  size: isSmallScreen ? 20 : 36,
-                ),
-              ),
-              if (!isSmallScreen) const SizedBox(height: 4),
-              SizedBox(
-                width: isSmallScreen ? 60 : 80,
-                child: Text(
-                  displayName,
-                  style: TextStyle(
-                    fontSize: isSmallScreen ? 12 : 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
+    final iconSize = isSmallScreen ? 36.0 : 60.0;
+    final fishIconSize = isSmallScreen ? 40.0 : 70.0;
+
+    // アバター ＆ ユーザー名
+    final avatarAndName = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: iconSize,
+          height: iconSize,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
             ],
           ),
-          SizedBox(width: isSmallScreen ? 4 : 12),
-          // 獲得カード一覧
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: isSmallScreen ? 2 : 4,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '合計コスト：${inventory.totalCost}',
-                    style: TextStyle(
-                      fontSize: isSmallScreen ? 10 : 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  if (!isSmallScreen) const SizedBox(height: 2),
-                  SizedBox(
-                    height: isSmallScreen ? 50 : 70,
-                    child: _buildWonCatsList(
-                      inventory,
-                      viewModel,
-                      isCompact: true,
-                      isSmallScreen: isSmallScreen,
-                    ),
-                  ),
-                ],
-              ),
+          alignment: Alignment.center,
+          child: UserIconWidget(
+            icon: isOpponent
+                ? viewModel.opponentUserIcon
+                : viewModel.myUserIcon,
+            size: isSmallScreen ? 20 : 36,
+          ),
+        ),
+        if (!isSmallScreen) const SizedBox(height: 4),
+        SizedBox(
+          width: isSmallScreen ? 60 : 80,
+          child: Text(
+            displayName,
+            style: TextStyle(
+              fontSize: isSmallScreen ? 12 : 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
+
+    // さかな数表示
+    final fishBox = !isOpponent
+        ? _buildMyFishDraggableArea(
+            context,
+            fishCount,
+            viewModel,
+            isSmallScreen,
+          )
+        : Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: isSmallScreen ? 2 : 4,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: innerBorderColor, width: 1.5),
+            ),
+            child: _buildFishWithNumber('$fishCount', size: fishIconSize),
+          );
+
+    // 左カラム：アイコン ＋ ユーザー名 ＋ 魚数
+    final leftColumn = Container(
+      width: isSmallScreen ? 110 : 150,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          if (isOpponent) ...[
+            avatarAndName,
+            const SizedBox(height: 4),
+            fishBox,
+          ] else ...[
+            fishBox,
+            const SizedBox(height: 4),
+            avatarAndName,
+          ],
+        ],
+      ),
+    );
+
+    // 獲得にゃんこ（合計コスト付き）
+    final wonCatsContainer = Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: isSmallScreen ? 4 : 6,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: innerBorderColor, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '合計コスト：${inventory.totalCost}',
+            style: TextStyle(
+              fontSize: isSmallScreen ? 10 : 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
+          ),
+          if (!isSmallScreen) const SizedBox(height: 2),
+          SizedBox(
+            height: isSmallScreen ? 50 : 70,
+            child: _buildWonCatsList(
+              inventory,
+              viewModel,
+              isCompact: true,
+              isSmallScreen: isSmallScreen,
             ),
           ),
         ],
       ),
     );
 
-    final fishAndItemsRow = SizedBox(
-      width: isSmallScreen ? 280 : 380,
-      child: Row(
+    // 所持アイテム一覧
+    final itemsContainer = Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: isSmallScreen ? 1 : 4,
+      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(width: 4),
-          // さかなの数 (自分ならドラッグ＆ドロップ用)
-          if (!isOpponent)
-            _buildMyFishDraggableArea(
-              context,
-              fishCount,
-              viewModel,
-              isSmallScreen,
-            )
-          else
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: isSmallScreen ? 2 : 4,
+          if (!isSmallScreen)
+            const Text(
+              '所持アイテム',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                color: Colors.black87,
               ),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.red.shade200),
-              ),
-              child: _buildFishWithNumber('$fishCount', size: fishIconSize),
             ),
-          SizedBox(width: isSmallScreen ? 4 : 16),
-          // 所持アイテム一覧
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: isSmallScreen ? 1 : 4,
-              ),
-              decoration: BoxDecoration(
-                color: isOpponent ? Colors.red.shade100 : Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isOpponent
-                      ? Colors.red.shade200
-                      : Colors.blue.shade200,
+          isOpponent
+              ? _buildOpponentItems(
+                  viewModel,
+                  iconSize: isSmallScreen ? 22 : 32,
+                )
+              : _buildMyItemsList(
+                  context,
+                  viewModel,
+                  isSmallScreen: isSmallScreen,
+                ),
+        ],
+      ),
+    );
+
+    // 右カラム：ネストされた明るめのコンテナ
+    final rightContainer = Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.55),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: innerBorderColor.withOpacity(0.5),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (isOpponent) ...[
+              wonCatsContainer,
+              const SizedBox(height: 6),
+              itemsContainer,
+            ] else ...[
+              itemsContainer,
+              const SizedBox(height: 6),
+              wonCatsContainer,
+            ],
+          ],
+        ),
+      ),
+    );
+
+    final content = StereoscopicContainer(
+      baseColor: baseColor,
+      shadowColor: shadowColor,
+      borderRadius: 24,
+      depth: 8,
+      showStripes: false,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: borderColor, width: 3),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            // ドット柄背景 (セクション全体に広がる)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: DotPatternPainter(
+                  dotColor: Colors.white.withOpacity(0.4),
+                  spacing: 12,
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!isSmallScreen)
-                    const Text(
-                      '所持アイテム',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  isOpponent
-                      ? _buildOpponentItems(
-                          viewModel,
-                          iconSize: isSmallScreen ? 22 : 32,
-                        )
-                      : _buildMyItemsList(
-                          context,
-                          viewModel,
-                          isSmallScreen: isSmallScreen,
+            ),
+            // 元のレイアウト構造を維持したコンテンツ
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 6.0,
+                  vertical: isSmallScreen ? 1.0 : 8.0,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: isSmallScreen ? 320 : 440,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [leftColumn, rightContainer],
                         ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    final content = Container(
-      decoration: BoxDecoration(
-        color: bgColor.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          // ドット柄背景 (セクション全体に広がる)
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DotPatternPainter(
-                dotColor: Colors.white.withOpacity(0.4),
-                spacing: 12,
-              ),
-            ),
-          ),
-          // 元のレイアウト構造を維持したコンテンツ
-          Positioned.fill(
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 6.0,
-                vertical: isSmallScreen ? 1.0 : 8.0,
-              ),
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isOpponent) ...[
-                      iconAndCardsRow,
-                      SizedBox(height: isSmallScreen ? 1 : 6),
-                      fishAndItemsRow,
-                    ] else ...[
-                      fishAndItemsRow,
-                      SizedBox(height: isSmallScreen ? 1 : 6),
-                      iconAndCardsRow,
-                    ],
-                    if (statusLabel != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFBF5F),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFF4D331F),
-                              width: 2,
+                      ),
+                      if (statusLabel != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 2,
                             ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0xFF4D331F),
-                                offset: Offset(0, 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFBF5F),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFF4D331F),
+                                width: 2,
                               ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                statusLabel.endsWith('...')
-                                    ? statusLabel.replaceFirst('...', '')
-                                    : statusLabel,
-                                style: TextStyle(
-                                  fontSize: isSmallScreen ? 12 : 14,
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w900,
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0xFF4D331F),
+                                  offset: Offset(0, 2),
                                 ),
-                              ),
-                              if (statusLabel.endsWith('...'))
-                                AnimatedWaitingDots(
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  statusLabel.endsWith('...')
+                                      ? statusLabel.replaceFirst('...', '')
+                                      : statusLabel,
                                   style: TextStyle(
                                     fontSize: isSmallScreen ? 12 : 14,
                                     color: statusColor,
                                     fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                            ],
+                                if (statusLabel.endsWith('...'))
+                                  AnimatedWaitingDots(
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 12 : 14,
+                                      color: statusColor,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -953,7 +995,7 @@ class BettingPhaseView extends StatelessWidget {
             foregroundDecoration: candidateData.isNotEmpty
                 ? BoxDecoration(
                     color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: const Color.fromARGB(255, 165, 173, 180),
                       width: 2,
@@ -978,16 +1020,16 @@ class BettingPhaseView extends StatelessWidget {
   ) {
     final remaining = totalFish - viewModel.totalBet;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
-    final fishSize = isSmallScreen ? 40.0 : 56.0;
+    final fishSize = isSmallScreen ? 24.0 : 32.0;
 
     // さかなエリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: const Color(0xFFCBE5FF), width: 1.5),
       ),
       child: GestureDetector(
         onTap: () {
@@ -1058,7 +1100,7 @@ Widget _buildCatCard(
 ) {
   final avatarSize = isSmallScreen ? 55.0 : 90.0;
   return Container(
-    width: isSmallScreen ? 80 : 110,
+    width: isSmallScreen ? 100 : 140,
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
       image: const DecorationImage(
@@ -1093,7 +1135,7 @@ Widget _buildCatCard(
           ),
         ),
         _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
-        SizedBox(height: isSmallScreen ? 1 : 2),
+        SizedBox(height: isSmallScreen ? 130 : 200), // increased for better visibility
         // さかなアイコンによるコスト表示
         Wrap(
           alignment: WrapAlignment.center,
@@ -1335,7 +1377,7 @@ Widget _buildDraggableItem(
     }
   }
   final bool isUnavailable = count <= 0 || isPlaced;
-  final itemSize = isSmallScreen ? 28.0 : 40.0;
+  final itemSize = isSmallScreen ? 32.0 : 48.0;
 
   return isUnavailable
       ? Opacity(
@@ -1446,7 +1488,9 @@ Widget _buildItemSlot(
     width: itemIconSize + 16,
     height: itemIconSize + 16,
     child: StereoscopicContainer(
-      baseColor: placedItem != null ? color : Colors.white.withOpacity(0.5),
+      baseColor: placedItem != null
+          ? _getItemLightColor(placedItem)
+          : Colors.white.withOpacity(0.5),
       shadowColor: shadowColor,
       borderRadius: 8,
       depth: 4,
@@ -1549,6 +1593,19 @@ Color _getItemColor(ItemType type) {
       return Colors.amber;
     default:
       return Colors.grey;
+  }
+}
+
+Color _getItemLightColor(ItemType type) {
+  switch (type) {
+    case ItemType.captureNet:
+      return const Color(0xFFF3E5F5); // 薄い紫 (purple.shade50)
+    case ItemType.surpriseHorn:
+      return const Color(0xFFFFF3E0); // 薄いオレンジ (orange.shade50)
+    case ItemType.potion:
+      return const Color(0xFFFFFDE7); // 薄い黄 (yellow.shade50)
+    default:
+      return Colors.white;
   }
 }
 

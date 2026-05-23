@@ -323,43 +323,98 @@ class WaitingView extends StatelessWidget {
   void _showLeaveDialog(BuildContext context, GameScreenViewModel vm) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('本当に退出してもよろしいですか？\n退出すると負け扱いになります。'),
-        actions: [
-          OutlinedButton(
-            onPressed: () {
-              SeService().play('button_buni.mp3');
-              Navigator.pop(context);
-            },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.grey),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: StereoscopicContainer(
+          baseColor: Colors.white,
+          shadowColor: Colors.grey.shade400,
+          borderRadius: 32,
+          depth: 8,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '退出しますか？',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF4D331F),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  '本当に退出してもよろしいですか？\n退出すると負け扱いになります。',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4D331F),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    StereoscopicButton(
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        Navigator.pop(context);
+                      },
+                      baseColor: Colors.grey.shade300,
+                      shadowColor: Colors.grey.shade500,
+                      borderRadius: 20,
+                      depth: 4,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          'キャンセル',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                    StereoscopicButton(
+                      onPressed: () {
+                        SeService().play('button_buni.mp3');
+                        Navigator.pop(context);
+                        vm.leaveRoom();
+                        if (context.mounted) {
+                          Navigator.of(
+                            context,
+                          ).popUntil((route) => route.isFirst);
+                        }
+                      },
+                      baseColor: const Color(0xFFFF5252),
+                      shadowColor: const Color(0xFFD32F2F),
+                      borderRadius: 20,
+                      depth: 4,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          '退出',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: const Text('キャンセル', style: TextStyle(color: Colors.black87)),
           ),
-          OutlinedButton(
-            onPressed: () {
-              SeService().play('button_buni.mp3');
-              Navigator.pop(context);
-              vm.leaveRoom();
-              if (context.mounted) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              '退出',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
