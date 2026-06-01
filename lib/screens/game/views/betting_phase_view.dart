@@ -675,8 +675,13 @@ class BettingPhaseView extends StatelessWidget {
         ? const Color(0xFFFFCCD2)
         : const Color(0xFFCBE5FF);
 
-    final iconSize = isSmallScreen ? 36.0 : 60.0;
-    final fishIconSize = isSmallScreen ? 40.0 : 70.0;
+    final iconSize = isOpponent
+    ? (isSmallScreen ? 72.0 : 120.0)
+    : (isSmallScreen ? 48.0 : 80.0);
+    final fishIconSize = isOpponent
+        ? (isSmallScreen ? 60.0 : 80.0)
+        : (isSmallScreen ? 80.0 : 120.0);
+
 
     // アバター ＆ ユーザー名
     final avatarAndName = Column(
@@ -702,7 +707,7 @@ class BettingPhaseView extends StatelessWidget {
             icon: isOpponent
                 ? viewModel.opponentUserIcon
                 : viewModel.myUserIcon,
-            size: isSmallScreen ? 20 : 36,
+            size: isOpponent ? (isSmallScreen ? 45 : 75) : (isSmallScreen ? 30 : 50),
           ),
         ),
         if (!isSmallScreen) const SizedBox(height: 4),
@@ -711,7 +716,7 @@ class BettingPhaseView extends StatelessWidget {
           child: Text(
             displayName,
             style: TextStyle(
-              fontSize: isSmallScreen ? 12 : 16,
+              fontSize: isSmallScreen ? 16 : 24,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -1020,7 +1025,7 @@ class BettingPhaseView extends StatelessWidget {
   ) {
     final remaining = totalFish - viewModel.totalBet;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
-    final fishSize = isSmallScreen ? 24.0 : 32.0;
+    final fishSize = isSmallScreen ? 50.0 : 72.0;
 
     // さかなエリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
@@ -1135,7 +1140,7 @@ Widget _buildCatCard(
           ),
         ),
         _buildCatAvatar(viewModel, card.displayName, size: avatarSize),
-        SizedBox(height: isSmallScreen ? 130 : 200), // increased for better visibility
+        Container(height: 0), // removed excess spacing
         // さかなアイコンによるコスト表示
         Wrap(
           alignment: WrapAlignment.center,
