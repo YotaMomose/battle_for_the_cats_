@@ -675,12 +675,8 @@ class BettingPhaseView extends StatelessWidget {
         ? const Color(0xFFFFCCD2)
         : const Color(0xFFCBE5FF);
 
-    final iconSize = isOpponent
-    ? (isSmallScreen ? 72.0 : 120.0)
-    : (isSmallScreen ? 48.0 : 80.0);
-    final fishIconSize = isOpponent
-        ? (isSmallScreen ? 60.0 : 80.0)
-        : (isSmallScreen ? 80.0 : 120.0);
+    final iconSize = isSmallScreen ? 72.0 : 120.0;
+    final fishIconSize = isSmallScreen ? 80.0 : 110.0;
 
 
     // アバター ＆ ユーザー名
@@ -707,7 +703,7 @@ class BettingPhaseView extends StatelessWidget {
             icon: isOpponent
                 ? viewModel.opponentUserIcon
                 : viewModel.myUserIcon,
-            size: isOpponent ? (isSmallScreen ? 45 : 75) : (isSmallScreen ? 30 : 50),
+              size: isSmallScreen ? 55 : 70,
           ),
         ),
         if (!isSmallScreen) const SizedBox(height: 4),
@@ -751,10 +747,12 @@ class BettingPhaseView extends StatelessWidget {
 
     // 左カラム：アイコン ＋ ユーザー名 ＋ 魚数
     final leftColumn = Container(
-      width: isSmallScreen ? 110 : 150,
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      width: isSmallScreen ? 90 : 130,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.only(left: 5, top: 4, bottom: 4),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isOpponent) ...[
             avatarAndName,
@@ -794,7 +792,7 @@ class BettingPhaseView extends StatelessWidget {
           ),
           if (!isSmallScreen) const SizedBox(height: 2),
           SizedBox(
-            height: isSmallScreen ? 50 : 70,
+            height: isSmallScreen ? 70 : 100,
             child: _buildWonCatsList(
               inventory,
               viewModel,
@@ -817,19 +815,10 @@ class BettingPhaseView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (!isSmallScreen)
-            const Text(
-              '所持アイテム',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-                color: Colors.black87,
-              ),
-            ),
           isOpponent
               ? _buildOpponentItems(
                   viewModel,
-                  iconSize: isSmallScreen ? 22 : 32,
+                  iconSize: isSmallScreen ? 36 : 56,
                 )
               : _buildMyItemsList(
                   context,
@@ -842,34 +831,74 @@ class BettingPhaseView extends StatelessWidget {
 
     // 右カラム：ネストされた明るめのコンテナ
     final rightContainer = Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.55),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: innerBorderColor.withOpacity(0.5),
-            width: 1.5,
+  child: Column(
+    children: [
+      if (isOpponent) ...[
+        // 獲得したカードの枠
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: innerBorderColor.withOpacity(0.5),
+              width: 1.5,
+            ),
           ),
+          child: wonCatsContainer,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (isOpponent) ...[
-              wonCatsContainer,
-              const SizedBox(height: 6),
-              itemsContainer,
-            ] else ...[
-              itemsContainer,
-              const SizedBox(height: 6),
-              wonCatsContainer,
-            ],
-          ],
+        const SizedBox(height: 6),
+        // アイテムの枠
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: innerBorderColor.withOpacity(0.5),
+              width: 1.5,
+            ),
+          ),
+          child: itemsContainer,
         ),
-      ),
-    );
+      ] else ...[
+        // アイテムの枠
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: innerBorderColor.withOpacity(0.5),
+              width: 1.5,
+            ),
+          ),
+          child: itemsContainer,
+        ),
+        const SizedBox(height: 6),
+        // 獲得したカードの枠
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.55),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: innerBorderColor.withOpacity(0.5),
+              width: 1.5,
+            ),
+          ),
+          child: wonCatsContainer,
+        ),
+      ],
+    ],
+  ),
+);
 
     final content = StereoscopicContainer(
       baseColor: baseColor,
@@ -898,20 +927,22 @@ class BettingPhaseView extends StatelessWidget {
             Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: 6.0,
+                  horizontal: 0,
                   vertical: isSmallScreen ? 1.0 : 8.0,
                 ),
                 child: FittedBox(
                   fit: BoxFit.contain,
+                  alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(
-                        width: isSmallScreen ? 320 : 440,
+                        width: isSmallScreen ? 460 : 640,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [leftColumn, rightContainer],
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [leftColumn, const SizedBox(width: 4), rightContainer],
                         ),
                       ),
                       if (statusLabel != null)
@@ -919,12 +950,12 @@ class BettingPhaseView extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 2,
+                              horizontal: 18,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFBF5F),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(24),
                               border: Border.all(
                                 color: const Color(0xFF4D331F),
                                 width: 2,
@@ -944,7 +975,7 @@ class BettingPhaseView extends StatelessWidget {
                                       ? statusLabel.replaceFirst('...', '')
                                       : statusLabel,
                                   style: TextStyle(
-                                    fontSize: isSmallScreen ? 12 : 14,
+                                    fontSize: isSmallScreen ? 18 : 21,
                                     color: statusColor,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -952,7 +983,7 @@ class BettingPhaseView extends StatelessWidget {
                                 if (statusLabel.endsWith('...'))
                                   AnimatedWaitingDots(
                                     style: TextStyle(
-                                      fontSize: isSmallScreen ? 12 : 14,
+                                      fontSize: isSmallScreen ? 18 : 21,
                                       color: statusColor,
                                       fontWeight: FontWeight.w900,
                                     ),
@@ -1025,7 +1056,7 @@ class BettingPhaseView extends StatelessWidget {
   ) {
     final remaining = totalFish - viewModel.totalBet;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
-    final fishSize = isSmallScreen ? 50.0 : 72.0;
+    final fishSize = isSmallScreen ? 75.0 : 108.0;
 
     // さかなエリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
@@ -1382,7 +1413,7 @@ Widget _buildDraggableItem(
     }
   }
   final bool isUnavailable = count <= 0 || isPlaced;
-  final itemSize = isSmallScreen ? 32.0 : 48.0;
+  final itemSize = isSmallScreen ? 40.0 : 60.0;
 
   return isUnavailable
       ? Opacity(
@@ -1646,16 +1677,16 @@ Widget _buildWonCatsList(
               _buildCatAvatar(
                 viewModel,
                 cat.name,
-                size: isSmallScreen ? 24 : 36,
+                size: isSmallScreen ? 40.0 : 55.0,
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  FishIcon(size: isSmallScreen ? 12 : 20),
+                  FishIcon(size: isSmallScreen ? 20 : 30),
                   Text(
                     '${cat.cost}',
                     style: TextStyle(
-                      fontSize: isSmallScreen ? 10 : 16,
+                      fontSize: isSmallScreen ? 16 : 20,
                       color: Colors.blue,
                       fontWeight: FontWeight.bold,
                     ),
