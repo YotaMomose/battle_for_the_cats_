@@ -10,6 +10,7 @@ import 'tutorial_view_model.dart';
 import '../home/home_screen_view_model.dart';
 import 'views/tutorial_round_result_view.dart';
 import 'views/tutorial_final_result_view.dart';
+import 'views/tutorial_fishing_phase_view.dart';
 import 'views/tutorial_characters_dialog.dart';
 import '../../widgets/user_icon_widget.dart';
 import '../../widgets/fish_icon.dart';
@@ -63,6 +64,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
               const SafeArea(child: TutorialFinalResultView())
             else if (viewModel.isResultPhase)
               const SafeArea(child: TutorialRoundResultView())
+            else if (viewModel.isFishingPhase)
+              const SafeArea(child: TutorialFishingPhaseView())
             else
               SafeArea(
                 child: Column(
@@ -1054,40 +1057,6 @@ class _TutorialScreenState extends State<TutorialScreen> {
             child: Center(
               child: Text(
                 viewModel.confirmBetsButtonLabel,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (viewModel.currentStep >= 18) {
-      return Center(
-        child: SizedBox(
-          width: 200,
-          height: 50,
-          child: StereoscopicButton(
-            onPressed: viewModel.currentStep == 20 ? viewModel.rollDice : null,
-            baseColor: isFishHighlighted
-                ? Colors.yellow
-                : (viewModel.isMyRolled
-                      ? Colors.grey
-                      : const Color(0xFFF06292)),
-            shadowColor: isFishHighlighted
-                ? Colors.yellow.shade800
-                : (viewModel.isMyRolled
-                      ? Colors.grey.shade700
-                      : const Color(0xFFAD1457)),
-            borderRadius: 12,
-            depth: 4,
-            child: Center(
-              child: Text(
-                viewModel.isMyRolled ? '振りました' : 'サイコロを振る',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

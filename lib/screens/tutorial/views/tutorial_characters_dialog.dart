@@ -44,6 +44,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
     {
       'name': 'ふとっちょにゃんこ',
       'icon': Icons.pets,
+      'image': 'assets/images/fatcat.png',
       'color': Colors.deepOrange,
       'description':
           'こやつは要注意じゃ！ターンのはじめに突然現れ、お主と相手の持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカーじゃ！さかなを溜め込んでいるときは特に注意じゃ！',

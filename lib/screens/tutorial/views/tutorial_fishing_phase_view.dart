@@ -1,0 +1,511 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../services/se_service.dart';
+import '../../../models/game_room.dart';
+import '../tutorial_view_model.dart';
+import '../../game/player_data.dart';
+import '../../../widgets/stereoscopic_ui.dart';
+import '../../../widgets/user_icon_widget.dart';
+import '../../../widgets/fish_icon.dart';
+import 'dart:math' as math;
+
+/// チュートリアル用のつりフェーズ画面
+class TutorialFishingPhaseView extends StatelessWidget {
+  const TutorialFishingPhaseView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<TutorialViewModel>();
+    final playerData = viewModel.playerData;
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 680;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // ターン情報 (ポップなバブル)
+              _buildTurnHeader(viewModel, isSmallScreen),
+              const SizedBox(height: 16),
+
+              // 相手の状態
+              _buildOpponentState(viewModel, playerData, isSmallScreen),
+              const SizedBox(height: 16),
+
+              // タイトル
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const FishIcon(size: 28),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'つりフェーズ',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1A73E8),
+                      shadows: [
+                        Shadow(
+                          color: Colors.white,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(math.pi),
+                    child: const FishIcon(size: 28),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 自分のつり場
+              _buildMyFishingArea(
+                viewModel,
+                playerData,
+                context,
+                isSmallScreen,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTurnHeader(TutorialViewModel viewModel, bool isSmallScreen) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFBF5F),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF4D331F), width: 3),
+        boxShadow: const [
+          BoxShadow(color: Color(0xFF4D331F), offset: Offset(0, 4)),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star, color: Color(0xFFFF9800), size: 18),
+          const SizedBox(width: 8),
+          Text(
+            'ターン ${viewModel.currentTurn}',
+            style: TextStyle(
+              fontSize: isSmallScreen ? 16 : 20,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF333333),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.star, color: Color(0xFFFF9800), size: 18),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOpponentState(
+    TutorialViewModel viewModel,
+    PlayerData playerData,
+    bool isSmallScreen,
+  ) {
+    return StereoscopicContainer(
+      baseColor: const Color.fromARGB(255, 245, 143, 158).withOpacity(0.9),
+      shadowColor: const Color.fromARGB(255, 180, 80, 100),
+      borderRadius: 24,
+      depth: 6,
+      showDots: true,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        width: 320,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: UserIconWidget(
+                    icon: viewModel.opponentUserIcon,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  viewModel.opponentDisplayName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF4D331F),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '準備完了！',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                shadows: [Shadow(color: Colors.green, blurRadius: 4)],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMyFishingArea(
+    TutorialViewModel viewModel,
+    PlayerData playerData,
+    BuildContext context,
+    bool isSmallScreen,
+  ) {
+    return StereoscopicContainer(
+      baseColor: const Color.fromARGB(255, 143, 208, 245).withOpacity(0.9),
+      shadowColor: const Color.fromARGB(255, 80, 140, 180),
+      borderRadius: 32,
+      depth: 6,
+      showDots: true,
+      showStripes: false,
+      backgroundImage: const DecorationImage(
+        image: AssetImage('assets/images/sea.jpg'),
+        fit: BoxFit.cover,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        width: 320,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: UserIconWidget(icon: viewModel.myUserIcon, size: 26),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  viewModel.myDisplayName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF4D331F),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // つり演出エリア
+            SizedBox(
+              height: 160,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (viewModel.isFishingEffect)
+                    const _FishingActionAnimation()
+                  else if (viewModel.isMyRolled)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: const Color(0xFF4D331F),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '獲物ゲット！',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF4D331F),
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const FishIcon(size: 32),
+                                const SizedBox(width: 8),
+                                Text(
+                                  viewModel.currentDiceRoll == null
+                                      ? '...'
+                                      : '${viewModel.currentDiceRoll}',
+                                  style: const TextStyle(
+                                    fontSize: 44,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF4D331F),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    // 待機状態 (竿だけ)
+                    const Positioned(
+                      left: 70,
+                      child: Text('🎣', style: TextStyle(fontSize: 60)),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            if (!viewModel.isFishingEffect && !viewModel.isMyRolled) ...[
+              // 本当につりを実行していない時だけボタンを表示
+              StereoscopicButton(
+                onPressed: viewModel.currentStep == 20
+                    ? () {
+                        SeService().play('button_buni.mp3');
+                        viewModel.catchFish();
+                      }
+                    : null,
+                baseColor: const Color(0xFF1A73E8),
+                shadowColor: const Color(0xFF0D47A1),
+                borderRadius: 30,
+                depth: 6,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.catching_pokemon,
+                        size: 28,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        viewModel.fishButtonLabel,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            // チュートリアルなので「次へ進む」ボタンはダイアログの「次へ」に任せるか、それともここに出すか？
+            // tutorial_screen.dart にダイアログがあるのでボタンは出さないでおく
+            // ただしスペースを調整
+            if (viewModel.isMyRolled)
+              const SizedBox(height: 48), // ボタンの代わりのスペース
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FishingActionAnimation extends StatefulWidget {
+  const _FishingActionAnimation();
+
+  @override
+  State<_FishingActionAnimation> createState() =>
+      _FishingActionAnimationState();
+}
+
+class _FishingActionAnimationState extends State<_FishingActionAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500), // 0.5秒周期（2回で1秒）
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        // ウキの沈み込み (0.8以上の時にピクッとする)
+        final double progress = _controller.value;
+        final bool isPulling = progress > 0.8;
+        final double bobberOffset = isPulling
+            ? 15.0
+            : math.sin(progress * math.pi * 2) * 5.0;
+        final double rodAngle = isPulling ? -0.1 : 0.0;
+
+        return Stack(
+          children: [
+            // 1. 釣り竿と糸 (CustomPaint)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _FishingLinePainter(
+                  catPos: const Offset(80, 80),
+                  bobberPos: Offset(210, 80 + bobberOffset),
+                  rodAngle: rodAngle,
+                ),
+              ),
+            ),
+
+            // 3. ウキ (右側、水面の中。Offsetを調整)
+            Positioned(
+              right: 50,
+              top: 40 + bobberOffset,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🔴', style: TextStyle(fontSize: 30)),
+                  const SizedBox(height: 4),
+                  if (isPulling)
+                    const Text(
+                      'ピクッ！',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF4D331F),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// 釣り竿と釣り糸を描画するペインター
+class _FishingLinePainter extends CustomPainter {
+  final Offset catPos;
+  final Offset bobberPos;
+  final double rodAngle;
+
+  _FishingLinePainter({
+    required this.catPos,
+    required this.bobberPos,
+    required this.rodAngle,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rodPaint = Paint()
+      ..color = const Color(0xFF4D331F)
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    final linePaint = Paint()
+      ..color = Colors.black.withOpacity(0.4)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    // 竿の描画 (にゃんこの手元から斜め上に)
+    final Offset rodStart = catPos + const Offset(30, 0);
+    final Offset rodEnd =
+        rodStart +
+        Offset(
+          50 * math.cos(rodAngle - math.pi / 4),
+          50 * math.sin(rodAngle - math.pi / 4),
+        );
+    canvas.drawLine(rodStart, rodEnd, rodPaint);
+
+    // 糸の描画 (竿の先からウキのOffset位置へ)
+    final Path path = Path();
+    path.moveTo(rodEnd.dx, rodEnd.dy);
+
+    // 糸のたわみを表現 (二次ベジェ曲線)
+    final controlPoint = Offset(
+      (rodEnd.dx + bobberPos.dx) / 2,
+      math.max(rodEnd.dy, bobberPos.dy) + 20,
+    );
+    path.quadraticBezierTo(
+      controlPoint.dx,
+      controlPoint.dy,
+      bobberPos.dx,
+      bobberPos.dy,
+    );
+
+    canvas.drawPath(path, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _FishingLinePainter oldDelegate) {
+    return oldDelegate.bobberPos != bobberPos ||
+        oldDelegate.rodAngle != rodAngle;
+  }
+}

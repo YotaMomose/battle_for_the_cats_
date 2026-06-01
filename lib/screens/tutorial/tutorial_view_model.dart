@@ -57,6 +57,13 @@ class TutorialViewModel extends ChangeNotifier {
   bool get isMyRolled => _isDiceRolled;
   bool get isResultPhase => _isResultPhase;
   bool get isAnimationFinished => _isAnimationFinished;
+  bool get isFishingPhase => _currentStep >= 18 && _currentStep <= 21;
+  bool _isFishingEffect = false;
+  bool get isFishingEffect => _isFishingEffect;
+  String get fishButtonLabel {
+    if (_isFishingEffect) return 'つり中...';
+    return '釣りをする';
+  }
   int get round => _round;
   int get currentTurn => _round;
   int? get currentDiceRoll => _randomDiceResult;
@@ -248,15 +255,15 @@ class TutorialViewModel extends ChangeNotifier {
       case 15:
         return '最後は「茶トラねこ」じゃが...おっと！相手が「食欲増進ポーション」を置いたようじゃ。';
       case 16:
-        return '「食欲増進ポーション」はにゃんこに必要なさかなの数が2倍になるじゃ！お主は1匹しか置いておらんから、さかな不足で仲間にできなかったようじゃ。';
+        return '「食欲増進ポーション」はにゃんこゲットに必要なさかなの数が2倍になるじゃ！1匹しか置いておらんから、さかな不足で仲間にできなかったようじゃ。';
       case 17:
         return '1ターン目の結果じゃ。\nしろねことくろねこをゲットしたから茶トラねこをゲットできれば勝てるぞ！';
       case 18:
         return 'しかし、おさかなが少なくなってきたのう。';
       case 19:
-        return 'おさかながなくなったらサイコロを振るのじゃ。出た目の数だけおさかなが補充されるぞ。';
+        return 'おさかながなくなったら釣りをするのじゃ。釣れた数だけおさかなが補充されるぞ。';
       case 20:
-        return '右下の「サイコロを振る」を押して、おさかなを補充するのじゃ！';
+        return '「釣りをする」を押して、おさかなをゲットするのじゃ！';
       case 21:
         return 'ほっほっほ、これでまた戦えるな！さあ、このまま第2ターンへ進むぞ。';
       case 22:
@@ -403,12 +410,18 @@ class TutorialViewModel extends ChangeNotifier {
     }
   }
 
-  void rollDice() {
+  void catchFish() {
     if (_currentStep == 20) {
-      _randomDiceResult = 4;
-      _isDiceRolled = true;
-      _currentStep = 21;
+      _isFishingEffect = true;
       notifyListeners();
+
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        _isFishingEffect = false;
+        _randomDiceResult = 4;
+        _isDiceRolled = true;
+        _currentStep = 21;
+        notifyListeners();
+      });
     }
   }
 

@@ -29,7 +29,7 @@ class GameConstants {
 
   // イベント
   static const double fatCatEventProbability =
-      1.0; // ふとっちょにゃんこイベント発生確率 (テスト用に100%)
+      0.1; // ふとっちょにゃんこイベント発生確率
 
   // フレンド
   static const int maxFriendLimit = 50; // フレンドの上限数
