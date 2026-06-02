@@ -366,7 +366,7 @@ class BettingPhaseView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        int selectedTab = 0; // 0: アイテム, 1: キャラクター
+        int selectedTab = 0; // 0: アイテム, 1: キャラクター, 2: ルール
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
@@ -396,7 +396,7 @@ class BettingPhaseView extends StatelessWidget {
                             const SizedBox(width: 8),
                             const Expanded(
                               child: Text(
-                                'アイテム・キャラクター',
+                                'ゲームガイド',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -420,6 +420,11 @@ class BettingPhaseView extends StatelessWidget {
                             text: 'キャラクター',
                             isSelected: selectedTab == 1,
                             onTap: () => setState(() => selectedTab = 1),
+                          ),
+                          _buildTabButton(
+                            text: 'ルール',
+                            isSelected: selectedTab == 2,
+                            onTap: () => setState(() => selectedTab = 2),
                           ),
                         ],
                       ),
@@ -470,7 +475,8 @@ class BettingPhaseView extends StatelessWidget {
                             tagTextColor: Colors.purple.shade400,
                           ),
                         ])
-                      : _buildGuideList([
+                      : selectedTab == 1
+                      ? _buildGuideList([
                           _GuideItem(
                             '茶トラねこ・白ねこ・黒ねこ',
                             null,
@@ -503,6 +509,32 @@ class BettingPhaseView extends StatelessWidget {
                             '仲間にした時、使ったアイテムを1つ復活させることができる。',
                             tagColor: Colors.orange.shade50,
                             tagTextColor: Colors.orange.shade600,
+                          ),
+                        ])
+                      : _buildGuideList([
+                          _GuideItem(
+                            '勝利条件',
+                            null,
+                            '同じにゃんこを3匹、または違うにゃんこを3種類集めると勝利。',
+                            fallbackIcon: Icons.rule,
+                            tagColor: Colors.green.shade50,
+                            tagTextColor: Colors.green.shade700,
+                          ),
+                          _GuideItem(
+                            '特殊キャラは勝利条件にならない',
+                            null,
+                            '漁師・いぬ・アイテム屋などのにゃんこ以外のキャラは、何匹集めても勝利条件にはならない。',
+                            fallbackIcon: Icons.block,
+                            tagColor: Colors.green.shade50,
+                            tagTextColor: Colors.green.shade700,
+                          ),
+                          _GuideItem(
+                            '同時勝利時の判定',
+                            null,
+                            '同時に勝利条件を満たした場合は、これまでに獲得したキャラクターのお魚コストの合計が高い人の勝ち。',
+                            fallbackIcon: Icons.science,
+                            tagColor: Colors.green.shade50,
+                            tagTextColor: Colors.green.shade700,
                           ),
                         ]),
                 ),
@@ -678,7 +710,6 @@ class BettingPhaseView extends StatelessWidget {
     final iconSize = isSmallScreen ? 72.0 : 120.0;
     final fishIconSize = isSmallScreen ? 80.0 : 110.0;
 
-
     // アバター ＆ ユーザー名
     final avatarAndName = Column(
       mainAxisSize: MainAxisSize.min,
@@ -703,7 +734,7 @@ class BettingPhaseView extends StatelessWidget {
             icon: isOpponent
                 ? viewModel.opponentUserIcon
                 : viewModel.myUserIcon,
-              size: isSmallScreen ? 55 : 70,
+            size: isSmallScreen ? 55 : 70,
           ),
         ),
         if (!isSmallScreen) const SizedBox(height: 4),
@@ -783,7 +814,7 @@ class BettingPhaseView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '合計コスト：${inventory.totalCost}',
+            '合計おさかな数：${inventory.totalCost}',
             style: TextStyle(
               fontSize: isSmallScreen ? 10 : 14,
               fontWeight: FontWeight.bold,
@@ -831,74 +862,74 @@ class BettingPhaseView extends StatelessWidget {
 
     // 右カラム：ネストされた明るめのコンテナ
     final rightContainer = Expanded(
-  child: Column(
-    children: [
-      if (isOpponent) ...[
-        // 獲得したカードの枠
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.55),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: innerBorderColor.withOpacity(0.5),
-              width: 1.5,
+      child: Column(
+        children: [
+          if (isOpponent) ...[
+            // 獲得したカードの枠
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: innerBorderColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: wonCatsContainer,
             ),
-          ),
-          child: wonCatsContainer,
-        ),
-        const SizedBox(height: 6),
-        // アイテムの枠
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.55),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: innerBorderColor.withOpacity(0.5),
-              width: 1.5,
+            const SizedBox(height: 6),
+            // アイテムの枠
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: innerBorderColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: itemsContainer,
             ),
-          ),
-          child: itemsContainer,
-        ),
-      ] else ...[
-        // アイテムの枠
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.55),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: innerBorderColor.withOpacity(0.5),
-              width: 1.5,
+          ] else ...[
+            // アイテムの枠
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: innerBorderColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: itemsContainer,
             ),
-          ),
-          child: itemsContainer,
-        ),
-        const SizedBox(height: 6),
-        // 獲得したカードの枠
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.55),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: innerBorderColor.withOpacity(0.5),
-              width: 1.5,
+            const SizedBox(height: 6),
+            // 獲得したカードの枠
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: innerBorderColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: wonCatsContainer,
             ),
-          ),
-          child: wonCatsContainer,
-        ),
-      ],
-    ],
-  ),
-);
+          ],
+        ],
+      ),
+    );
 
     final content = StereoscopicContainer(
       baseColor: baseColor,
@@ -942,7 +973,11 @@ class BettingPhaseView extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [leftColumn, const SizedBox(width: 4), rightContainer],
+                          children: [
+                            leftColumn,
+                            const SizedBox(width: 4),
+                            rightContainer,
+                          ],
                         ),
                       ),
                       if (statusLabel != null)

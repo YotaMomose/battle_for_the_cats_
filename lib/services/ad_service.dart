@@ -14,11 +14,13 @@ class AdService {
   /// インタースティシャル広告のユニットIDを取得
   String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      // Android テスト用
-      return 'ca-app-pub-3940256099942544/1033173712';
+      return kReleaseMode
+          ? 'ca-app-pub-4143123204763905/8518417756'
+          : 'ca-app-pub-3940256099942544/1033173712';
     } else if (Platform.isIOS) {
-      // iOS テスト用
-      return 'ca-app-pub-3940256099942544/4411468910';
+      return kReleaseMode
+          ? 'ca-app-pub-4143123204763905/2084871344'
+          : 'ca-app-pub-3940256099942544/4411468910';
     }
     return '';
   }
