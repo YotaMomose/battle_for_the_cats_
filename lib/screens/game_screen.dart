@@ -72,8 +72,28 @@ class _GameScreenContent extends StatefulWidget {
   State<_GameScreenContent> createState() => _GameScreenContentState();
 }
 
-class _GameScreenContentState extends State<_GameScreenContent> {
+class _GameScreenContentState extends State<_GameScreenContent> with WidgetsBindingObserver {
   Type? _lastStateType;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (!mounted) return;
+    final viewModel = context.read<GameScreenViewModel>();
+    viewModel.updateAppLifecycleState(state);
+  }
 
   @override
   Widget build(BuildContext context) {

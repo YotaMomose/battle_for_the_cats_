@@ -138,6 +138,10 @@ class GameScreenViewModel extends ChangeNotifier {
   int? _predictedDiceResult; // 先行決定したサイコロの結果
   bool get isFishingEffect => _isFishingEffect;
 
+  Timer? _presenceTimer;
+  bool _hasDetectedOpponentTimeout = false;
+  int? _opponentInactiveStartTime;
+
   // カード選択状態（賭け用）
   String? _selectedCatIndex;
   String? get selectedCatIndex => _selectedCatIndex;
@@ -528,6 +532,7 @@ class GameScreenViewModel extends ChangeNotifier {
             _updateUiState(room);
             _syncWithServerState(room);
             _checkTurnChange(room);
+            _checkOpponentTimeout(room);
             notifyListeners();
           },
           onError: (error) {
@@ -535,6 +540,7 @@ class GameScreenViewModel extends ChangeNotifier {
             notifyListeners();
           },
         );
+    _startPresenceHeartbeat();
   }
 
   void _updateUiState(GameRoom room) {
@@ -791,6 +797,27 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> updateAppLifecycleState(AppLifecycleState state) async {
+    if (_currentRoom == null || _currentRoom!.status == GameStatus.finished) {
+      return;
+    }
+
+    final isActive = state == AppLifecycleState.resumed;
+    if (!isActive) {
+      _presenceTimer?.cancel();
+    }
+
+    try {
+      await _gameService.updatePlayerAppState(roomCode, playerId, isActive);
+    } catch (e) {
+      debugPrint('[GameScreenViewModel] AppLifecycleState更新に失敗しました: $e');
+    }
+
+    if (isActive) {
+      _startPresenceHeartbeat();
+    }
+  }
+
   void updateBet(String catIndex, int amount) {
     if (_hasPlacedBet) return;
     if (amount < 0) return;
@@ -1028,6 +1055,77 @@ class GameScreenViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _roomSubscription?.cancel();
+    _presenceTimer?.cancel();
+    _opponentInactiveStartTime = null;
     super.dispose();
+  }
+
+  void _startPresenceHeartbeat() {
+    _presenceTimer?.cancel();
+    _presenceTimer = Timer.periodic(
+      const Duration(seconds: 10),
+      (_) => _sendPresenceHeartbeat(),
+    );
+    _sendPresenceHeartbeat();
+  }
+
+  Future<void> _sendPresenceHeartbeat() async {
+    if (_currentRoom == null || _currentRoom!.status == GameStatus.finished) {
+      return;
+    }
+    try {
+      await _gameService.updatePlayerPresence(roomCode, playerId);
+    } catch (e) {
+      debugPrint('[GameScreenViewModel] プレゼンス更新に失敗しました: $e');
+    }
+  }
+
+  void _checkOpponentTimeout(GameRoom room) {
+    if (room.status == GameStatus.waiting ||
+        room.status == GameStatus.finished ||
+        _hasDetectedOpponentTimeout) {
+      return;
+    }
+
+    final opponent = isHost ? room.guest : room.host;
+    if (opponent == null) return;
+
+    // 相手がinactive状態の場合、その状態がどのくらい続いているかチェック
+    if (!opponent.isActive) {
+      if (_opponentInactiveStartTime == null) {
+        // 初めてinactiveになった時刻を記録
+        _opponentInactiveStartTime = DateTime.now().millisecondsSinceEpoch;
+      }
+
+      // inactiveから30秒以上経過したか判定
+      final inactiveDuration =
+          DateTime.now().millisecondsSinceEpoch - _opponentInactiveStartTime!;
+      if (inactiveDuration >= 30000) {
+        // 30秒以上inactive状態が続いている
+        _hasDetectedOpponentTimeout = true;
+        _markOpponentDisconnected();
+      }
+    } else {
+      // 相手が復帰した場合は記録をリセット
+      _opponentInactiveStartTime = null;
+    }
+
+    // フォールバック: lastActiveAtがかなり古い場合も判定
+    final lastActiveAt = opponent.lastActiveAt;
+    if (lastActiveAt == 0) return;
+
+    final age = DateTime.now().millisecondsSinceEpoch - lastActiveAt;
+    if (age > GameConstants.opponentDisconnectTimeoutMillis) {
+      _hasDetectedOpponentTimeout = true;
+      _markOpponentDisconnected();
+    }
+  }
+
+  Future<void> _markOpponentDisconnected() async {
+    try {
+      await _gameService.markPlayerDisconnected(roomCode, playerId);
+    } catch (e) {
+      debugPrint('[GameScreenViewModel] 対戦相手切断処理に失敗しました: $e');
+    }
   }
 }

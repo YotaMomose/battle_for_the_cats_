@@ -101,9 +101,69 @@ class RoomService {
     return _repository.getRoom(roomCode);
   }
 
+  /// Heartbeat を更新してプレイヤーが生存中であることを示す
+  Future<void> updatePlayerPresence(String roomCode, String playerId) async {
+    final room = await _repository.getRoom(roomCode);
+    if (room == null) return;
+
+    await _repository.updatePlayerData(roomCode, playerId, {
+      'lastActiveAt': DateTime.now().millisecondsSinceEpoch,
+      'isActive': true,
+    });
+  }
+
+  Future<void> updatePlayerAppState(
+    String roomCode,
+    String playerId,
+    bool isActive,
+  ) async {
+    final room = await _repository.getRoom(roomCode);
+    if (room == null) return;
+
+    await _repository.updatePlayerData(roomCode, playerId, {
+      'isActive': isActive,
+      'lastActiveAt': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
   /// ルームを監視
   Stream<GameRoom?> watchRoom(String roomCode) {
     return _repository.watchRoom(roomCode);
+  }
+
+  /// 対戦相手が一定時間応答しなかった場合に相手を切断扱いにする
+  Future<void> markPlayerDisconnected(
+    String roomCode,
+    String remainingPlayerId,
+  ) async {
+    await _repository.runTransaction((transaction) async {
+      final room = await _repository.getRoomInTransaction(
+        transaction,
+        roomCode,
+      );
+      if (room == null) return;
+
+      if (room.status == GameStatus.waiting) return;
+
+      final isHostRemaining = room.hostId == remainingPlayerId;
+      final disconnectedPlayer = isHostRemaining ? room.guest : room.host;
+      final disconnectedKey = isHostRemaining ? 'guest' : 'host';
+
+      if (disconnectedPlayer == null || disconnectedPlayer.abandoned) return;
+
+      final updates = <String, dynamic>{
+        '${disconnectedKey}.abandoned': true,
+      };
+
+      if (room.status != GameStatus.finished || room.finalWinner == null) {
+        updates['status'] = GameStatus.finished.value;
+        updates['finalWinner'] = isHostRemaining
+            ? Winner.host.value
+            : Winner.guest.value;
+      }
+
+      _repository.updateRoomInTransaction(transaction, roomCode, updates);
+    });
   }
 
   /// ルームを退出する

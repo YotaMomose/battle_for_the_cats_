@@ -66,6 +66,17 @@ class GameService {
       _roomService.watchRoom(roomCode);
   Future<void> leaveRoom(String roomCode, String playerId) =>
       _roomService.leaveRoom(roomCode, playerId);
+  Future<void> updatePlayerPresence(String roomCode, String playerId) =>
+      _roomService.updatePlayerPresence(roomCode, playerId);
+  Future<void> updatePlayerAppState(
+    String roomCode,
+    String playerId,
+    bool isActive,
+  ) => _roomService.updatePlayerAppState(roomCode, playerId, isActive);
+  Future<void> markPlayerDisconnected(
+    String roomCode,
+    String remainingPlayerId,
+  ) => _roomService.markPlayerDisconnected(roomCode, remainingPlayerId);
   Future<void> startGame(String roomCode, String hostId) =>
       _roomService.startGame(roomCode, hostId);
   Future<void> rejectGuest(String roomCode, String hostId) =>

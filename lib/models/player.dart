@@ -25,6 +25,8 @@ class Player {
   int fishermanCount;
   int pendingDogChases;
   bool confirmedFatCatEvent;
+  bool isActive;
+  int lastActiveAt;
 
   Player({
     required this.id,
@@ -44,9 +46,12 @@ class Player {
     this.fishermanCount = 0,
     this.pendingDogChases = 0,
     this.confirmedFatCatEvent = false,
+    this.isActive = true,
+    int? lastActiveAt,
   }) : catsWon = catsWon ?? CatInventory(),
        currentBets = currentBets ?? Bets(),
-       items = items ?? ItemInventory.initial();
+       items = items ?? ItemInventory.initial(),
+       lastActiveAt = lastActiveAt ?? DateTime.now().millisecondsSinceEpoch;
 
   Map<String, dynamic> toMap() {
     return {
@@ -68,6 +73,8 @@ class Player {
       'fishermanCount': fishermanCount,
       'pendingDogChases': pendingDogChases,
       'confirmedFatCatEvent': confirmedFatCatEvent,
+      'isActive': isActive,
+      'lastActiveAt': lastActiveAt,
     };
   }
 
@@ -97,6 +104,8 @@ class Player {
       fishermanCount: map['fishermanCount'] ?? 0,
       pendingDogChases: map['pendingDogChases'] ?? 0,
       confirmedFatCatEvent: map['confirmedFatCatEvent'] ?? false,
+      isActive: map['isActive'] ?? true,
+      lastActiveAt: map['lastActiveAt'] ?? DateTime.now().millisecondsSinceEpoch,
     );
   }
 

@@ -33,6 +33,9 @@ class GameConstants {
 
   // フレンド
   static const int maxFriendLimit = 50; // フレンドの上限数
+
+  // 対戦相手の応答がなくなったと判断するまでの時間（ミリ秒）
+  static const int opponentDisconnectTimeoutMillis = 30000;
 }
 
 /// ゲーム状態
