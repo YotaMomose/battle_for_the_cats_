@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/paw_background.dart';
 import '../services/se_service.dart';
-import '../services/ad_service.dart';
-import '../repositories/user_repository.dart';
 import 'game/game_screen_view_model.dart';
 import 'game/game_screen_state.dart';
 import 'game/views/waiting_view.dart';
@@ -219,10 +217,7 @@ class _GameScreenContentState extends State<_GameScreenContent> {
                       borderRadius: 20,
                       depth: 4,
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         child: Text(
                           'キャンセル',
                           style: TextStyle(
@@ -233,37 +228,12 @@ class _GameScreenContentState extends State<_GameScreenContent> {
                       ),
                     ),
                     StereoscopicButton(
-                      onPressed: () async {
+                      onPressed: () {
                         SeService().play('button_buni.mp3');
                         Navigator.pop(context);
-
-                        final userRepository = Provider.of<UserRepository>(
-                          context,
-                          listen: false,
-                        );
-                        final profile = await userRepository.getProfile(
-                          vm.playerId,
-                        );
-                        final isSupporter = profile?.isSupporter ?? false;
-
-                        if (!isSupporter && context.mounted) {
-                          await AdService().showInterstitialAd(
-                            onAdClosed: () {
-                              if (context.mounted) {
-                                vm.leaveRoom();
-                                Navigator.of(
-                                  context,
-                                ).popUntil((route) => route.isFirst);
-                              }
-                            },
-                          );
-                        } else {
-                          vm.leaveRoom();
-                          if (context.mounted) {
-                            Navigator.of(
-                              context,
-                            ).popUntil((route) => route.isFirst);
-                          }
+                        vm.leaveRoom();
+                        if (context.mounted) {
+                          Navigator.of(context).popUntil((route) => route.isFirst);
                         }
                       },
                       baseColor: const Color(0xFFFF5252),
@@ -271,10 +241,7 @@ class _GameScreenContentState extends State<_GameScreenContent> {
                       borderRadius: 20,
                       depth: 4,
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 12,
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                         child: Text(
                           '退出',
                           style: TextStyle(

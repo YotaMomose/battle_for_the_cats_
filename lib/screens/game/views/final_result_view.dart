@@ -781,8 +781,9 @@ class _FinalResultViewState extends State<FinalResultView> {
         );
         final profile = await userRepository.getProfile(viewModel.playerId);
         final isSupporter = profile?.isSupporter ?? false;
+        final adsRemoved = profile?.adsRemoved ?? false;
 
-        if (!isSupporter) {
+        if (!isSupporter && !adsRemoved) {
           if (context.mounted) {
             await AdService().showInterstitialAd(
               onAdClosed: () {

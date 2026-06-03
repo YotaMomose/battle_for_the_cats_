@@ -45,6 +45,7 @@ class IapService extends ChangeNotifier {
       _isAvailable = await _iap.isAvailable();
       if (_isAvailable) {
         await _loadProducts();
+        await restorePurchases();
       }
     } catch (e) {
       debugPrint('IapService Initialization Error: $e');
@@ -68,6 +69,17 @@ class IapService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 既存の購入情報を復元する
+  Future<void> restorePurchases() async {
+    if (!_isAvailable) return;
+
+    try {
+      await _iap.restorePurchases();
+    } catch (e) {
+      debugPrint('Restore purchases failed: $e');
+    }
+  }
+
   /// 購入リクエスト（消耗型）
   Future<void> buySupporter() async {
     if (!_isAvailable) return;
@@ -82,8 +94,8 @@ class IapService extends ChangeNotifier {
     await _iap.buyConsumable(purchaseParam: purchaseParam);
   }
 
-  /// 広告非表示の購入リクエスト（非消耗型または投げ銭形式）
-  /// ここでは何度も購入可能な投げ銭形式（応援の簡易版）として扱う
+  /// 広告非表示の購入リクエスト（非消耗型）
+  /// 1度購入すれば永久に広告をオフにする想定
   Future<void> buyRemoveAds() async {
     if (!_isAvailable) return;
 
@@ -93,7 +105,7 @@ class IapService extends ChangeNotifier {
     );
 
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
-    await _iap.buyConsumable(purchaseParam: purchaseParam);
+    await _iap.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
   /// 購入状態の更新通知
