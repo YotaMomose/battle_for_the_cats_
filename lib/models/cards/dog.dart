@@ -6,7 +6,7 @@ import 'game_card.dart';
 import 'card_type.dart';
 import 'card_effect.dart';
 
-/// キャラクター「犬」
+/// キャラクター「いぬ」
 /// 獲得した場合、そのターンで獲得したにゃんこを含めた相手のキャラクターを1匹逃がすことができる。
 final class Dog implements GameCard {
   @override
@@ -46,7 +46,7 @@ final class Dog implements GameCard {
     );
   }
 
-  /// ランダムな犬を生成
+  /// ランダムないぬを生成
   factory Dog.random(int index) {
     final random = Random();
     final cost = random.nextInt(4) + 1; // 1-4

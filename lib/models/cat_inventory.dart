@@ -23,7 +23,7 @@ class CatInventory {
   void addCat(String name, int cost) =>
       _cats.add(WonCat(name: name, cost: cost));
 
-  /// 名前を指定してにゃんこを1匹削除する（犬の効果などで使用）
+  /// 名前を指定してにゃんこを1匹削除する（いぬの効果などで使用）
   void removeByName(String name) {
     final index = _cats.indexWhere((c) => c.name == name);
     if (index != -1) {

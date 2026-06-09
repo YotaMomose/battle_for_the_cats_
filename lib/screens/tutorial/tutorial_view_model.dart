@@ -28,7 +28,7 @@ class TutorialViewModel extends ChangeNotifier {
     final round = RoundCards(
       card1: const RegularCat(id: 'white', displayName: 'しろねこ', baseCost: 3),
       card2: const RegularCat(id: 'black', displayName: 'くろねこ', baseCost: 2),
-      card3: const RegularCat(id: 'tabby', displayName: '茶トラねこ', baseCost: 1),
+      card3: const RegularCat(id: 'tabby', displayName: 'とらねこ', baseCost: 1),
     );
 
     _me = player;
@@ -103,7 +103,7 @@ class TutorialViewModel extends ChangeNotifier {
           winStatus: 'win',
         ),
         TutorialRoundResultItem(
-          catName: '茶トラねこ',
+          catName: 'とらねこ',
           myBet: 1,
           opponentBet: 0,
           opponentItem: ItemType.potion,
@@ -114,7 +114,7 @@ class TutorialViewModel extends ChangeNotifier {
       // 第2ターン:
       // 0: しろ(びっくりホーンで引き分け)
       // 1: しろ(自分3、相手4で負け)
-      // 2: 茶トラ(自分2、相手1で勝ち)
+      // 2: とら(自分2、相手1で勝ち)
       return [
         TutorialRoundResultItem(
           catName: 'しろねこ',
@@ -130,7 +130,7 @@ class TutorialViewModel extends ChangeNotifier {
           winStatus: 'lose',
         ),
         TutorialRoundResultItem(
-          catName: '茶トラねこ',
+          catName: 'とらねこ',
           myBet: 2,
           opponentBet: 1,
           winStatus: 'win',
@@ -171,7 +171,7 @@ class TutorialViewModel extends ChangeNotifier {
     }
 
     if (_isFinalResultPhase) {
-      myInventory.addCat('茶トラねこ', 1);
+      myInventory.addCat('とらねこ', 1);
       oppInventory.addCat('しろねこ', 3);
     }
 
@@ -216,7 +216,7 @@ class TutorialViewModel extends ChangeNotifier {
   String? getCatImagePath(String catName) {
     if (catName.contains('しろ')) return 'assets/images/sironeko.png';
     if (catName.contains('くろ')) return 'assets/images/kuroneko.png';
-    if (catName.contains('茶トラ')) return 'assets/images/tyatoranekopng.png';
+    if (catName.contains('とら')) return 'assets/images/tyatoranekopng.png';
     if (catName.contains('ふとっちょ')) return 'assets/images/fatcat.png';
     return null;
   }
@@ -225,7 +225,7 @@ class TutorialViewModel extends ChangeNotifier {
   Color getCatIconColor(String catName) {
     if (catName.contains('しろ')) return Colors.grey[300]!;
     if (catName.contains('くろ')) return Colors.grey[800]!;
-    if (catName.contains('茶トラ')) return Colors.orange;
+    if (catName.contains('とら')) return Colors.orange;
     return Colors.grey;
   }
 
@@ -251,9 +251,9 @@ class TutorialViewModel extends ChangeNotifier {
       case 8:
         return '「捕獲ネット」は相手がおさかなを置いていなければ、おさかなを使わずに仲間にできる優れものじゃ。';
       case 9:
-        return 'アイテムは使うとなくなるからタイミングが大事じゃ。\n最後に右の「茶トラねこ」じゃな。';
+        return 'アイテムは使うとなくなるからタイミングが大事じゃ。\n最後に右の「とらねこ」じゃな。';
       case 10:
-        return '「茶トラねこ」はおさかな1匹分必要じゃから、おさかなを1匹だけ置いてみるのじゃ。';
+        return '「とらねこ」はおさかな1匹分必要じゃから、おさかなを1匹だけ置いてみるのじゃ。';
       case 11:
         return 'よし、これですべての準備が整った！\nそれじゃあ「確定する」ボタンを押してみるのじゃ。\n今回使わなかったおさかなは次のターンに持ち越されるぞ。';
       case 12:
@@ -263,11 +263,11 @@ class TutorialViewModel extends ChangeNotifier {
       case 14:
         return '次は「くろねこ」じゃな。相手がおさかなを置いてないから、「捕獲ネット」のおかげでおさかな0匹で仲間にできたぞ。';
       case 15:
-        return '最後は「茶トラねこ」じゃが...おっと！相手が「食欲増進ポーション」を置いたようじゃ。';
+        return '最後は「とらねこ」じゃが...おっと！相手が「食欲増進ポーション」を置いたようじゃ。';
       case 16:
         return '「食欲増進ポーション」はにゃんこゲットに必要なおさかなの数が2倍になるじゃ！1匹しか置いておらんから、おさかな不足で仲間にできなかったようじゃ。';
       case 17:
-        return '1ターン目の結果じゃ。\nしろねことくろねこをゲットしたから茶トラねこをゲットできれば勝てるぞ！';
+        return '1ターン目の結果じゃ。\nしろねことくろねこをゲットしたからとらねこをゲットできれば勝てるぞ！';
       case 18:
         return 'しかし、おさかなが少なくなってきたのう。';
       case 19:
@@ -291,7 +291,7 @@ class TutorialViewModel extends ChangeNotifier {
       case 28:
         return 'ふむ、おさかなを置いても安心はできんぞ。相手の方が多くのおさかなを置いた場合は、そちらに取られてしまうのじゃ。';
       case 29:
-        return '最後に、右の「茶トラ」を取るために、おさかなを2匹置いておくのじゃ！';
+        return '最後に、右の「とら」を取るために、おさかなを2匹置いておくのじゃ！';
       case 30:
         return 'ほっほっほ、完璧な布陣じゃな。それでは「確定する」ボタンを押してみるのじゃ。';
       case 31:
@@ -307,11 +307,11 @@ class TutorialViewModel extends ChangeNotifier {
       case 36:
         return '残念！お主より多いおさかなを置かれてしまった。必要なおさかなの数を満たしていても相手より少ないと取られてしまうのじゃ。';
       case 37:
-        return '最後は右の「茶トラ」！お主は必要な数より多い2匹置いておるが、相手は？';
+        return '最後は右の「とら」！お主は必要な数より多い2匹置いておるが、相手は？';
       case 38:
         return '相手は1匹しか置かなかったようじゃな。お主の勝ちじゃ！';
       case 39:
-        return 'これで「しろ」「くろ」「茶トラ」の3種類が揃ったな！';
+        return 'これで「しろ」「くろ」「とら」の3種類が揃ったな！';
       case 40:
         return 'お見事！お主の完全勝利じゃ！';
       case 41:
@@ -499,7 +499,7 @@ class TutorialViewModel extends ChangeNotifier {
     final round2 = RoundCards(
       card1: const RegularCat(id: 'white1', displayName: 'しろねこ', baseCost: 3),
       card2: const RegularCat(id: 'white2', displayName: 'しろねこ', baseCost: 3),
-      card3: const RegularCat(id: 'tabby2', displayName: '茶トラねこ', baseCost: 1),
+      card3: const RegularCat(id: 'tabby2', displayName: 'とらねこ', baseCost: 1),
     );
 
     _room = GameRoom(

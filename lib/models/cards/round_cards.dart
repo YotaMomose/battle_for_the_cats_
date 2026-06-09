@@ -56,7 +56,7 @@ class RoundCards {
     if (rand < 0.2) {
       return Fisherman.random(index);
     }
-    // 10%の確率で犬が出現
+    // 10%の確率でいぬが出現
     if (rand < 0.3) {
       return Dog.random(index);
     }

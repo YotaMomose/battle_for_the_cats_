@@ -97,7 +97,7 @@ class _TutorialRoundResultViewState extends State<TutorialRoundResultView> {
         _forceCompleteCard(1);
         viewModel.setAnimationFinished(true);
       } else if (step == 37) {
-        // カード2 演出開始 (茶トラ)
+        // カード2 演出開始 (とら)
         _forceCompleteCard(1);
         _startCardAnimation(2, viewModel);
       } else if (step == 38) {

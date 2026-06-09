@@ -1,4 +1,4 @@
-/// 犬の効果で追い出されたカードの情報
+/// いぬの効果で追い出されたカードの情報
 class ChasedCardInfo {
   final String cardName;
   final String chaserPlayerId;

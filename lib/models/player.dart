@@ -152,7 +152,7 @@ class Player {
     catsWon.addCat(name, cost);
   }
 
-  /// 獲得したにゃんこを削除する（犬の効果などで使用）
+  /// 獲得したにゃんこを削除する（いぬの効果などで使用）
   void removeWonCat(String name) {
     final beforeCount = catsWon.count;
     catsWon.removeByName(name);

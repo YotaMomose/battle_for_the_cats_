@@ -478,7 +478,7 @@ class BettingPhaseView extends StatelessWidget {
                       : selectedTab == 1
                       ? _buildGuideList([
                           _GuideItem(
-                            '茶トラねこ・白ねこ・黒ねこ',
+                            'とらねこ・しろねこ・くろねこ',
                             null,
                             '3種類または同じ色3匹集めると勝利！基本となるカード。',
                             imagePaths: [

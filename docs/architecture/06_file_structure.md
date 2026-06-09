@@ -71,7 +71,7 @@ lib/
 │       ├── boss_cat.dart                       (約70行) - ボスにゃんこ
 │       ├── fisherman.dart                      (約60行) - 漁師
 │       ├── item_shop.dart                      (約60行) - アイテム屋
-│       └── dog.dart                             (約70行) - 犬
+│       └── dog.dart                             (約70行) - いぬ
 │
 ├── repositories/                                【リポジトリ層：データアクセス】
 │   ├── firestore_repository.dart               (104行)

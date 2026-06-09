@@ -32,9 +32,9 @@ void main() {
 
     test('addWonCat should add to catsWon list', () {
       final player = Player(id: 'p1');
-      player.addWonCat('茶トラねこ', 3);
+      player.addWonCat('とらねこ', 3);
       expect(player.catsWon.count, 1);
-      expect(player.catsWon.all.first.name, '茶トラねこ');
+      expect(player.catsWon.all.first.name, 'とらねこ');
       expect(player.catsWon.all.first.cost, 3);
     });
 

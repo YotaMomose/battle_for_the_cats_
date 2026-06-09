@@ -100,7 +100,7 @@ class _TutorialFinalResultViewState extends State<TutorialFinalResultView> {
       // チュートリアルでは 3種類集めているのですべて勝利カード扱い
       return _CardInfo(
         name: catName,
-        cost: count * (catName.contains('茶トラ') ? 1 : 3), // 概算コスト
+        cost: count * (catName.contains('とら') ? 1 : 3), // 概算コスト
         color: viewModel.getCatIconColor(catName),
         icon: viewModel.getCatIconData(catName),
         imagePath: viewModel.getCatImagePath(catName),

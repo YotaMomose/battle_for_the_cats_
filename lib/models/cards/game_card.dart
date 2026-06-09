@@ -6,7 +6,7 @@ import 'item_shop.dart';
 import 'fisherman.dart';
 import 'dog.dart';
 
-/// ゲーム内の全カード（にゃんこ、犬、漁師など）が実装すべきインターフェース
+/// ゲーム内の全カード（にゃんこ、いぬ、漁師など）が実装すべきインターフェース
 abstract interface class GameCard {
   /// カードの一意なID
   String get id;
@@ -14,7 +14,7 @@ abstract interface class GameCard {
   /// 画面表示用の名前
   String get displayName;
 
-  /// カードのタイプ（にゃんこ、犬など）
+  /// カードのタイプ（にゃんこ、いぬなど）
   CardType get cardType;
 
   /// 特殊効果

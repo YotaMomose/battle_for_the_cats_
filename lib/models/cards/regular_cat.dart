@@ -28,7 +28,7 @@ final class RegularCat implements GameCard {
 
   /// RegularCat のコンストラクタ
   /// [id]: このカード固有のID（例: 'round_1_cat_0'）
-  /// [displayName]: 表示名（例: '茶トラねこ', '白ねこ'）
+  /// [displayName]: 表示名（例: 'とらねこ', 'しろねこ'）
   /// [baseCost]: このカードを獲得するのに必要なさかなの数（1-4）
   const RegularCat({
     required this.id,

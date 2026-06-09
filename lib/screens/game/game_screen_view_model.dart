@@ -67,7 +67,7 @@ class FinalResultCardInfo {
   });
 }
 
-/// 犬の効果による通知データ
+/// いぬの効果による通知データ
 class DogEffectNotification {
   final String cardName;
   final String? imagePath;
@@ -142,7 +142,7 @@ class GameScreenViewModel extends ChangeNotifier {
   // 戦績記録済みフラグ
   bool _hasRecordedFinalResult = false;
 
-  // 表示済みの犬の効果通知メッセージのハッシュ値または内容を保持
+  // 表示済みのいぬの効果通知メッセージのハッシュ値または内容を保持
   final Set<String> _shownDogNotificationIds = {};
 
   // つり演出中フラグ
@@ -328,7 +328,7 @@ class GameScreenViewModel extends ChangeNotifier {
     final brown = counts[GameConstants.catOrange] ?? 0;
     final white = counts[GameConstants.catWhite] ?? 0;
     final black = counts[GameConstants.catBlack] ?? 0;
-    return '茶トラ$brown匹 白$white匹 黒$black匹';
+    return 'とら$brown匹 白$white匹 黒$black匹';
   }
 
   /// 最終勝者のラベル
@@ -1014,10 +1014,10 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
-  /// 犬の効果を適用できるか
+  /// いぬの効果を適用できるか
   bool get canChaseAway => (playerData?.myPendingDogChases ?? 0) > 0;
 
-  /// 犬の効果の残り回数
+  /// いぬの効果の残り回数
   int get remainingDogChases => playerData?.myPendingDogChases ?? 0;
 
   /// 追い出す対象として選べる相手のカードリスト
@@ -1038,7 +1038,7 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
-  /// 犬の効果による通知リスト
+  /// いぬの効果による通知リスト
   List<DogEffectNotification> get dogEffectNotifications {
     final data = playerData;
     if (data == null) return [];
@@ -1058,7 +1058,7 @@ class GameScreenViewModel extends ChangeNotifier {
     }).toList();
   }
 
-  /// 全ての犬の通知を表示済みとしてマーク
+  /// 全てのいぬの通知を表示済みとしてマーク
   void clearDogNotifications() {
     final notifications = dogEffectNotifications;
     for (var n in notifications) {

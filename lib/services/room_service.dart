@@ -277,7 +277,7 @@ class RoomService {
     });
   }
 
-  /// キャラクターを追い出す（犬の効果）
+  /// キャラクターを追い出す（いぬの効果）
   Future<void> chaseAwayCard(
     String roomCode,
     String playerId,

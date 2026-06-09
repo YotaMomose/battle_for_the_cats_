@@ -30,7 +30,7 @@ class GameRoom {
   // 最終勝者
   Winner? finalWinner;
 
-  // 犬の効果で逃がされたカード（通知用）
+  // いぬの効果で逃がされたカード（通知用）
   List<ChasedCardInfo> chasedCards;
 
   GameRoom({

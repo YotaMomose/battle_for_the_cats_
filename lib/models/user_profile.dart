@@ -122,7 +122,7 @@ class UserIcon {
   /// デフォルトアイコン
   static const defaultIcon = UserIcon(
     id: 'cat_orange',
-    label: '茶トラねこ',
+    label: 'とらねこ',
     emoji: '🐱',
     imagePath: 'assets/images/tyatoranekopng.png',
   );
@@ -131,19 +131,19 @@ class UserIcon {
   static const List<UserIcon> presets = [
     UserIcon(
       id: 'cat_orange',
-      label: '茶トラ',
+      label: 'とら',
       emoji: '🐱',
       imagePath: 'assets/images/tyatoranekopng.png',
     ),
     UserIcon(
       id: 'cat_white',
-      label: '白ねこ',
+      label: 'しろねこ',
       emoji: '🐈',
       imagePath: 'assets/images/sironeko.png',
     ),
     UserIcon(
       id: 'cat_black',
-      label: '黒ねこ',
+      label: 'くろねこ',
       emoji: '🐈‍⬛',
       imagePath: 'assets/images/kuroneko.png',
     ),

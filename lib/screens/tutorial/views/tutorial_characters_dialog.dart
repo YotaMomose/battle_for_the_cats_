@@ -26,7 +26,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
           '仲間にすると、毎ターンの『つり』のたびに、おさかなを1匹追加で獲ってきてくれる頼もしい味方じゃ！たくさん集めればさかなに困ることはなくなるぞ。',
     },
     {
-      'name': '犬',
+      'name': 'いぬ',
       'icon': Icons.pets,
       'image': 'assets/images/inu.png',
       'color': Colors.brown,

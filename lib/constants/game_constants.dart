@@ -9,14 +9,14 @@ class GameConstants {
   static const int diceMax = 6;
 
   // にゃんこの種類名
-  static const String catOrange = '茶トラねこ';
-  static const String catWhite = '白ねこ';
-  static const String catBlack = '黒ねこ';
+  static const String catOrange = 'とらねこ';
+  static const String catWhite = 'しろねこ';
+  static const String catBlack = 'くろねこ';
 
   // 特殊カード名
   static const String fisherman = '漁師';
   static const String itemShop = 'アイテム屋';
-  static const String dog = '犬';
+  static const String dog = 'いぬ';
 
   // ゲームルール
   static const int catsPerRound = 3; // 1ターンに登場するにゃんこの数

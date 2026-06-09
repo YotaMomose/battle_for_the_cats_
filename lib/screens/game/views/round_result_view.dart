@@ -198,7 +198,7 @@ class _RoundResultViewState extends State<RoundResultView> {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.height < 680;
 
-    // 犬の効果通知がある場合、ビルド後にポップアップを表示（アニメーション終了後）
+    // いぬの効果通知がある場合、ビルド後にポップアップを表示（アニメーション終了後）
     if (_step >= 7 && viewModel.dogEffectNotifications.isNotEmpty) {
       final notifications = List<DogEffectNotification>.from(
         viewModel.dogEffectNotifications,
@@ -362,7 +362,7 @@ class _RoundResultViewState extends State<RoundResultView> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '犬の効果発動！',
+                      'いぬの効果発動！',
                       style: TextStyle(
                         fontSize: isSmallScreen ? 20 : 24,
                         fontWeight: FontWeight.w900,

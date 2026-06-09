@@ -35,7 +35,7 @@ class RoundResolver {
     room.applyRoundResults(winnersMap);
 
     // 3. 最終勝利判定 (WinCondition)
-    // 犬の効果などで保留中のアクションがある場合は、判定をスキップする
+    // いぬの効果などで保留中のアクションがある場合は、判定をスキップする
     final hasPendingEffects =
         room.host.pendingDogChases > 0 || room.guest!.pendingDogChases > 0;
 
