@@ -47,7 +47,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/fatcat.png',
       'color': Colors.deepOrange,
       'description':
-          'こやつは要注意じゃ！ターンのはじめに突然現れ、お主と相手の持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカーじゃ！さかなを溜め込んでいるときは特に注意じゃ！',
+          'こやつは要注意じゃ！ターンのおわりに突然現れ、お主と相手の持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカーじゃ！さかなを溜め込んでいるときは特に注意じゃ！',
     },
   ];
 
