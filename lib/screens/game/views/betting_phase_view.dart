@@ -782,7 +782,7 @@ class BettingPhaseView extends StatelessWidget {
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.only(left: 5, top: 4, bottom: 4),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isOpponent) ...[
@@ -800,6 +800,7 @@ class BettingPhaseView extends StatelessWidget {
 
     // 獲得にゃんこ（合計コスト付き）
     final wonCatsContainer = Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(
         horizontal: 8,
         vertical: isSmallScreen ? 4 : 6,
@@ -849,7 +850,7 @@ class BettingPhaseView extends StatelessWidget {
           isOpponent
               ? _buildOpponentItems(
                   viewModel,
-                  iconSize: isSmallScreen ? 36 : 56,
+                  iconSize: isSmallScreen ? 40 : 60,
                 )
               : _buildMyItemsList(
                   context,
@@ -863,6 +864,7 @@ class BettingPhaseView extends StatelessWidget {
     // 右カラム：ネストされた明るめのコンテナ
     final rightContainer = Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (isOpponent) ...[
             // 獲得したカードの枠
@@ -899,6 +901,7 @@ class BettingPhaseView extends StatelessWidget {
           ] else ...[
             // アイテムの枠
             Container(
+              width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
@@ -914,6 +917,7 @@ class BettingPhaseView extends StatelessWidget {
             const SizedBox(height: 6),
             // 獲得したカードの枠
             Container(
+              width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
@@ -970,14 +974,16 @@ class BettingPhaseView extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: isSmallScreen ? 460 : 640,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            leftColumn,
-                            const SizedBox(width: 4),
-                            rightContainer,
-                          ],
+                        child: IntrinsicHeight(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              leftColumn,
+                              const SizedBox(width: 4),
+                              rightContainer,
+                            ],
+                          ),
                         ),
                       ),
                       if (statusLabel != null)
@@ -1025,6 +1031,13 @@ class BettingPhaseView extends StatelessWidget {
                                   ),
                               ],
                             ),
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: SizedBox(
+                            height: isSmallScreen ? 34.0 : 37.0, // statusLabelコンテナと高さを揃えてFittedBoxの縮小率を一致させる
                           ),
                         ),
                     ],
@@ -1091,12 +1104,15 @@ class BettingPhaseView extends StatelessWidget {
   ) {
     final remaining = totalFish - viewModel.totalBet;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
-    final fishSize = isSmallScreen ? 75.0 : 108.0;
+    final fishSize = isSmallScreen ? 80.0 : 110.0;
 
     // さかなエリア単体のDragTargetは廃止し（上位のPlayerSectionで受けるため）、
     // 見た目とDraggable（投げる側）だけを残す
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: isSmallScreen ? 2 : 4,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1122,7 +1138,7 @@ class BettingPhaseView extends StatelessWidget {
                   center,
                   '1',
                   targetKey: dishKey,
-                  size: fishSize,
+                  size: isSmallScreen ? 35.0 : 50.0,
                   onComplete: () {
                     final currentAmount = viewModel.bets[catIndex] ?? 0;
                     viewModel.updateBet(catIndex, currentAmount + 1);
@@ -1138,7 +1154,7 @@ class BettingPhaseView extends StatelessWidget {
                 data: 'fish_from_hand',
                 feedback: Material(
                   color: Colors.transparent,
-                  child: FishIcon(size: fishSize * 1.4),
+                  child: FishIcon(size: fishSize * 0.7),
                 ),
                 childWhenDragging: Opacity(
                   opacity: 0.3,
@@ -1271,7 +1287,7 @@ Widget _buildDishArea(
                           data: 'fish_from_$catIndex',
                           feedback: Material(
                             color: Colors.transparent,
-                            child: FishIcon(size: fishSize * 1.6),
+                            child: FishIcon(size: fishSize * 0.8),
                           ),
                           childWhenDragging: Opacity(
                             opacity: 0.3,
@@ -1491,7 +1507,7 @@ Widget _buildDraggableItem(
               child: _buildItemIcon(
                 type,
                 isFeedback: true,
-                size: itemSize * 1.2,
+                size: itemSize * 1.0,
               ),
             ),
             childWhenDragging: Opacity(
@@ -1578,7 +1594,7 @@ Widget _buildItemSlot(
                             color: Colors.transparent,
                             child: _buildItemImage(
                               placedItem,
-                              size: itemIconSize * 1.2,
+                              size: itemIconSize * 1.0,
                             ),
                           ),
                           childWhenDragging: Opacity(
