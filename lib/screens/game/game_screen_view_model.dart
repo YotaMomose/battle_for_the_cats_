@@ -124,6 +124,18 @@ class GameScreenViewModel extends ChangeNotifier {
   // 退出処理中かどうか
   bool _isExiting = false;
 
+  // 参加者拒否中かどうか
+  bool _isRejectingGuest = false;
+
+  // UI表示用の通知メッセージ
+  String? _infoMessage;
+  String? get infoMessage => _infoMessage;
+
+  void clearInfoMessage() {
+    _infoMessage = null;
+    notifyListeners();
+  }
+
   // アイテム復活中かどうか
   bool _isReviving = false;
 
@@ -528,6 +540,17 @@ class GameScreenViewModel extends ChangeNotifier {
               }
               return;
             }
+            final wasGuestConnected = _currentRoom?.guest != null;
+            final isGuestConnected = room.guest != null;
+
+            if (isHost &&
+                room.status == GameStatus.waiting &&
+                wasGuestConnected &&
+                !isGuestConnected &&
+                !_isRejectingGuest) {
+              _infoMessage = '相手が退出しました';
+            }
+
             _currentRoom = room;
             _updateUiState(room);
             _syncWithServerState(room);
@@ -900,10 +923,13 @@ class GameScreenViewModel extends ChangeNotifier {
   Future<void> rejectGuest() async {
     if (!isHost) return;
     try {
+      _isRejectingGuest = true;
       await _gameService.rejectGuest(roomCode, playerId);
     } catch (e) {
       _uiState = _uiState.copyWithError('不参加処理に失敗しました: $e');
       notifyListeners();
+    } finally {
+      _isRejectingGuest = false;
     }
   }
 

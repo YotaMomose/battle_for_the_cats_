@@ -345,7 +345,7 @@ class WaitingView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  '本当に退出してもよろしいですか？\n退出すると負け扱いになります。',
+                  '本当に退出してもよろしいですか？',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,

@@ -300,6 +300,18 @@ class _GameScreenContentState extends State<_GameScreenContent> with WidgetsBind
       });
     }
 
+    // メッセージ表示
+    if (vm.infoMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(vm.infoMessage!)),
+          );
+          vm.clearInfoMessage();
+        }
+      });
+    }
+
     // 状態別View
     return switch (state) {
       LoadingState() => const Center(child: CircularProgressIndicator()),
