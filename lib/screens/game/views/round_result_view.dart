@@ -532,8 +532,8 @@ class _RoundResultViewState extends State<RoundResultView> {
   }
 
   Widget _buildHeader(int turn, bool isSmallScreen) {
-    final headerHeight = isSmallScreen ? 30.0 : 50.0;
-    final fontSize = isSmallScreen ? 20.0 : 30.0;
+    final headerHeight = isSmallScreen ? 30.0 : 35.0;
+    final fontSize = isSmallScreen ? 20.0 : 24.0;
 
     return Container(
       height: headerHeight,
@@ -1749,7 +1749,7 @@ class _RoundResultViewState extends State<RoundResultView> {
     required Color color,
     bool isSmallScreen = false,
   }) {
-    final fontSize = isSmallScreen ? 14.0 : 21.0;
+    final fontSize = isSmallScreen ? 14.0 : 16.0;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
