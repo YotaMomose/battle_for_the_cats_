@@ -867,7 +867,9 @@ class _TutorialScreenState extends State<TutorialScreen> {
     TutorialViewModel viewModel,
     bool isSmallScreen,
   ) {
-    final remaining = totalFish - viewModel.totalBet;
+    // `totalFish` はチュートリアル用に残り魚数を既に計算した値を返すため、
+    // さらに `totalBet` を引くと二重減算になってしまう。
+    final remaining = totalFish;
     final fishSize = isSmallScreen ? 36.0 : 48.0;
     final canDrag = !viewModel.hasPlacedBet && remaining > 0;
 

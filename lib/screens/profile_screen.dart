@@ -371,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SeService().play('button_buni.mp3');
               if (isLocked) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('このアイコンはサポーターになると解放されます')),
+                  const SnackBar(content: Text('このアイコンは開発者応援で解放されます')),
                 );
                 return;
               }

@@ -1122,9 +1122,10 @@ class BettingPhaseView extends StatelessWidget {
         onTap: () {
           if (viewModel.selectedCatIndex != null && remaining > 0) {
             final catIndex = viewModel.selectedCatIndex!;
-            final dishKey = _dishKeys[catIndex];
+            final currentAmount = viewModel.bets[catIndex] ?? 0;
+            viewModel.updateBet(catIndex, currentAmount + 1);
 
-            // 手元の位置からターゲット（お皿）へアニメーション
+            final dishKey = _dishKeys[catIndex];
             if (dishKey != null) {
               final RenderBox? handBox =
                   _myHandFishKey.currentContext?.findRenderObject()
@@ -1139,10 +1140,6 @@ class BettingPhaseView extends StatelessWidget {
                   '1',
                   targetKey: dishKey,
                   size: isSmallScreen ? 35.0 : 50.0,
-                  onComplete: () {
-                    final currentAmount = viewModel.bets[catIndex] ?? 0;
-                    viewModel.updateBet(catIndex, currentAmount + 1);
-                  },
                 );
               }
             }
@@ -1299,6 +1296,11 @@ Widget _buildDishArea(
                           child: GestureDetector(
                             onTap: () {
                               if (currentBet > 0) {
+                                viewModel.updateBet(
+                                  catIndex,
+                                  currentBet - 1,
+                                );
+
                                 final RenderBox? box =
                                     dishKey.currentContext?.findRenderObject()
                                         as RenderBox?;
@@ -1312,12 +1314,6 @@ Widget _buildDishArea(
                                     '1',
                                     targetKey: _myHandFishKey,
                                     size: fishSize,
-                                    onComplete: () {
-                                      viewModel.updateBet(
-                                        catIndex,
-                                        currentBet - 1,
-                                      );
-                                    },
                                   );
                                 }
                                 SeService().play('button_buni.mp3');

@@ -389,6 +389,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 8),
+        const Text(
+          '※ユーザー名は12文字以内で入力してください',
+          style: TextStyle(
+            fontSize: 11,
+            color: Color(0xFF4D331F),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 12),
         _buildValidationMessage(),
       ],

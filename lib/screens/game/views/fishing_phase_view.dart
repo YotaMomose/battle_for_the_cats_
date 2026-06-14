@@ -218,15 +218,20 @@ class FishingPhaseView extends StatelessWidget {
             else
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    '${viewModel.opponentDisplayName}が釣りをしています',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Color(0xFF4D331F),
-                      fontWeight: FontWeight.w900,
+                  Flexible(
+                    child: Text(
+                      '${viewModel.opponentDisplayName}が釣りをしています',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFF4D331F),
+                        fontWeight: FontWeight.w900,
+                      ),
+                      softWrap: true,
                     ),
                   ),
+                  const SizedBox(width: 8),
                   const AnimatedWaitingDots(
                     style: TextStyle(
                       fontSize: 15,
