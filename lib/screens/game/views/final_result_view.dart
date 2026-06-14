@@ -116,7 +116,9 @@ class _FinalResultViewState extends State<FinalResultView> {
     final viewModel = context.watch<GameScreenViewModel>();
 
     // 対戦相手の退出チェック（一回限り表示）
-    if (viewModel.uiState.isOpponentLeft && !_hasShownOpponentLeftDialog) {
+    if (viewModel.uiState.isOpponentLeft &&
+        viewModel.opponentAbandonedDuringGame &&
+        !_hasShownOpponentLeftDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkOpponentLeft();
       });

@@ -141,6 +141,7 @@ class GameScreenViewModel extends ChangeNotifier {
 
   // 戦績記録済みフラグ
   bool _hasRecordedFinalResult = false;
+  bool _opponentAbandonedDuringGame = false;
 
   // 表示済みのいぬの効果通知メッセージのハッシュ値または内容を保持
   final Set<String> _shownDogNotificationIds = {};
@@ -170,6 +171,7 @@ class GameScreenViewModel extends ChangeNotifier {
   bool get isRoundResult => _uiState is RoundResultState;
   bool get isFinished => _uiState is FinishedState;
   bool get isFatCatEvent => _uiState is FatCatEventState;
+  bool get opponentAbandonedDuringGame => _opponentAbandonedDuringGame;
   ItemType? getPlacedItem(String catIndex) => _bets.getItem(catIndex);
   Winner? get finalWinner => _currentRoom?.finalWinner;
 
@@ -345,7 +347,7 @@ class GameScreenViewModel extends ChangeNotifier {
         ? myDisplayName
         : opponentDisplayName;
 
-    if (opponentAbandoned && room.finalWinner == myRole) {
+    if (opponentAbandoned && room.finalWinner == myRole && _opponentAbandonedDuringGame) {
       return '👑 $winnerName の不戦勝！\n(相手の退出)';
     }
 
@@ -647,8 +649,11 @@ class GameScreenViewModel extends ChangeNotifier {
         final opponentAbandoned = isHost
             ? ((room.guest?.abandoned ?? false) || room.guest == null)
             : room.host.abandoned;
-        if (opponentAbandoned) {
+        if (opponentAbandoned && !(_uiState is FinishedState)) {
           newState = newState.copyWithOpponentLeft();
+          _opponentAbandonedDuringGame = true;
+        } else {
+          _opponentAbandonedDuringGame = false;
         }
         _uiState = newState;
         _recordMatchResultIfFinished(room);
@@ -673,6 +678,7 @@ class GameScreenViewModel extends ChangeNotifier {
     } else {
       _uiState = _uiState.copyWithOpponentLeft();
     }
+    _opponentAbandonedDuringGame = true;
     notifyListeners();
   }
 

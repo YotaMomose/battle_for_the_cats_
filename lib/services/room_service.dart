@@ -193,12 +193,17 @@ class RoomService {
           });
         }
       } else {
+        // ゲーム終了後の退出は結果に影響しない
+        if (room.status == GameStatus.finished && room.finalWinner != null) {
+          return;
+        }
+
         // プレイ中なら退出フラグを立てる
         final updates = <String, dynamic>{
           '${isHost ? 'host' : 'guest'}.abandoned': true,
         };
 
-        // まだ終了していない場合は、退出した側を負けにする
+        // まだ終了していない場合、退出した側を負けにする
         if (room.status != GameStatus.finished) {
           updates['status'] = GameStatus.finished.value;
           updates['finalWinner'] = isHost
