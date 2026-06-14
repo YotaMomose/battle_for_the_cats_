@@ -11,6 +11,11 @@ class SeService {
     try {
       // SEは重なる可能性があるため、再生のたびに一時的なプレイヤーを使用する
       final player = AudioPlayer();
+      // マナーモード（サイレント）を尊重するAudioContextを設定
+      try {
+        final audioContext = AudioContextConfig(respectSilence: true).build();
+        await player.setAudioContext(audioContext);
+      } catch (_) {}
       await player.setVolume(SettingsService().seVolume);
       await player.play(AssetSource('audio/$fileName'));
 

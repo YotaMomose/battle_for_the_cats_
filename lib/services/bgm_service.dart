@@ -27,6 +27,13 @@ class BgmService {
   Future<void> initialize() async {
     await _player.setReleaseMode(ReleaseMode.loop);
     await _player.setVolume(SettingsService().bgmVolume);
+    // デバイスのマナーモード（サイレント）を尊重する設定を適用
+    try {
+      final audioContext = AudioContextConfig(respectSilence: true).build();
+      await _player.setAudioContext(audioContext);
+    } catch (_) {
+      // 念のため例外は握りつぶす（互換性のため）
+    }
   }
 
   Future<void> playBgm(String fileName) async {
