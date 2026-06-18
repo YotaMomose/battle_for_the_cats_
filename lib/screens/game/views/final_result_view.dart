@@ -141,6 +141,11 @@ class _FinalResultViewState extends State<FinalResultView> {
       popResultText = 'LOSE...';
     }
 
+    final bool myTimeoutLoss = viewModel.myAbandonedDuringGame &&
+        widget.room.finalWinner != null &&
+        widget.room.finalWinner !=
+            (viewModel.isHost ? Winner.host : Winner.guest);
+
     return Container(
       color: const Color(0xFFFFF9E6), // 背景色
       child: Center(
@@ -152,6 +157,32 @@ class _FinalResultViewState extends State<FinalResultView> {
               // 勝利者のバナーヘッダー（WIN! / LOSE...）
               _buildWinnerBanner(popResultText, resultColor),
               const SizedBox(height: 16),
+              if (myTimeoutLoss)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE8E5),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFFDD5C45)),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 16,
+                    ),
+                    child: const Text(
+                      '一定時間戻らなかったため、敗北として処理されました。',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4D331F),
+                      ),
+                    ),
+                  ),
+                ),
+              if (myTimeoutLoss) const SizedBox(height: 16),
 
               // 最終スコアセクション
               _buildPopSection(

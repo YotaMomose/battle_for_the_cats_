@@ -358,7 +358,9 @@ class FishingPhaseView extends StatelessWidget {
                                               viewModel.predictedDiceResult) ==
                                           null
                                       ? '...'
-                                      : '${(playerData.myDiceRoll ?? viewModel.predictedDiceResult)! + playerData.myFishermanCount}',
+                                      : (playerData.myFishermanCount > 0
+                                          ? '${playerData.myDiceRoll ?? viewModel.predictedDiceResult} + ${playerData.myFishermanCount}'
+                                          : '${playerData.myDiceRoll ?? viewModel.predictedDiceResult}'),
                                   style: const TextStyle(
                                     fontSize: 44,
                                     fontWeight: FontWeight.w900,

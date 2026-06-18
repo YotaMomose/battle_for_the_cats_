@@ -28,6 +28,7 @@ class _RoundResultViewState extends State<RoundResultView> {
   Set<int> _blownAwayIndices = {}; // びっくりホーンで吹き飛んだかどうかを管理
   Timer? _revealTimer;
   Timer? _itemTimer; // アイテム表示用のセカンドタイマー
+  bool _hasAutoRevivedItem = false; // 自動復活処理を一度だけ行う
 
   @override
   void initState() {
@@ -213,7 +214,9 @@ class _RoundResultViewState extends State<RoundResultView> {
     // アイテム復活が1つの場合は自動復活（ポップアップ表示）（アニメーション終了後）
     if (_step >= 7 &&
         viewModel.canReviveItem &&
-        viewModel.revivableItems.length == 1) {
+        viewModel.revivableItems.length == 1 &&
+        !_hasAutoRevivedItem) {
+      _hasAutoRevivedItem = true;
       final item = viewModel.revivableItems.first;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // 先に復活処理を実行（再表示を防ぐ）

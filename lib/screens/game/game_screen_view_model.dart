@@ -366,6 +366,14 @@ class GameScreenViewModel extends ChangeNotifier {
     return room.finalWinner == myRole ? Colors.green : Colors.red;
   }
 
+  /// 自分が途中退出扱いになったかどうか
+  bool get myAbandonedDuringGame {
+    final room = _currentRoom;
+    if (room == null) return false;
+    final myPlayer = isHost ? room.host : room.guest;
+    return myPlayer?.abandoned ?? false;
+  }
+
   /// 現在表示すべきターン数
   int get displayTurn => playerData?.displayTurn ?? 0;
 
@@ -1129,11 +1137,11 @@ class GameScreenViewModel extends ChangeNotifier {
         _opponentInactiveStartTime = DateTime.now().millisecondsSinceEpoch;
       }
 
-      // inactiveから30秒以上経過したか判定
+      // inactiveから60秒以上経過したか判定
       final inactiveDuration =
           DateTime.now().millisecondsSinceEpoch - _opponentInactiveStartTime!;
-      if (inactiveDuration >= 30000) {
-        // 30秒以上inactive状態が続いている
+      if (inactiveDuration >= 60000) {
+        // 60秒以上inactive状態が続いている
         _hasDetectedOpponentTimeout = true;
         _markOpponentDisconnected();
       }

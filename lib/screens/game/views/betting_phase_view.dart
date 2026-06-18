@@ -456,21 +456,21 @@ class BettingPhaseView extends StatelessWidget {
                           _GuideItem(
                             '捕獲ネット',
                             'assets/images/net.png',
-                            '相手がさかなを置いていなければ、そのにゃんこをタダで獲得できる。読み勝ちの一手。',
+                            '相手がおさかなを置いていなければ、そのキャラをタダで獲得できる。読み勝ちの一手。',
                             tagColor: Colors.red.shade50,
                             tagTextColor: Colors.red.shade400,
                           ),
                           _GuideItem(
                             'びっくりホーン',
                             'assets/images/horn.png',
-                            '両者が置いたさかなをすべて無効化。相手に取られたくない時に有効！',
+                            '両者が置いたおさかなをすべて無効化。相手に取られたくない時に有効！',
                             tagColor: Colors.blue.shade50,
                             tagTextColor: Colors.blue.shade400,
                           ),
                           _GuideItem(
                             '食欲増進ポーション',
                             'assets/images/potion.png',
-                            'そのキャラを獲得するために必要なさかなの数が2倍になる。狙われているにゃんこを守るのに使える。',
+                            'そのキャラを獲得するために必要なおさかなの数が2倍になる。狙われているキャラを守るのに使える。',
                             tagColor: Colors.purple.shade50,
                             tagTextColor: Colors.purple.shade400,
                           ),
@@ -1280,53 +1280,57 @@ Widget _buildDishArea(
             offset: Offset(0, isSmallScreen ? -10 : -15),
             child: (!viewModel.isMyReady)
                 ? (currentBet > 0 && !viewModel.hasPlacedBet
-                      ? Draggable<String>(
-                          data: 'fish_from_$catIndex',
-                          feedback: Material(
-                            color: Colors.transparent,
-                            child: FishIcon(size: fishSize * 0.8),
+                    ? Draggable<String>(
+                        data: 'fish_from_$catIndex',
+                        feedback: Material(
+                          color: Colors.transparent,
+                          child: FishIcon(size: fishSize * 0.8),
+                        ),
+                        childWhenDragging: Opacity(
+                          opacity: 0.3,
+                          child: _buildFishWithNumber(
+                            '$currentBet',
+                            size: fishSize,
                           ),
-                          childWhenDragging: Opacity(
-                            opacity: 0.3,
-                            child: _buildFishWithNumber(
-                              '$currentBet',
-                              size: fishSize,
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              if (currentBet > 0) {
-                                viewModel.updateBet(
-                                  catIndex,
-                                  currentBet - 1,
-                                );
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (currentBet > 0) {
+                              viewModel.updateBet(
+                                catIndex,
+                                currentBet - 1,
+                              );
 
-                                final RenderBox? box =
-                                    dishKey.currentContext?.findRenderObject()
-                                        as RenderBox?;
-                                if (box != null) {
-                                  final center = box.localToGlobal(
-                                    box.size.center(Offset.zero),
-                                  );
-                                  _flyFishAnimation(
-                                    context,
-                                    center,
-                                    '1',
-                                    targetKey: _myHandFishKey,
-                                    size: fishSize,
-                                  );
-                                }
-                                SeService().play('button_buni.mp3');
+                              final RenderBox? box =
+                                  dishKey.currentContext?.findRenderObject()
+                                      as RenderBox?;
+                              if (box != null) {
+                                final center = box.localToGlobal(
+                                  box.size.center(Offset.zero),
+                                );
+                                _flyFishAnimation(
+                                  context,
+                                  center,
+                                  '1',
+                                  targetKey: _myHandFishKey,
+                                  size: fishSize,
+                                );
                               }
-                            },
-                            child: _buildFishWithNumber(
-                              '$currentBet',
-                              size: fishSize,
-                            ),
+                              SeService().play('button_buni.mp3');
+                            }
+                          },
+                          child: _buildFishWithNumber(
+                            '$currentBet',
+                            size: fishSize,
                           ),
-                        )
-                      : _buildFishWithNumber('$currentBet', size: fishSize))
-                : _buildFishWithNumber('$currentBet', size: fishSize),
+                        ),
+                      )
+                    : (currentBet > 0
+                        ? _buildFishWithNumber('$currentBet', size: fishSize)
+                        : const SizedBox.shrink()))
+                : (currentBet > 0
+                    ? _buildFishWithNumber('$currentBet', size: fishSize)
+                    : const SizedBox.shrink()),
           ),
         ],
       ),
