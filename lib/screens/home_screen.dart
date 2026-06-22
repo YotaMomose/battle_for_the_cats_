@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(
                 builder: (context) => MultiProvider(
                   providers: [
-                    ChangeNotifierProvider(create: (_) => TutorialViewModel()),
+                    ChangeNotifierProvider(create: (_) => TutorialViewModel(userProfile: _viewModel!.userProfile!)),
                     ChangeNotifierProvider.value(value: _viewModel!),
                   ],
                   child: const TutorialScreen(),

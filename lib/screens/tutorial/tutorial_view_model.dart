@@ -20,10 +20,16 @@ class TutorialViewModel extends ChangeNotifier {
   Bets _bets = Bets.empty();
   bool _hasPlacedBet = false;
 
-  TutorialViewModel() {
+  TutorialViewModel({UserProfile? userProfile}) {
     // チュートリアル用の初期設定
-    final player = Player(id: 'me', displayName: 'あなた', iconId: 'cat_orange');
-    final elder = Player(id: 'elder', displayName: 'あいて', iconId: 'cat_black');
+    final player = Player(
+        id: 'me',
+        displayName: userProfile?.displayName ?? 'あなた',
+        iconId: userProfile?.iconId ?? 'cat_orange');
+    final elder = Player(
+        id: 'elder',
+        displayName: 'あいて',
+        iconId: 'cat_black');
 
     final round = RoundCards(
       card1: const RegularCat(id: 'white', displayName: 'しろねこ', baseCost: 3),
@@ -69,18 +75,18 @@ class TutorialViewModel extends ChangeNotifier {
   int? get currentDiceRoll => _randomDiceResult;
   String get confirmBetsButtonLabel => _hasPlacedBet ? '確定済み' : '確定する';
 
-  String get myDisplayName => 'あなた';
-  String get myIconEmoji => '🐱';
-  String get myIconId => 'cat_orange';
-  String get opponentDisplayName => 'あいて';
-  String get opponentIconEmoji => '👴';
-  String get opponentIconId => 'cat_black';
-
-  /// 自分のアイコン
-  UserIcon get myUserIcon => UserIcon.fromId(myIconId);
+  String get myDisplayName => _me.displayName;
+  String get myIconId => _me.iconId;
+  String get myIconEmoji => UserIcon.fromId(_me.iconId).emoji;
+  UserIcon get myUserIcon => UserIcon.fromId(_me.iconId);
 
   /// 相手のアイコン
   UserIcon get opponentUserIcon => UserIcon.fromId(opponentIconId);
+
+String get opponentIconEmoji => opponentUserIcon.emoji;
+
+  String get opponentDisplayName => 'あいて';
+  String get opponentIconId => 'cat_black';
 
   String get opponentReadyStatusLabel => '選択中...';
   Color get opponentReadyStatusColor => const Color.fromARGB(255, 255, 38, 0);
@@ -179,7 +185,7 @@ class TutorialViewModel extends ChangeNotifier {
       room: _room,
       isHost: true,
       myDisplayName: 'あなた',
-      myIconId: 'cat_orange',
+      myIconId: _me.iconId,
       opponentDisplayName: 'あいて',
       opponentIconId: 'cat_black',
       myFishCount: myCurrentFish,
@@ -347,6 +353,7 @@ class TutorialViewModel extends ChangeNotifier {
 
   // --- アクション ---
   void updateBet(String catIndex, int delta) {
+    if (delta <= 0) return; // チュートリアルでは魚を戻すことはできない
     if ((_currentStep == 5 && catIndex == '0') ||
         (_currentStep == 10 && catIndex == '2') ||
         (_currentStep == 27 && catIndex == '1') ||
@@ -390,8 +397,10 @@ class TutorialViewModel extends ChangeNotifier {
   }
 
   void updateItemPlacement(String catIndex, ItemType? item) {
+    // チュートリアルではアイテムの削除は許可しない
+    if (item == null) return;
+    
     if ((_currentStep == 7 && catIndex == '1' && item == ItemType.captureNet) ||
-        (_currentStep == 10 && catIndex == '2' && item != null) ||
         (_currentStep == 25 &&
             catIndex == '0' &&
             item == ItemType.surpriseHorn)) {
@@ -409,13 +418,6 @@ class TutorialViewModel extends ChangeNotifier {
       } else if (_currentStep == 25) {
         _currentStep = 26;
       }
-      notifyListeners();
-    } else if (item == null) {
-      final newItemsMap = _bets.itemsToMap().map(
-        (k, v) => MapEntry(k, v != null ? ItemType.fromString(v) : null),
-      );
-      newItemsMap[catIndex] = null;
-      _bets = Bets(_bets.toMap(), newItemsMap);
       notifyListeners();
     }
   }
