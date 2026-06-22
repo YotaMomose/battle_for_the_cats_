@@ -1649,16 +1649,25 @@ class _RoundResultViewState extends State<RoundResultView> {
       alignment: Alignment.center,
       children: [
         FishIcon(size: size),
+        // 白フチ（ストローク）
+        Text(
+          number,
+          style: TextStyle(
+            fontSize: size * 0.55,
+            fontWeight: FontWeight.w900,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3.0
+              ..color = Colors.white,
+          ),
+        ),
+        // 黒文字
         Text(
           number,
           style: TextStyle(
             fontSize: size * 0.55,
             fontWeight: FontWeight.w900,
             color: Colors.black,
-            shadows: const [
-              Shadow(color: Colors.white, blurRadius: 4),
-              Shadow(color: Colors.white, blurRadius: 2),
-            ],
           ),
         ),
       ],
