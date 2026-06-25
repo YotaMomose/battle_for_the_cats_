@@ -583,8 +583,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
           if (data.startsWith('fish_from_')) {
             final catIndex = data.replaceFirst('fish_from_', '');
             if (catIndex != 'hand') {
-              final currentBet = viewModel.bets[catIndex] ?? 0;
-              viewModel.updateBet(catIndex, currentBet - 1);
+              viewModel.updateBet(catIndex, -1);
             }
           } else if (data.startsWith('item_from_')) {
             final catIndex = data.replaceFirst('item_from_', '');

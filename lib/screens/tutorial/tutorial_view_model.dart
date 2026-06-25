@@ -357,8 +357,7 @@ String get opponentIconEmoji => opponentUserIcon.emoji;
     if ((_currentStep == 5 && catIndex == '0') ||
         (_currentStep == 10 && catIndex == '2') ||
         (_currentStep == 27 && catIndex == '1') ||
-        (_currentStep == 29 && catIndex == '2') ||
-        (_currentStep == 30 && catIndex == '2')) {
+        (_currentStep == 29 && catIndex == '2')) {
       final currentAmount = _bets.getBet(catIndex);
       final newAmount = (currentAmount + delta).clamp(0, 50);
 
