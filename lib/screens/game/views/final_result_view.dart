@@ -565,11 +565,18 @@ class _FinalResultViewState extends State<FinalResultView> {
           style: TextStyle(
             fontSize: size * 0.55,
             fontWeight: FontWeight.w900,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3.0
+              ..color = Colors.white,
+          ),
+        ),
+        Text(
+          number,
+          style: TextStyle(
+            fontSize: size * 0.55,
+            fontWeight: FontWeight.w900,
             color: Colors.black,
-            shadows: const [
-              Shadow(color: Colors.white, blurRadius: 4),
-              Shadow(color: Colors.white, blurRadius: 2),
-            ],
           ),
         ),
       ],

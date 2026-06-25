@@ -30,6 +30,8 @@ final Map<String, GlobalKey> _itemSlotKeys = {
   '1': GlobalKey(),
   '2': GlobalKey(),
 };
+// 実行中の飛行アニメーションをトラックして重複を防ぐ
+final Set<Object> _activeFlyAnimations = {};
 
 /// 賭けフェーズ画面
 class BettingPhaseView extends StatelessWidget {
@@ -1139,6 +1141,7 @@ class BettingPhaseView extends StatelessWidget {
                   center,
                   '1',
                   targetKey: dishKey,
+                  id: dishKey,
                   size: isSmallScreen ? 35.0 : 50.0,
                 );
               }
@@ -1313,6 +1316,7 @@ Widget _buildDishArea(
                                   center,
                                   '1',
                                   targetKey: _myHandFishKey,
+                                  id: _myHandFishKey,
                                   size: fishSize,
                                 );
                               }
@@ -1490,6 +1494,7 @@ Widget _buildDraggableItem(
                   center,
                   type,
                   targetKey: slotKey,
+                  id: slotKey,
                   size: itemSize,
                   onComplete: () {
                     viewModel.updateItemPlacement(catIndex, type);
@@ -1618,6 +1623,7 @@ Widget _buildItemSlot(
                                   center,
                                   placedItem,
                                   targetKey: _itemTypeKeys[placedItem]!,
+                                  id: _itemTypeKeys[placedItem]!,
                                   size: itemIconSize,
                                 );
                               }
@@ -1785,6 +1791,7 @@ void _flyFishAnimation(
   required GlobalKey targetKey,
   double size = 48,
   VoidCallback? onComplete,
+  Object? id,
 }) {
   final overlay = Overlay.of(context);
   final RenderBox? overlayBox =
@@ -1795,6 +1802,12 @@ void _flyFishAnimation(
 
   late OverlayEntry entry;
 
+  // アニメーション重複ガード: 同じIDのアニメーションが動いている場合は無視
+  if (id != null) {
+    if (_activeFlyAnimations.contains(id)) return;
+    _activeFlyAnimations.add(id);
+  }
+
   entry = OverlayEntry(
     builder: (context) {
       return TweenAnimationBuilder<double>(
@@ -1803,6 +1816,8 @@ void _flyFishAnimation(
         curve: Curves.easeInOutQuad,
         onEnd: () {
           entry.remove();
+          // 終了後にトラックから除去
+          if (id != null) _activeFlyAnimations.remove(id);
           onComplete?.call();
         },
         builder: (context, value, child) {
@@ -1868,6 +1883,7 @@ void _flyItemAnimation(
   required GlobalKey targetKey,
   double size = 32,
   VoidCallback? onComplete,
+  Object? id,
 }) {
   final overlay = Overlay.of(context);
   final RenderBox? overlayBox =
@@ -1878,6 +1894,12 @@ void _flyItemAnimation(
 
   late OverlayEntry entry;
 
+  // アニメーション重複ガード: 同じIDのアニメーションが動いている場合は無視
+  if (id != null) {
+    if (_activeFlyAnimations.contains(id)) return;
+    _activeFlyAnimations.add(id);
+  }
+
   entry = OverlayEntry(
     builder: (context) {
       return TweenAnimationBuilder<double>(
@@ -1886,6 +1908,8 @@ void _flyItemAnimation(
         curve: Curves.easeInOutQuad,
         onEnd: () {
           entry.remove();
+          // 終了後にトラックから除去
+          if (id != null) _activeFlyAnimations.remove(id);
           onComplete?.call();
         },
         builder: (context, value, child) {
@@ -1956,12 +1980,18 @@ Widget _buildFishWithNumber(String number, {double size = 48, Key? key}) {
         style: TextStyle(
           fontSize: size * 0.45,
           fontWeight: FontWeight.w900,
+          foreground: Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3.0
+            ..color = Colors.white,
+        ),
+      ),
+      Text(
+        number,
+        style: TextStyle(
+          fontSize: size * 0.45,
+          fontWeight: FontWeight.w900,
           color: const Color.fromARGB(255, 49, 4, 4),
-          shadows: const [
-            Shadow(color: Colors.white, blurRadius: 4),
-            Shadow(color: Colors.white, blurRadius: 4),
-            Shadow(color: Colors.white, blurRadius: 4),
-          ],
         ),
       ),
     ],

@@ -75,9 +75,12 @@ class _RoundResultViewState extends State<RoundResultView> {
         maxBetForThisCard = val1 > val2 ? val1 : val2;
       }
 
-      // 第1段階: カウントアップ終了まで待つ (1匹300msに短縮)
-      final animationDuration = maxBetForThisCard * 300;
-      final countWait = 400 + animationDuration;
+      // 第1段階: カウントアップ終了まで待つ
+      // 多数のさかながあると待ち時間が増えすぎるため、合計時間に上限をかける
+      const perFishMs = 120; // 1匹あたりの加算時間（ms）
+      const maxTotalMs = 900; // カウントアップの最大時間（ms）
+      final animationDuration = math.min(maxBetForThisCard * perFishMs, maxTotalMs);
+      final countWait = 300 + animationDuration;
 
       setState(() {
         _step++; // カウント開始

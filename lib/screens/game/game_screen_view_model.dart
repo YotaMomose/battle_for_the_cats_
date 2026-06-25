@@ -544,8 +544,13 @@ class GameScreenViewModel extends ChangeNotifier {
               if (!_isExiting) {
                 if (_uiState is WaitingState && !isHost) {
                   _handleHostClosed();
+                } else if (_currentRoom != null && _currentRoom!.status == GameStatus.finished) {
+                  // すでに終了状態を受信していた場合は何もしない（最終結果画面に留まる）
+                  // winnerが退出してルームを削除しただけ。
                 } else {
-                  _handleOpponentLeft();
+                  // プレイ中にルームが突然削除された場合
+                  // これは自分がタイムアウト（非アクティブ）になり、相手が勝利して退出（ルーム削除）したことを意味する
+                  _handleRoomDeletedDuringGame();
                 }
               }
               return;
@@ -657,7 +662,14 @@ class GameScreenViewModel extends ChangeNotifier {
         final opponentAbandoned = isHost
             ? ((room.guest?.abandoned ?? false) || room.guest == null)
             : room.host.abandoned;
-        if (opponentAbandoned && !(_uiState is FinishedState)) {
+        final myRole = isHost ? Winner.host : Winner.guest;
+        final iWon = room.finalWinner == myRole;
+
+        // 「不戦勝（isOpponentLeft）」は以下の場合のみ表示する:
+        //   - 相手が abandoned かつ
+        //   - 自分が勝者（負けた側には表示しない）かつ
+        //   - まだ FinishedState になっていない（初回遷移）
+        if (opponentAbandoned && iWon && _uiState is! FinishedState) {
           newState = newState.copyWithOpponentLeft();
           _opponentAbandonedDuringGame = true;
         } else {
@@ -666,6 +678,7 @@ class GameScreenViewModel extends ChangeNotifier {
         _uiState = newState;
         _recordMatchResultIfFinished(room);
         break;
+
       case GameStatus.fatCatEvent:
         final myConfirmedFatCat = isHost
             ? host.confirmedFatCatEvent
@@ -680,6 +693,38 @@ class GameScreenViewModel extends ChangeNotifier {
     }
   }
 
+  /// プレイ中にルームが削除された場合の処理
+  /// 自分がタイムアウトして負けた後に、相手がホームに戻ってルームを削除した可能性が高い
+  void _handleRoomDeletedDuringGame() {
+    if (_currentRoom != null) {
+      final room = _currentRoom!;
+      final myPlayer = isHost ? room.host : room.guest;
+      final myAbandoned = myPlayer?.abandoned ?? false;
+
+      if (myAbandoned && room.finalWinner != null) {
+        // 自分がタイムアウト負けだった: 最終結果画面をそのまま表示（退出扱いにしない）
+        _uiState = FinishedState(room);
+        _recordMatchResultIfFinished(room);
+      } else if (room.finalWinner != null) {
+        // finalWinner が確定していたが finished 状態を受け取れていなかった
+        _uiState = FinishedState(room);
+        _recordMatchResultIfFinished(room);
+      } else {
+        // ルームの状態が不明: 自分が負けた可能性が高いが、データがない
+        // 相手の退出として扱う（フォールバック）
+        _handleOpponentLeft();
+        return;
+      }
+      notifyListeners();
+    } else {
+      // _currentRoom が null（一度もデータを受け取れていなかった）= ロード前に削除された
+      // この場合はホームに戻す
+      _uiState = _uiState.copyWithRoomClosed();
+      notifyListeners();
+      onRoomClosed?.call();
+    }
+  }
+
   void _handleOpponentLeft() {
     if (_currentRoom != null) {
       _uiState = FinishedState(_currentRoom!).copyWithOpponentLeft();
@@ -689,6 +734,7 @@ class GameScreenViewModel extends ChangeNotifier {
     _opponentAbandonedDuringGame = true;
     notifyListeners();
   }
+
 
   void _handleKicked() {
     _uiState = _uiState.copyWithKicked();
@@ -1132,10 +1178,8 @@ class GameScreenViewModel extends ChangeNotifier {
 
     // 相手がinactive状態の場合、その状態がどのくらい続いているかチェック
     if (!opponent.isActive) {
-      if (_opponentInactiveStartTime == null) {
-        // 初めてinactiveになった時刻を記録
-        _opponentInactiveStartTime = DateTime.now().millisecondsSinceEpoch;
-      }
+      // 初めてinactiveになった時刻を記録
+      _opponentInactiveStartTime ??= DateTime.now().millisecondsSinceEpoch;
 
       // inactiveから60秒以上経過したか判定
       final inactiveDuration =
