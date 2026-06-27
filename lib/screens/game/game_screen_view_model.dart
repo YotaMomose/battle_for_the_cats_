@@ -710,10 +710,20 @@ class GameScreenViewModel extends ChangeNotifier {
         _uiState = FinishedState(room);
         _recordMatchResultIfFinished(room);
       } else {
-        // ルームの状態が不明: 自分が負けた可能性が高いが、データがない
-        // 相手の退出として扱う（フォールバック）
-        _handleOpponentLeft();
-        return;
+        // ルームの状態が不明（かつ finalWinner も null）：
+        // 自分がバックグラウンド等でタイムアウト（または切断）になり、相手が勝利して退出（ルーム削除）したとみなす。
+        // ローカルのルーム状態を「自分がタイムアウト敗北した状態」に仕立てて最終結果画面を表示する。
+        room.status = GameStatus.finished;
+        room.finalWinner = isHost ? Winner.guest : Winner.host;
+        if (isHost) {
+          room.host.abandoned = true;
+        } else {
+          if (room.guest != null) {
+            room.guest!.abandoned = true;
+          }
+        }
+        _uiState = FinishedState(room);
+        _recordMatchResultIfFinished(room);
       }
       notifyListeners();
     } else {
