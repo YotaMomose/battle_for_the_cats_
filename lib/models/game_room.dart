@@ -33,6 +33,10 @@ class GameRoom {
   // いぬの効果で逃がされたカード（通知用）
   List<ChasedCardInfo> chasedCards;
 
+  // ふとっちょにゃんこイベントで没収されたさかなの数
+  int hostFatCatEatenFish;
+  int guestFatCatEatenFish;
+
   GameRoom({
     required this.roomId,
     required this.host,
@@ -44,6 +48,8 @@ class GameRoom {
     this.winners,
     this.finalWinner,
     List<ChasedCardInfo>? chasedCards,
+    this.hostFatCatEatenFish = 0,
+    this.guestFatCatEatenFish = 0,
   }) : chasedCards = chasedCards ?? [];
 
   String get hostId => host.id;
@@ -61,6 +67,8 @@ class GameRoom {
       'finalWinner': finalWinner?.value,
       'lastRoundResult': lastRoundResult?.toMap(),
       'chasedCards': chasedCards.map((c) => c.toMap()).toList(),
+      'hostFatCatEatenFish': hostFatCatEatenFish,
+      'guestFatCatEatenFish': guestFatCatEatenFish,
     };
   }
 
@@ -88,6 +96,8 @@ class GameRoom {
       chasedCards: (map['chasedCards'] as List?)
           ?.map((c) => ChasedCardInfo.fromMap(Map<String, dynamic>.from(c)))
           .toList(),
+      hostFatCatEatenFish: map['hostFatCatEatenFish'] ?? 0,
+      guestFatCatEatenFish: map['guestFatCatEatenFish'] ?? 0,
     );
   }
 
@@ -210,6 +220,10 @@ class GameRoom {
 
     host.resetRoundState();
     guest?.resetRoundState();
+
+    // 没収されるさかなの数を記録
+    hostFatCatEatenFish = host.fishCount;
+    guestFatCatEatenFish = guest?.fishCount ?? 0;
 
     // さかなを没収
     host.fishCount = 0;

@@ -214,15 +214,153 @@ class _FatCatEventViewState extends State<FatCatEventView>
                                                 width: 2,
                                               ),
                                             ),
-                                            child: const Text(
-                                              'ふとっちょにゃんこがさかなを\n全部食べてしまいました！\n\n両プレイヤーのさかなが 0 になります。',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.w900,
-                                                height: 1.5,
-                                              ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Text(
+                                                  'ふとっちょにゃんこがさかなを\n全部食べてしまいました！\n\n両プレイヤーのさかなが 0 になります。',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.red,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1.5,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Divider(
+                                                  color: Colors.red.shade200,
+                                                  thickness: 1.5,
+                                                ),
+                                                const SizedBox(height: 12),
+                                                const Text(
+                                                  '【食べられたさかなの数】',
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.red,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    // ホスト側の数
+                                                    Expanded(
+                                                      child: Column(
+                                                        children: [
+                                                          Text(
+                                                            widget.room.host
+                                                                .displayName,
+                                                            style: const TextStyle(
+                                                              fontSize: 13,
+                                                              color:
+                                                                  Colors
+                                                                      .black87,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              const FishIcon(
+                                                                size: 16,
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                '${widget.room.hostFatCatEatenFish}',
+                                                                style: const TextStyle(
+                                                                  fontSize: 16,
+                                                                  color: Colors
+                                                                      .red,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w900,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    if (widget.room.guest !=
+                                                        null) ...[
+                                                      Container(
+                                                        width: 1.5,
+                                                        height: 36,
+                                                        color: Colors
+                                                            .red.shade200,
+                                                      ),
+                                                      // ゲスト側の数
+                                                      Expanded(
+                                                        child: Column(
+                                                          children: [
+                                                            Text(
+                                                              widget
+                                                                  .room
+                                                                  .guest!
+                                                                  .displayName,
+                                                              style: const TextStyle(
+                                                                fontSize: 13,
+                                                                color: Colors
+                                                                    .black87,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 4,
+                                                            ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                const FishIcon(
+                                                                  size: 16,
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                Text(
+                                                                  '${widget.room.guestFatCatEatenFish}',
+                                                                  style: const TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .red,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w900,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],

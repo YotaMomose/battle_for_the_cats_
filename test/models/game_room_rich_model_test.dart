@@ -80,6 +80,8 @@ void main() {
       expect(room.status, GameStatus.fatCatEvent);
       expect(room.host.fishCount, 0);
       expect(room.guest?.fishCount, 0);
+      expect(room.hostFatCatEatenFish, 5);
+      expect(room.guestFatCatEatenFish, 10);
     });
 
     test('confirmFatCatEvent should update individual flags', () {
