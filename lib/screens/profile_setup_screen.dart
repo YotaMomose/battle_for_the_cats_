@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'home/home_screen_view_model.dart';
 import '../models/user_profile.dart';
@@ -378,6 +379,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   ),
                 ),
                 maxLength: 12,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(12),
+                ],
                 buildCounter:
                     (
                       context, {
@@ -408,7 +413,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       return const Text(
-        '※一意のユーザー名が必要です\n※あとから変更することはできません',
+        '※すでに存在するユーザー名は使用できません\n※あとから変更することはできません',
         style: TextStyle(
           fontSize: 11,
           color: Color(0xFFFF6B6B),
