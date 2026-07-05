@@ -121,75 +121,88 @@ class UserIcon {
 
   /// デフォルトアイコン
   static const defaultIcon = UserIcon(
-    id: 'cat_orange',
-    label: 'とらねこ',
-    emoji: '🐱',
-    imagePath: 'assets/images/tyatoranekopng.png',
+    id: 'person1',
+    label: '人物1',
+    emoji: '😸',
+    imagePath: 'assets/images/person1.png',
   );
 
   /// 選択可能なアイコン一覧
   static const List<UserIcon> presets = [
     UserIcon(
-      id: 'cat_orange',
-      label: 'とら',
-      emoji: '🐱',
-      imagePath: 'assets/images/tyatoranekopng.png',
+      id: 'person1',
+      label: '',
+      emoji: '😸',
+      imagePath: 'assets/images/person1.png',
     ),
     UserIcon(
-      id: 'cat_white',
-      label: 'しろねこ',
-      emoji: '🐈',
-      imagePath: 'assets/images/sironeko.png',
+      id: 'person2',
+      label: '',
+      emoji: '😺',
+      imagePath: 'assets/images/person2.png',
     ),
     UserIcon(
-      id: 'cat_black',
-      label: 'くろねこ',
-      emoji: '🐈‍⬛',
-      imagePath: 'assets/images/kuroneko.png',
+      id: 'person3',
+      label: '',
+      emoji: '😼',
+      imagePath: 'assets/images/person3.png',
     ),
     UserIcon(
-      id: 'dog',
-      label: 'いぬ',
-      emoji: '🐶',
-      imagePath: 'assets/images/inu.png',
+      id: 'person4',
+      label: '',
+      emoji: '🙀',
+      imagePath: 'assets/images/person4.png',
     ),
     UserIcon(
-      id: 'fisherman',
-      label: '漁師',
-      emoji: '🎣',
-      imagePath: 'assets/images/ryousi.png',
+      id: 'person5',
+      label: '',
+      emoji: '😹',
+      imagePath: 'assets/images/person5.png',
     ),
     UserIcon(
-      id: 'shop',
-      label: 'お店',
-      emoji: '🏪',
-      imagePath: 'assets/images/shop.png',
+      id: 'person6',
+      label: '',
+      emoji: '😿',
+      imagePath: 'assets/images/person6.png',
     ),
-    UserIcon(
-      id: 'toy',
-      label: 'じゃらし',
-      emoji: '🌿',
-      imagePath: 'assets/images/net.png',
-    ),
-    UserIcon(
-      id: 'silver_vine',
-      label: '食欲増進ポーション',
-      emoji: '💊',
-      imagePath: 'assets/images/potion.png',
-    ),
-
-    // プレミアムアイコン
-    UserIcon(id: 'cat_crown', label: '王冠ねこ', emoji: '🤴', isPremium: true),
-    UserIcon(id: 'cat_diamond', label: '宝石ねこ', emoji: '💎', isPremium: true),
-    UserIcon(id: 'trophy', label: 'トロフィー', emoji: '🏆', isPremium: true),
-    UserIcon(id: 'star', label: 'スター', emoji: '⭐', isPremium: true),
   ];
 
   /// IDからアイコンを取得
   static UserIcon fromId(String id) {
-    return presets.firstWhere(
-      (icon) => icon.id == id,
-      orElse: () => defaultIcon,
-    );
+    switch (id) {
+      case 'cat_black':
+        return const UserIcon(
+          id: 'cat_black',
+          label: 'くろねこ',
+          emoji: '🐈‍⬛',
+          imagePath: 'assets/images/kuroneko.png',
+        );
+      case 'cat_white':
+        return const UserIcon(
+          id: 'cat_white',
+          label: 'しろねこ',
+          emoji: '🐈',
+          imagePath: 'assets/images/sironeko.png',
+        );
+      case 'cat_orange':
+        return const UserIcon(
+          id: 'cat_orange',
+          label: 'とらねこ',
+          emoji: '🐱',
+          imagePath: 'assets/images/tyatoranekopng.png',
+        );
+      case 'fisherman':
+        return const UserIcon(
+          id: 'fisherman',
+          label: '漁師',
+          emoji: '🎣',
+          imagePath: 'assets/images/ryousi.png',
+        );
+      default:
+        return presets.firstWhere(
+          (icon) => icon.id == id,
+          orElse: () => defaultIcon,
+        );
+    }
   }
 }

@@ -231,15 +231,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
         // プレビュー
         UserIconPreview(icon: selectedIcon, size: 110),
-        const SizedBox(height: 4),
-        Text(
-          selectedIcon.label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF4D331F),
-          ),
-        ),
         const SizedBox(height: 24),
 
         // グリッド
@@ -252,65 +243,69 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final availableIcons = UserIcon.presets
         .where((icon) => !icon.isPremium)
         .toList();
+    final firstRow = availableIcons.take(3).toList();
+    final secondRow = availableIcons.skip(3).toList();
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      alignment: WrapAlignment.center,
-      children: availableIcons.map((icon) {
-        final isSelected = icon.id == _selectedIconId;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedIconId = icon.id),
-          child: Column(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.white70,
-                  shape: BoxShape.circle,
-                  border: isSelected
-                      ? Border.all(color: const Color(0xFFFFCE35), width: 3)
-                      : Border.all(color: Colors.black12, width: 1),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: const Color(0xFFFFCE35).withOpacity(0.5),
-                            blurRadius: 8,
-                          ),
-                        ]
-                      : null,
-                ),
-                padding: EdgeInsets.all(isSelected ? 2 : 6),
-                child: isSelected
-                    ? Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFFFFCE35),
-                            width: 1.5,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(4),
-                        child: UserIconWidget(icon: icon, size: 36),
-                      )
-                    : UserIconWidget(icon: icon, size: 36),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                icon.label,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected
-                      ? const Color(0xFF4D331F)
-                      : Colors.grey[700],
-                ),
-              ),
-            ],
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: firstRow
+              .map((icon) => _buildIconOption(icon))
+              .toList(),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: secondRow
+              .map((icon) => _buildIconOption(icon))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconOption(UserIcon icon) {
+    final isSelected = icon.id == _selectedIconId;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIconId = icon.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.white70,
+            shape: BoxShape.circle,
+            border: isSelected
+                ? Border.all(color: const Color(0xFFFFCE35), width: 3)
+                : Border.all(color: Colors.black12, width: 1),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFFFCE35).withOpacity(0.5),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : null,
           ),
-        );
-      }).toList(),
+          padding: EdgeInsets.all(isSelected ? 2 : 6),
+          child: isSelected
+              ? Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFFFCE35),
+                      width: 1.5,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: UserIconWidget(icon: icon, size: 36),
+                )
+              : UserIconWidget(icon: icon, size: 36),
+        ),
+      ),
     );
   }
 

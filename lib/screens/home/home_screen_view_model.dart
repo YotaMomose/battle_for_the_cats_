@@ -11,6 +11,7 @@ import '../../models/user_profile.dart';
 import '../../services/iap_service.dart';
 import '../../models/player.dart';
 import 'home_screen_state.dart';
+import '../../constants/game_constants.dart';
 
 /// ホーム画面のViewModel
 /// ホーム画面の状態管理とビジネスロジックを担当する
@@ -64,6 +65,7 @@ class HomeScreenViewModel extends ChangeNotifier {
 
   /// IAPの初期化
   void _initIap() {
+    if (!GameConstants.enableIap) return;
     IapService().initialize(
       onPurchaseCompleted: (purchase) async {
         if (purchase.productID == IapService.supporterProductId) {

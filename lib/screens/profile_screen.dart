@@ -9,6 +9,7 @@ import '../models/user_profile.dart';
 import '../services/iap_service.dart';
 import '../widgets/stereoscopic_ui.dart';
 import '../widgets/user_icon_widget.dart';
+import '../constants/game_constants.dart';
 
 /// プロフィール設定画面
 ///
@@ -149,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 40),
 
                 // 開発者応援・広告非表示セクション（一番下に移動）
-                if (viewModel.shouldShowAds) ...[
+                if (GameConstants.enableIap && viewModel.shouldShowAds) ...[
                   _buildSupportSection(context, viewModel),
                   const SizedBox(height: 40),
                 ],
@@ -356,82 +357,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildIconGrid(BuildContext context, HomeScreenViewModel viewModel) {
-    return Center(
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 20,
-        alignment: WrapAlignment.center,
-        children: UserIcon.presets.map((icon) {
-          final isSelected = icon.id == _selectedIconId;
-          final isLocked =
-              icon.isPremium && !(viewModel.userProfile?.isSupporter ?? false);
+    final availableIcons = UserIcon.presets
+        .where((icon) => GameConstants.enableIap || !icon.isPremium)
+        .toList();
+    final firstRow = availableIcons.take(3).toList();
+    final secondRow = availableIcons.skip(3).toList();
 
-          return GestureDetector(
-            onTap: () async {
-              SeService().play('button_buni.mp3');
-              if (isLocked) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('このアイコンは開発者応援で解放されます')),
-                );
-                return;
-              }
-              if (icon.id == _selectedIconId) return;
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: firstRow
+              .map((icon) => _buildIconOption(context, viewModel, icon))
+              .toList(),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: secondRow
+              .map((icon) => _buildIconOption(context, viewModel, icon))
+              .toList(),
+        ),
+      ],
+    );
+  }
 
-              setState(() => _selectedIconId = icon.id);
+  Widget _buildIconOption(
+    BuildContext context,
+    HomeScreenViewModel viewModel,
+    UserIcon icon,
+  ) {
+    final isSelected = icon.id == _selectedIconId;
+    final isLocked = icon.isPremium && !(viewModel.userProfile?.isSupporter ?? false);
 
-              // 即座に保存
-              try {
-                await viewModel.updateProfile(iconId: icon.id);
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('エラー: $e')));
-                }
-              }
-            },
-            child: Column(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.white70,
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(color: const Color(0xFFFFCE35), width: 3)
-                        : Border.all(color: Colors.black12, width: 1),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFFFFCE35).withOpacity(0.5),
-                              blurRadius: 8,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  padding: EdgeInsets.all(isSelected ? 2 : 6),
-                  child: UserIconWidget(
-                    icon: icon,
-                    size: 36,
-                    isLocked: isLocked,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  icon.label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected
-                        ? const Color(0xFF4D331F)
-                        : Colors.grey[700],
-                  ),
-                ),
-              ],
-            ),
+    return GestureDetector(
+      onTap: () async {
+        SeService().play('button_buni.mp3');
+        if (isLocked) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('このアイコンは開発者応援で解放されます')),
           );
-        }).toList(),
+          return;
+        }
+        if (icon.id == _selectedIconId) return;
+
+        setState(() => _selectedIconId = icon.id);
+
+        try {
+          await viewModel.updateProfile(iconId: icon.id);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('エラー: $e')));
+          }
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.white70,
+            shape: BoxShape.circle,
+            border: isSelected
+                ? Border.all(color: const Color(0xFFFFCE35), width: 3)
+                : Border.all(color: Colors.black12, width: 1),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFFFCE35).withOpacity(0.5),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : null,
+          ),
+          padding: EdgeInsets.all(isSelected ? 2 : 6),
+          child: UserIconWidget(
+            icon: icon,
+            size: 36,
+            isLocked: isLocked,
+          ),
+        ),
       ),
     );
   }

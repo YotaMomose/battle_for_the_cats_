@@ -1,5 +1,8 @@
 /// ゲーム全体で使用する定数
 class GameConstants {
+  // アプリ内課金（IAP）の有効フラグ
+  static const bool enableIap = false;
+
   // ルームコード
   static const int roomCodeLength = 6;
   static const String roomCodeChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
