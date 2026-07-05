@@ -189,117 +189,91 @@ class _MainMenuViewState extends State<MainMenuView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      // チュートリアルボタン (テスト用)
+                      const SizedBox(height: 20),
+                      // 下部の横並びボタンメニュー
                       SizedBox(
-                        height: 52,
-                        child: StereoscopicButton(
-                          onPressed: isNotIdle
-                              ? null
-                              : () {
-                                  FocusScope.of(context).unfocus();
-                                  SeService().play('button_buni.mp3');
-                                  viewModel.onNavigateToTutorial();
-                                },
-                          baseColor: Colors.teal.shade400,
-                          shadowColor: Colors.teal.shade900,
-                          child: const Center(
-                            child: Text(
-                              'チュートリアルをプレイ',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                        height: 64,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // 設定ボタン
+                            _buildCircleButton(
+                              icon: Icons.settings,
+                              tooltip: 'プロフィール設定',
+                              onPressed: isNotIdle
+                                  ? null
+                                  : () {
+                                      SeService().play('button_buni.mp3');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ChangeNotifierProvider.value(
+                                                value: viewModel,
+                                                child: const ProfileScreen(),
+                                              ),
+                                        ),
+                                      );
+                                    },
                             ),
-                          ),
+                            // 通知ボタン
+                            _buildCircleButton(
+                              icon: Icons.notifications,
+                              tooltip: '招待',
+                              onPressed: isNotIdle
+                                  ? null
+                                  : () {
+                                      SeService().play('button_buni.mp3');
+                                      _showInvitationsBox(context, viewModel);
+                                    },
+                              badge: viewModel.invitations.isNotEmpty
+                                  ? Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 16,
+                                        minHeight: 16,
+                                      ),
+                                      child: Text(
+                                        '${viewModel.invitations.length}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            // フレンド管理ボタン
+                            _buildCircleButton(
+                              icon: Icons.people,
+                              tooltip: 'フレンド管理',
+                              onPressed: isNotIdle
+                                  ? null
+                                  : () {
+                                      SeService().play('button_buni.mp3');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ChangeNotifierProvider.value(
+                                                value: viewModel,
+                                                child: const FriendManagementScreen(),
+                                              ),
+                                        ),
+                                      );
+                                    },
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-              // 右上の丸いボタンメニュー
-              Positioned(
-                top: 16,
-                right: 16,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 設定ボタン
-                    _buildCircleButton(
-                      icon: Icons.settings,
-                      tooltip: 'プロフィール設定',
-                      onPressed: isNotIdle
-                          ? null
-                          : () {
-                              SeService().play('button_buni.mp3');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChangeNotifierProvider.value(
-                                        value: viewModel,
-                                        child: const ProfileScreen(),
-                                      ),
-                                ),
-                              );
-                            },
-                    ),
-                    // 通知ボタン
-                    _buildCircleButton(
-                      icon: Icons.notifications,
-                      tooltip: '招待',
-                      onPressed: isNotIdle
-                          ? null
-                          : () {
-                              SeService().play('button_buni.mp3');
-                              _showInvitationsBox(context, viewModel);
-                            },
-                      badge: viewModel.invitations.isNotEmpty
-                          ? Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Text(
-                                '${viewModel.invitations.length}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            )
-                          : null,
-                    ),
-                    // フレンド管理ボタン
-                    _buildCircleButton(
-                      icon: Icons.people,
-                      tooltip: 'フレンド管理',
-                      onPressed: isNotIdle
-                          ? null
-                          : () {
-                              SeService().play('button_buni.mp3');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChangeNotifierProvider.value(
-                                        value: viewModel,
-                                        child: const FriendManagementScreen(),
-                                      ),
-                                ),
-                              );
-                            },
-                    ),
-                  ],
                 ),
               ),
             ],
@@ -426,9 +400,9 @@ class _MainMenuViewState extends State<MainMenuView> {
           height: 52,
           child: StereoscopicButton(
             onPressed: onPressed,
-            baseColor: Colors.pink.shade100,
+            baseColor: const Color.fromARGB(255, 246, 218, 250),
             shadowColor: Colors.pink.shade800,
-            borderRadius: 26,
+            borderRadius: 12,
             depth: 4,
             showStripes: false,
             child: Stack(
