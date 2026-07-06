@@ -23,7 +23,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/ryousi.png',
       'color': Colors.blue,
       'description':
-          '仲間にすると、毎ターンの『つり』のたびに、おさかなを1匹追加で獲ってきてくれる頼もしい味方じゃ！たくさん集めればさかなに困ることはなくなるぞ。',
+          '仲間にすると、毎ターンの『釣り』のたびに、おさかなを1匹追加で獲ってきてくれる頼もしい味方！たくさん集めればおさかなに困ることはなくなるぞ。',
     },
     {
       'name': 'いぬ',
@@ -31,7 +31,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/inu.png',
       'color': Colors.brown,
       'description':
-          '仲間にすると、相手がすでに獲得しているキャラクターを1匹追い出してしまう恐ろしいヤツじゃ。逆転のチャンスに狙ってみるのじゃ！',
+          '仲間にすると、相手がすでに獲得しているキャラクターを1匹追い出してしまう恐ろしいヤツ。逆転のチャンスに狙ってみるのといいかも！',
     },
     {
       'name': 'アイテム屋',
@@ -39,7 +39,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/shop.png',
       'color': Colors.purple,
       'description':
-          '勝負に勝って仲間に引き入れると、すでに使用したアイテムを1つ復活してくれるぞ。戦いを有利に進めるために、見かけたらぜひ狙いたいところじゃな。',
+          '勝負に勝って仲間に引き入れると、すでに使用したアイテムを1つ復活してくれる。戦いを有利に進めるために、見かけたらぜひ狙いたいところ。',
     },
     {
       'name': 'ふとっちょにゃんこ',
@@ -47,7 +47,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/fatcat.png',
       'color': Colors.deepOrange,
       'description':
-          'こやつは要注意じゃ！ターンのおわりに突然現れ、お主と相手の持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカーじゃ！さかなを溜め込んでいるときは特に注意じゃ！',
+          'こやつは要注意！ターンのおわりに突然現れ、両プレイヤーの持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカー！さかなを溜め込んでいるときは特に注意！',
     },
   ];
 
