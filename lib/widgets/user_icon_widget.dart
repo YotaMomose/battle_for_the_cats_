@@ -78,24 +78,28 @@ class UserIconPreview extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
+        shape: BoxShape.circle,
+      ),
+      foregroundDecoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: ringColor, width: 3),
       ),
+      clipBehavior: Clip.antiAlias,
       padding: EdgeInsets.only(top: size * 0.03, left: size * 0.03, right: size * 0.03),
       alignment: Alignment.bottomCenter,
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
         ),
         padding: EdgeInsets.only(top: size * 0.08, left: size * 0.08, right: size * 0.08),
         foregroundDecoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: ringColor, width: 1.5),
-          ),
-          clipBehavior: Clip.antiAlias,
-          alignment: Alignment.bottomCenter,
+          shape: BoxShape.circle,
+          border: Border.all(color: ringColor, width: 1.5),
+        ),
+        clipBehavior: Clip.antiAlias,
+        alignment: Alignment.bottomCenter,
         child: UserIconWidget(icon: icon, size: size * 0.6),
       ),
     );

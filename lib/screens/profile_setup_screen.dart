@@ -278,9 +278,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           decoration: BoxDecoration(
             color: isSelected ? Colors.white : Colors.white70,
             shape: BoxShape.circle,
-            border: isSelected
-                ? Border.all(color: const Color(0xFFFFCE35), width: 3)
-                : Border.all(color: Colors.black12, width: 1),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
@@ -290,25 +287,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   ]
                 : null,
           ),
-          padding: EdgeInsets.all(isSelected ? 2 : 6),
-          child: isSelected
-              ? Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  foregroundDecoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFFFCE35),
-                      width: 1.5,
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  alignment: Alignment.bottomCenter,
-                  padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
-                  child: UserIconWidget(icon: icon, size: 36),
-                )
-              : UserIconWidget(icon: icon, size: 36),
+          foregroundDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: isSelected
+                ? Border.all(color: const Color(0xFFFFCE35), width: 3)
+                : Border.all(color: Colors.black12, width: 1),
+          ),
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.bottomCenter,
+          padding: EdgeInsets.only(
+            top: isSelected ? 4 : 6,
+            left: isSelected ? 4 : 6,
+            right: isSelected ? 4 : 6,
+          ),
+          child: UserIconWidget(icon: icon, size: 36),
         ),
       ),
     );

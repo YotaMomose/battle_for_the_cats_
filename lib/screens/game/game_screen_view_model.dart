@@ -1191,11 +1191,11 @@ class GameScreenViewModel extends ChangeNotifier {
       // 初めてinactiveになった時刻を記録
       _opponentInactiveStartTime ??= DateTime.now().millisecondsSinceEpoch;
 
-      // inactiveから60秒以上経過したか判定
+      // inactiveから90秒以上経過したか判定
       final inactiveDuration =
           DateTime.now().millisecondsSinceEpoch - _opponentInactiveStartTime!;
-      if (inactiveDuration >= 60000) {
-        // 60秒以上inactive状態が続いている
+      if (inactiveDuration >= 90000) {
+        // 90秒以上inactive状態が続いている
         _hasDetectedOpponentTimeout = true;
         _markOpponentDisconnected();
       }
