@@ -402,7 +402,6 @@ class _TutorialScreenState extends State<TutorialScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -411,14 +410,17 @@ class _TutorialScreenState extends State<TutorialScreen> {
               ),
             ],
           ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: UserIconWidget(
-              icon: isOpponent
-                  ? viewModel.opponentUserIcon
-                  : viewModel.myUserIcon,
-              size: avatarSize * 0.7,
-            ),
+          foregroundDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.bottomCenter,
+          child: UserIconWidget(
+            icon: isOpponent
+                ? viewModel.opponentUserIcon
+                : viewModel.myUserIcon,
+            size: avatarSize * 0.7,
           ),
         ),
         const SizedBox(width: 8),
