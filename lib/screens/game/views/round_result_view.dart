@@ -1831,12 +1831,16 @@ class _RoundResultViewState extends State<RoundResultView> {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
+        shape: BoxShape.circle,
+      ),
+      foregroundDecoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
       ),
-      alignment: Alignment.center,
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.bottomCenter,
       child: UserIconWidget(icon: icon, size: size * 0.7),
     );
   }

@@ -141,10 +141,6 @@ class FishingPhaseView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF4D331F),
-                      width: 1.5,
-                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -153,7 +149,15 @@ class FishingPhaseView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  alignment: Alignment.center,
+                  foregroundDecoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.bottomCenter,
                   child: UserIconWidget(
                     icon: viewModel.opponentUserIcon,
                     size: 22,
@@ -278,10 +282,6 @@ class FishingPhaseView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF4D331F),
-                      width: 1.5,
-                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -290,7 +290,15 @@ class FishingPhaseView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  alignment: Alignment.center,
+                  foregroundDecoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.bottomCenter,
                   child: UserIconWidget(icon: viewModel.myUserIcon, size: 26),
                 ),
                 const SizedBox(width: 8),

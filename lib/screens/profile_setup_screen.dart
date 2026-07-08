@@ -293,14 +293,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           padding: EdgeInsets.all(isSelected ? 2 : 6),
           child: isSelected
               ? Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  foregroundDecoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: const Color(0xFFFFCE35),
                       width: 1.5,
                     ),
                   ),
-                  padding: const EdgeInsets.all(4),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.bottomCenter,
+                  padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
                   child: UserIconWidget(icon: icon, size: 36),
                 )
               : UserIconWidget(icon: icon, size: 36),

@@ -421,9 +421,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: BoxDecoration(
             color: isSelected ? Colors.white : Colors.white70,
             shape: BoxShape.circle,
-            border: isSelected
-                ? Border.all(color: const Color(0xFFFFCE35), width: 3)
-                : Border.all(color: Colors.black12, width: 1),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
@@ -433,7 +430,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ]
                 : null,
           ),
-          padding: EdgeInsets.all(isSelected ? 2 : 6),
+          foregroundDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: isSelected
+                ? Border.all(color: const Color(0xFFFFCE35), width: 3)
+                : Border.all(color: Colors.black12, width: 1),
+          ),
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.bottomCenter,
+          padding: EdgeInsets.only(top: isSelected ? 2 : 6, left: isSelected ? 2 : 6, right: isSelected ? 2 : 6),
           child: UserIconWidget(
             icon: icon,
             size: 36,

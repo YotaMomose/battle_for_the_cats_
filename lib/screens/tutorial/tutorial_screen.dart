@@ -411,7 +411,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
               ),
             ],
           ),
-          child: Center(
+          child: Align(
+            alignment: Alignment.bottomCenter,
             child: UserIconWidget(
               icon: isOpponent
                   ? viewModel.opponentUserIcon

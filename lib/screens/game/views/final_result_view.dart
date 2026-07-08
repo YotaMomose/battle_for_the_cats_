@@ -648,10 +648,6 @@ class _FinalResultViewState extends State<FinalResultView> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF4D331F),
-                      width: 1.5,
-                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -660,7 +656,15 @@ class _FinalResultViewState extends State<FinalResultView> {
                       ),
                     ],
                   ),
-                  alignment: Alignment.center,
+                  foregroundDecoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4D331F),
+                      width: 1.5,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.bottomCenter,
                   child: UserIconWidget(
                     icon: UserIcon.fromId(
                       name == viewModel.myDisplayName

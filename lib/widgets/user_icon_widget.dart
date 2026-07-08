@@ -18,19 +18,24 @@ class UserIconWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget iconWidget;
     if (icon.imagePath != null) {
-      iconWidget = Image.asset(
-        icon.imagePath!,
-        width: size,
-        height: size,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return Center(
-            child: Text(
-              icon.emoji,
-              style: TextStyle(fontSize: size * 0.8),
-            ),
-          );
-        },
+      iconWidget = Transform.scale(
+        scale: 1.25,
+        alignment: Alignment.bottomCenter,
+        child: Image.asset(
+          icon.imagePath!,
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          alignment: Alignment.bottomCenter,
+          errorBuilder: (context, error, stackTrace) {
+            return Center(
+              child: Text(
+                icon.emoji,
+                style: TextStyle(fontSize: size * 0.8),
+              ),
+            );
+          },
+        ),
       );
     } else {
       iconWidget = Center(
@@ -78,14 +83,19 @@ class UserIconPreview extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: ringColor, width: 3),
       ),
-      padding: EdgeInsets.all(size * 0.03),
+      padding: EdgeInsets.only(top: size * 0.03, left: size * 0.03, right: size * 0.03),
+      alignment: Alignment.bottomCenter,
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: ringColor, width: 1.5),
         ),
-        padding: EdgeInsets.all(size * 0.08),
-        alignment: Alignment.center,
+        padding: EdgeInsets.only(top: size * 0.08, left: size * 0.08, right: size * 0.08),
+        foregroundDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: ringColor, width: 1.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.bottomCenter,
         child: UserIconWidget(icon: icon, size: size * 0.6),
       ),
     );

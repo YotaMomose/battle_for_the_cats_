@@ -73,10 +73,6 @@ class WaitingView extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.pink.shade200,
-                              width: 2,
-                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.1),
@@ -85,7 +81,15 @@ class WaitingView extends StatelessWidget {
                               ),
                             ],
                           ),
-                          alignment: Alignment.center,
+                          foregroundDecoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.pink.shade200,
+                              width: 2,
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          alignment: Alignment.bottomCenter,
                           child: UserIconWidget(
                             icon: viewModel.opponentUserIcon,
                             size: 64,

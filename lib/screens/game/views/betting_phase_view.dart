@@ -722,7 +722,6 @@ class BettingPhaseView extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
             boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
@@ -731,7 +730,12 @@ class BettingPhaseView extends StatelessWidget {
               ),
             ],
           ),
-          alignment: Alignment.center,
+          foregroundDecoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: const Color(0xFF4D331F), width: 1.5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.bottomCenter,
           child: UserIconWidget(
             icon: isOpponent
                 ? viewModel.opponentUserIcon
