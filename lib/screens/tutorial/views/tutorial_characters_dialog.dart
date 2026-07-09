@@ -31,7 +31,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/inu.png',
       'color': Colors.brown,
       'description':
-          '仲間にすると、相手がすでに獲得しているキャラクターを1匹追い出してしまう恐ろしいヤツ。逆転のチャンスに狙ってみるのといいかも！',
+          '仲間にすると、相手がすでに獲得しているキャラクターを1匹追い出してしまう恐ろしいヤツ。逆転のチャンスに狙ってみるといいかも！',
     },
     {
       'name': 'アイテム屋',
@@ -47,7 +47,7 @@ class _TutorialCharactersDialogState extends State<TutorialCharactersDialog> {
       'image': 'assets/images/fatcat.png',
       'color': Colors.deepOrange,
       'description':
-          'こやつは要注意！ターンのおわりに突然現れ、両プレイヤーの持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカー！さかなを溜め込んでいるときは特に注意！',
+          'こいつは要注意！ターンのおわりに突然現れ、両プレイヤーの持っているおさかなをすべて食べてゼロにしてしまうハプニングメーカー！さかなを溜め込んでいるときは特に注意！',
     },
   ];
 

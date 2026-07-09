@@ -508,7 +508,7 @@ class BettingPhaseView extends StatelessWidget {
                           _GuideItem(
                             'アイテム屋',
                             'assets/images/shop.png',
-                            '仲間にした時、使ったアイテムを1つ復活させることができる。',
+                            '仲間にした時、今まで使ったアイテムを1つ復活させることができる。',
                             tagColor: Colors.orange.shade50,
                             tagTextColor: Colors.orange.shade600,
                           ),
@@ -749,7 +749,7 @@ class BettingPhaseView extends StatelessWidget {
           child: Text(
             displayName,
             style: TextStyle(
-              fontSize: isSmallScreen ? 16 : 24,
+              fontSize: isSmallScreen ? 10 : 18,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -1806,11 +1806,7 @@ void _flyFishAnimation(
 
   late OverlayEntry entry;
 
-  // アニメーション重複ガード: 同じIDのアニメーションが動いている場合は無視
-  if (id != null) {
-    if (_activeFlyAnimations.contains(id)) return;
-    _activeFlyAnimations.add(id);
-  }
+  // アニメーション重複ガードを削除し、連続タップで複数アニメーションが飛ぶように変更
 
   entry = OverlayEntry(
     builder: (context) {
@@ -1820,8 +1816,7 @@ void _flyFishAnimation(
         curve: Curves.easeInOutQuad,
         onEnd: () {
           entry.remove();
-          // 終了後にトラックから除去
-          if (id != null) _activeFlyAnimations.remove(id);
+          // 終了後にトラックから除去 (ガード削除に伴い不要に)
           onComplete?.call();
         },
         builder: (context, value, child) {
@@ -1898,11 +1893,7 @@ void _flyItemAnimation(
 
   late OverlayEntry entry;
 
-  // アニメーション重複ガード: 同じIDのアニメーションが動いている場合は無視
-  if (id != null) {
-    if (_activeFlyAnimations.contains(id)) return;
-    _activeFlyAnimations.add(id);
-  }
+  // アニメーション重複ガードを削除し、連続タップで複数アニメーションが飛ぶように変更
 
   entry = OverlayEntry(
     builder: (context) {
@@ -1912,8 +1903,7 @@ void _flyItemAnimation(
         curve: Curves.easeInOutQuad,
         onEnd: () {
           entry.remove();
-          // 終了後にトラックから除去
-          if (id != null) _activeFlyAnimations.remove(id);
+          // 終了後にトラックから除去 (ガード削除に伴い不要に)
           onComplete?.call();
         },
         builder: (context, value, child) {
