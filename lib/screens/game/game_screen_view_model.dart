@@ -1090,6 +1090,9 @@ class GameScreenViewModel extends ChangeNotifier {
   /// いぬの効果の残り回数
   int get remainingDogChases => playerData?.myPendingDogChases ?? 0;
 
+  /// 相手のいぬの効果の残り回数
+  int get opponentPendingDogChases => playerData?.opponentPendingDogChases ?? 0;
+
   /// 追い出す対象として選べる相手のカードリスト
   List<String> get availableTargetsForDog {
     final data = playerData;

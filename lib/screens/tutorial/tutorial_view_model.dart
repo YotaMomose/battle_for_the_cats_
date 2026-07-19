@@ -212,6 +212,7 @@ String get opponentIconEmoji => opponentUserIcon.emoji;
       myFishermanCount: 0,
       opponentFishermanCount: 0,
       myPendingDogChases: 0,
+      opponentPendingDogChases: 0,
       chasedCards: [],
     );
   }

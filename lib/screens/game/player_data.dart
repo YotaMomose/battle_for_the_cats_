@@ -32,6 +32,7 @@ class PlayerData {
   final int myFishermanCount;
   final int opponentFishermanCount;
   final int myPendingDogChases;
+  final int opponentPendingDogChases;
   final List<ChasedCardInfo> chasedCards;
 
   const PlayerData({
@@ -59,6 +60,7 @@ class PlayerData {
     required this.myFishermanCount,
     required this.opponentFishermanCount,
     required this.myPendingDogChases,
+    required this.opponentPendingDogChases,
     required this.chasedCards,
   });
 
@@ -128,6 +130,7 @@ class PlayerData {
       myFishermanCount: my?.fishermanCount ?? 0,
       opponentFishermanCount: opponent?.fishermanCount ?? 0,
       myPendingDogChases: my?.pendingDogChases ?? 0,
+      opponentPendingDogChases: opponent?.pendingDogChases ?? 0,
       chasedCards: room.chasedCards,
     );
   }

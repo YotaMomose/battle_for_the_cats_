@@ -201,7 +201,11 @@ class _RoundResultViewState extends State<RoundResultView> {
     final isSmallScreen = screenSize.height < 680;
 
     // いぬの効果通知がある場合、ビルド後にポップアップを表示（アニメーション終了後）
-    if (_step >= 7 && viewModel.dogEffectNotifications.isNotEmpty) {
+    // いぬの効果の選択がすべて完了した（自分も相手も保留がない）時点でのみ表示する
+    if (_step >= 7 &&
+        viewModel.dogEffectNotifications.isNotEmpty &&
+        !viewModel.canChaseAway &&
+        viewModel.opponentPendingDogChases == 0) {
       final notifications = List<DogEffectNotification>.from(
         viewModel.dogEffectNotifications,
       );
@@ -374,35 +378,66 @@ class _RoundResultViewState extends State<RoundResultView> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ...notifications.map(
-                      (n) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (n.imagePath != null)
-                              Image.asset(
-                                n.imagePath!,
-                                width: isSmallScreen ? 40 : 50,
-                                height: isSmallScreen ? 40 : 50,
-                                fit: BoxFit.contain,
-                              )
-                            else
-                              const Icon(Icons.pets, color: Colors.grey),
-                            const SizedBox(width: 12),
-                            Flexible(
-                              child: Text(
-                                n.message,
-                                style: TextStyle(
-                                  fontSize: isSmallScreen ? 14 : 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF4D331F),
+                    Builder(
+                      builder: (context) {
+                        final myActions = notifications.where((n) => n.isMyAction).toList();
+                        final opponentActions = notifications.where((n) => !n.isMyAction).toList();
+
+                        Widget buildNotificationRow(List<DogEffectNotification> notifs, bool isMyAction) {
+                          if (notifs.isEmpty) return const SizedBox.shrink();
+
+                          final message = isMyAction ? ' を追い出しました！' : ' が逃げてしまいました、、';
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: notifs.map((n) {
+                                    if (n.imagePath != null) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                                        child: Image.asset(
+                                          n.imagePath!,
+                                          width: isSmallScreen ? 30 : 40,
+                                          height: isSmallScreen ? 30 : 40,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      );
+                                    } else {
+                                      return const Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 4),
+                                        child: Icon(Icons.pets, color: Colors.grey),
+                                      );
+                                    }
+                                  }).toList(),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    message,
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 14 : 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF4D331F),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
+                          );
+                        }
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            buildNotificationRow(myActions, true),
+                            buildNotificationRow(opponentActions, false),
                           ],
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                     StereoscopicButton(
